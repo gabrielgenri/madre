@@ -8,12 +8,12 @@
 - Servicio de datos para crear, listar, consultar y editar unidades editoriales.
 - Vista inicial de Madre Editorial.
 - Servicio compartido con reglas editoriales operativas.
-- Migración SQL versionada y documentación técnica.
+- Documentación técnica y criterios editoriales iniciales. La migración SQL reconstruida permanece pendiente de incorporación al repositorio.
 
 ## Verificado
 
 - `node --check` sobre los archivos JavaScript del starter original y los archivos modificados.
-- La migración remota figura en el historial Supabase con versión `20261114034956` y nombre `madre_core_foundation`; el SQL incluido en el repositorio es una reconstrucción del esquema observado, no una copia byte a byte del archivo original.
+- La migración remota figura en el historial Supabase con versión `20261114034956` y nombre `madre_core_foundation`. El SQL local es una reconstrucción del esquema observado, no una copia byte a byte del original; todavía no está incorporado al repositorio.
 - Se consultó el esquema remoto: diez tablas públicas, políticas RLS, funciones y triggers, y bucket privado `madre-originals`.
 
 ## Pendiente de verificación
