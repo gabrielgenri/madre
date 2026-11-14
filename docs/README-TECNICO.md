@@ -41,7 +41,7 @@ El módulo Madre Editorial permite autenticarse por enlace mágico, crear unidad
 
 ## Base de datos
 
-La migración `20261114034956_madre_core_foundation.sql` es una reconstrucción reproducible del esquema inicial, elaborada mediante introspección del proyecto Supabase activo. Coincide con la versión/nombre registrados en el historial remoto, pero no debe confundirse con una copia byte a byte del SQL original. Incluye perfiles, roles, unidades editoriales, versiones, fuentes, afirmaciones, evidencias, verificaciones, formatos, auditoría, RLS y el bucket privado de originales.
+La migración `20261114034956_madre_core_foundation.sql` está reconstruida localmente a partir de la introspección del proyecto Supabase activo. Coincide con la versión/nombre registrados en el historial remoto, pero no es una copia byte a byte del SQL original. Su incorporación al repositorio queda pendiente; no aplicar manualmente sobre el proyecto ya inicializado.
 
 Para un entorno nuevo, revisar el SQL y aplicarlo mediante Supabase CLI o el mecanismo de migraciones del entorno. No volver a aplicar manualmente sobre el proyecto ya inicializado.
 
