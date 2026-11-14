@@ -1,50 +1,26 @@
 Configuración del proyecto
-Configuración general, dominios, propiedad y ciclo de vida
-Configuración general
-madre
-Nombre del proyecto
-Se muestra en todo el panel de control.
-cxuoaydhmvafsgtklwny
-ID del proyecto
-Referencia utilizada en API y URL.
-sa-east-1
-Región del proyecto
-Sudamérica (São Paulo)
 
-Guardar cambios
-Acceso al proyecto
-Acceso para toda la organización
+Nombre del proyecto cxuoaydhmvafsgtklwny
+ID del proyecto Referencia utilizada en API y URL.
+Región del proyecto: sa-east-1 Sudamérica (São Paulo)
 
-Todos los miembros de la organización pueden acceder a este proyecto.
+Gestionar miembros gabrielgenri@gmail.com
 
-Gestionar miembros
-Miembro	Role
-gabrielgenri@gmail.com
+Servicio
+https://cxuoaydhmvafsgtklwny.supabase.co
+sb_publishable_NUvUPIKgOsaPli2REl7HYQ_wIZBdzaX
+_fVHBgXAS9YUpPFOdDOdz6A_Gv-01-Xx
 
-Tú
-Dueño
-Disponibilidad del proyecto
-Reinicie o pause su proyecto cuando realice tareas de mantenimiento.
-Reiniciar proyecto
+Direct connection string
+postgresql://postgres:[YOUR-PASSWORD]@db.cxuoaydhmvafsgtklwny.supabase.co:5432/postgres
 
-Tu proyecto no estará disponible durante unos minutos.
+CLI setup commands
+supabase login - supabase init - supabase link --project-ref cxuoaydhmvafsgtklwny
 
-
-Reiniciar proyecto
-
-Proyecto de pausa
-
-Tu proyecto no estará accesible mientras esté en pausa.
-
-
-Proyecto de pausa
-Versiones del servicio
 Versiones de servicio y elegibilidad para la actualización de su instancia aprovisionada.
-Versión de autenticación
-2.197.0
-Versión PostgREST
-14.18
-Versión de Postgres
-17.11.0.019
+Versión de autenticación 2.197.0
+Versión PostgREST 14.18
+Versión de Postgres 17.11.0.019
+
 Este proyecto ya utiliza la última versión de PostgreSQL compatible con Supabase. Las actualizaciones aparecerán aquí cuando estén disponibles. Más información.
-Dominios personalizados
+
