@@ -57,7 +57,6 @@ function buildQualityReport({ unit, version, formats, research }) {
     if (!latestVerification.has(item.claim_id)) latestVerification.set(item.claim_id, item.status)
   }
 
-  const criticalClaims = research.claims.filter(item => ['critical', 'high'].includes(item.importance))
   const unsupportedClaims = research.claims.filter(claim => {
     const hasSourceEvidence = research.evidences.some(item => item.claim_id === claim.id && item.source_id && item.relation === 'supports')
     const status = latestVerification.get(claim.id) ?? claim.verification_status
@@ -65,7 +64,8 @@ function buildQualityReport({ unit, version, formats, research }) {
   })
   add('research-sources', 'Investigación con fuentes registradas', research.sources.length > 0, research.sources.length + ' fuentes registradas')
   if (!research.sources.length) finding('critical', 'no_sources', 'La unidad no tiene fuentes registradas.')
-  add('claims-traceability', 'Afirmaciones importantes con respaldo', criticalClaims.every(claim => !unsupportedClaims.includes(claim)), unsupportedClaims.length + ' afirmaciones requieren atención de trazabilidad')
+  add('claims-traceability', 'Afirmaciones registradas con respaldo', research.claims.length > 0 && unsupportedClaims.length === 0, research.claims.length ? unsupportedClaims.length + ' afirmaciones requieren atención de trazabilidad' : 'No hay afirmaciones registradas para verificar')
+  if (!research.claims.length) finding('warning', 'no_claims', 'No hay afirmaciones desglosadas para controlar su trazabilidad.')
   for (const claim of unsupportedClaims) {
     const status = latestVerification.get(claim.id) ?? claim.verification_status
     const noEvidence = !research.evidences.some(item => item.claim_id === claim.id && item.source_id && item.relation === 'supports')
