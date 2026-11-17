@@ -92,7 +92,7 @@ security definer
 set search_path = public, pg_temp
 as $$
 begin
-  if p_recipient is null or p_recipient = auth.uid() and p_recipient is null then
+  if p_recipient is null then
     return;
   end if;
   insert into public.editorial_notifications (
@@ -281,3 +281,7 @@ $$;
 
 revoke all on function public.enqueue_my_editorial_due_notifications() from public, anon;
 grant execute on function public.enqueue_my_editorial_due_notifications() to authenticated;
+
+revoke all on function public.guard_editorial_notification_update() from public, anon, authenticated;
+revoke all on function public.notify_editorial_work_event() from public, anon, authenticated;
+revoke all on function public.notify_editorial_review_event() from public, anon, authenticated;
