@@ -148,7 +148,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - El control es determinístico y estructural; no usa IA para juzgar veracidad ni sustituye una lectura semántica completa.
 - Las divergencias numéricas y de fechas son heurísticas basadas en fragmentos de texto similares; pueden generar falsos positivos o no detectar paráfrasis.
 - Falta probar el flujo completo en navegador con perfiles autor, revisor y editor.
-- El asesor de rendimiento ya no señala claves foráneas sin índice en las dos tablas nuevas; permanecen ocho advertencias informativas en tablas previas y la advertencia de políticas SELECT múltiples en `user_roles`.
+- El asesor de rendimiento mantiene ocho claves foráneas sin índice en tablas previas, 15 índices informados como no utilizados y la advertencia de políticas SELECT múltiples en `user_roles`; las cuatro FK de la nueva tabla de eventos están indexadas.
 - El asesor de seguridad mantiene tres advertencias previas sobre funciones `SECURITY DEFINER` en `public` (`audit_editorial_unit`, `handle_new_user`, `has_role`) y una sobre protección de contraseñas filtradas deshabilitada. No fueron modificadas en este paso.
 
 - Ejecutar `node --check`, `vite build` y pruebas de extremo a extremo. No se declaran realizadas en esta entrega.
@@ -160,13 +160,16 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - La RPC `record_editorial_review_event` usa `SECURITY INVOKER`, exige sesión y nota, y registra el evento contra la última versión madre y el control de calidad correspondiente.
 - La base valida que existan los seis formatos completos, vigentes y vinculados a la versión madre actual; que el control de calidad sea posterior a la última modificación de formatos; y que no haya hallazgos críticos.
 - Secuencia permitida: `review_requested` por autor/asignado/editor/admin; `changes_requested` por reviewer/editor/admin; `approved` por editor/admin. La solicitud puede reiterarse después de una devolución.
-- La aprobación humana cambia la unidad de `draft` a `reviewed`. La publicación sigue requiriendo editor/admin y ahora también exige que la unidad ya esté en `reviewed`.
+- La aprobación humana cambia la unidad de `draft` a `reviewed`. La base exige que exista un evento `approved` asociado a la versión madre vigente; no alcanza con editar directamente el estado. La publicación requiere editor/admin, estado `reviewed` y aprobación humana vigente.
+- Si se modifica el contenido madre de una unidad `reviewed` o `published`, el flujo vuelve automáticamente a `draft`, se limpia `published_at` y se crea una nueva versión de contenido. La pieza debe pasar nuevamente por revisión.
+- Los eventos usan `clock_timestamp()` para conservar el orden real de decisiones incluso cuando se registran dentro de una misma transacción.
 - El estado editorial se excluye de la captura de versiones de contenido: una aprobación no crea una versión madre nueva ni invalida los seis formatos. Las modificaciones de contenido sí continúan creando versiones.
 - La interfaz muestra historial y acciones según el rol y el estado; el servidor y la base de datos vuelven a validar todos los permisos y precondiciones. La visibilidad de botones no se considera un control de seguridad.
 
 ### Verificaciones ejecutadas / pendientes
 
 - Migraciones desplegadas en Supabase y código del servicio/vista/documentación incorporado al repositorio.
-- Pendiente completar prueba transaccional integral con los seis formatos, control de calidad, solicitud, devolución y aprobación; también verificar rechazo con roles sin permiso.
+- Prueba transaccional ejecutada como usuario autenticado con rol admin: creó una unidad temporal, vinculó los seis formatos a una versión, registró control de calidad, completó solicitud → devolución → nueva solicitud → aprobación y verificó estado `reviewed`. También comprobó que una transición directa a `reviewed` es rechazada y que una edición posterior vuelve a `draft` y crea una nueva versión. La transacción terminó en `ROLLBACK`; no dejó filas de prueba.
+- Se verificó RLS activo y permisos append-only: authenticated SELECT/INSERT, sin UPDATE/DELETE; anon sin SELECT. El índice de `source_version_id` fue agregado tras detectar una FK sin índice.
 - El proyecto actualmente solo tiene un usuario con rol `admin` registrado en `user_roles`; no se encontró un usuario con rol `reviewer` ni `editor`. Para probar esos perfiles será necesario asignarlos mediante el procedimiento administrativo de roles, sin elevar permisos desde la interfaz.
 - No se declara prueba de navegador, compilación Vite ni E2E como realizada.
