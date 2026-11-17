@@ -102,7 +102,7 @@ create or replace function private.create_editorial_notification(
 returns void
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 as $$
 begin
   if p_recipient is null then
@@ -125,7 +125,7 @@ create or replace function private.notify_editorial_work_event()
 returns trigger
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 as $$
 declare
   v_title text;
@@ -176,7 +176,7 @@ create or replace function private.notify_editorial_review_event()
 returns trigger
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 as $$
 declare
   v_title text;
@@ -253,7 +253,7 @@ create or replace function public.enqueue_my_editorial_due_notifications()
 returns integer
 language plpgsql
 security invoker
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 as $
 declare
   v_count integer := 0;
@@ -296,6 +296,7 @@ revoke all on function public.enqueue_my_editorial_due_notifications() from publ
 grant execute on function public.enqueue_my_editorial_due_notifications() to authenticated;
 
 revoke all on function public.guard_editorial_notification_update() from public, anon, authenticated;
+revoke all on function private.create_editorial_notification(uuid,uuid,text,text,text,uuid,text,jsonb) from public, anon, authenticated;
 revoke all on function private.notify_editorial_work_event() from public, anon, authenticated;
 revoke all on function private.notify_editorial_review_event() from public, anon, authenticated;
 
