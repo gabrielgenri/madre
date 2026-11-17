@@ -66,18 +66,26 @@ Deno.serve(async (req: Request) => {
     if (!sourceVersion) return json({ error: "La unidad todavía no tiene una versión madre registrada." }, 409);
     if (!unit.content_mother?.trim()) return json({ error: "Completá el contenido madre antes de generar." }, 422);
 
-    const [sourceResult, claimResult, evidenceResult, verificationResult] = await Promise.all([
+    const [sourceResult, claimResult, evidenceResult] = await Promise.all([
       supabase.from("sources").select("id,title,source_type,source_url,publisher,author,published_at,original_text,notes").eq("editorial_unit_id", unitId).order("created_at", { ascending: false }).limit(30),
       supabase.from("claims").select("id,claim_text,claim_type,verification_status,importance,context_note").eq("editorial_unit_id", unitId).limit(60),
-      supabase.from("evidences").select("id,claim_id,source_id,evidence_text,locator,relation").eq("editorial_unit_id", unitId).limit(100),
-      supabase.from("verifications").select("id,claim_id,status,rationale,checked_at").limit(150)
+      supabase.from("evidences").select("id,claim_id,source_id,evidence_text,locator,relation").eq("editorial_unit_id", unitId).limit(100)
     ]);
-    for (const result of [sourceResult, claimResult, evidenceResult, verificationResult]) {
+    for (const result of [sourceResult, claimResult, evidenceResult]) {
       if (result.error) throw result.error;
     }
 
-    const claimIds = new Set((claimResult.data ?? []).map((claim) => claim.id));
-    const verifications = (verificationResult.data ?? []).filter((item) => claimIds.has(item.claim_id));
+    const claimIds = (claimResult.data ?? []).map((claim) => claim.id);
+    let verifications: Array<{ id: string; claim_id: string; status: string; rationale: string | null; checked_at: string }> = [];
+    if (claimIds.length) {
+      const verificationResult = await supabase.from("verifications")
+        .select("id,claim_id,status,rationale,checked_at")
+        .in("claim_id", claimIds)
+        .order("checked_at", { ascending: false })
+        .limit(150);
+      if (verificationResult.error) throw verificationResult.error;
+      verifications = verificationResult.data ?? [];
+    }
     const format = formats[formatType as keyof typeof formats];
     const editorialInput = {
       title: unit.title, summary: unit.summary, content_mother: unit.content_mother,
