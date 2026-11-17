@@ -194,3 +194,41 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - No se declara compilación Vite, prueba de navegador ni E2E como realizada.
 - El asesor de rendimiento conserva siete claves foráneas sin índice en tablas preexistentes y reporta índices aún no utilizados (incluidos algunos nuevos, esperable antes de tener carga real). La advertencia de políticas SELECT múltiples en `user_roles` quedó resuelta.
 - El asesor de seguridad mantiene las advertencias previas sobre `audit_editorial_unit`, `handle_new_user`, `has_role` (SECURITY DEFINER expuestas a anon/authenticated) y la protección de contraseñas filtradas deshabilitada.
+
+## PASO 20 — Notificaciones editoriales
+
+### Alcance incorporado al repositorio
+
+- Se agregó la tabla `editorial_notifications`, con notificaciones privadas por destinatario, referencia a la unidad editorial, tipo de evento, título, detalle, metadatos, fecha de creación y marca de lectura.
+- La tabla tiene RLS: cada usuario autenticado solo puede consultar y actualizar sus propias notificaciones. Las actualizaciones están limitadas por trigger a cambiar `read_at`; una notificación leída no puede volver a no leída.
+- Los avisos de asignación/reasignación se generan a partir de `editorial_work_events`; los avisos de solicitud de revisión, devolución y aprobación se generan a partir de `editorial_review_events`.
+- Las funciones privilegiadas de triggers están aisladas en el esquema no expuesto `private`, con ejecución revocada a roles de cliente. Los triggers registran los eventos; no alteran estados editoriales ni autorizan publicaciones.
+- Los recordatorios de vencimiento se generan de manera idempotente al abrir/actualizar la bandeja de notificaciones: vencimientos dentro de 24 horas y tareas vencidas del usuario autenticado. La función es `SECURITY INVOKER` y solo permite insertar recordatorios propios.
+- Se agregó el servicio `src/shared/services/notifications.service.js` para listar, contar, marcar una notificación como leída, marcar todas y suscribirse a nuevos registros.
+- Se agregó el centro visual en `src/modules/madre-editorial/notifications.view.js`, montado en la cabecera de Madre Editorial. Incluye contador de pendientes, panel, navegación a la unidad relacionada y actualización en tiempo real.
+- Se agregaron estilos adaptables en `src/styles/main.css`.
+- La migración incorpora `editorial_notifications` a la publicación `supabase_realtime` si todavía no está incluida.
+
+### Eventos cubiertos
+
+- Asignación y cambio de responsable.
+- Solicitud de revisión a perfiles reviewer/editor/admin.
+- Solicitud de correcciones a autor y responsable asignado.
+- Aprobación editorial a autor y responsable asignado.
+- Vencimiento próximo (24 horas) y tarea vencida.
+
+### Seguridad y límites
+
+- No se envían correos, SMS ni notificaciones push: esta etapa implementa notificaciones internas en la aplicación.
+- Los avisos de revisión dependen de que existan usuarios con roles reviewer/editor/admin; la base de datos de referencia tenía únicamente un usuario admin al momento del PASO 19.
+- La suscripción Realtime requiere que el proyecto tenga habilitado Realtime y que la migración de publicación se aplique.
+- No se incorpora un cron externo; los recordatorios de vencimiento se calculan cuando el usuario consulta su centro de notificaciones.
+- La notificación es informativa: abrirla o marcarla como leída no modifica la unidad, no aprueba y no publica.
+
+### Verificación pendiente
+
+- Aplicar la migración `20261117213000_editorial_notifications.sql` al proyecto Supabase `cxuoaydhmvafsgtklwny`.
+- Verificar RLS con dos usuarios distintos y comprobar que no pueden leer ni modificar notificaciones ajenas.
+- Probar triggers con asignación, reasignación, solicitud, devolución y aprobación bajo perfiles reales.
+- Probar Realtime con dos sesiones autenticadas y revisar el contador en navegador.
+- Ejecutar `node --check`, `vite build` y pruebas E2E. No se declaran realizadas.
