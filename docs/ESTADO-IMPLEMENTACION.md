@@ -147,4 +147,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - El control es determinístico y estructural; no usa IA para juzgar veracidad ni sustituye una lectura semántica completa.
 - Las divergencias numéricas y de fechas son heurísticas basadas en fragmentos de texto similares; pueden generar falsos positivos o no detectar paráfrasis.
 - Falta probar el flujo completo en navegador con perfiles autor, revisor y editor.
+- El asesor de rendimiento ya no señala claves foráneas sin índice en las dos tablas nuevas; permanecen ocho advertencias informativas en tablas previas y la advertencia de políticas SELECT múltiples en `user_roles`.
+- El asesor de seguridad mantiene tres advertencias previas sobre funciones `SECURITY DEFINER` en `public` (`audit_editorial_unit`, `handle_new_user`, `has_role`) y una sobre protección de contraseñas filtradas deshabilitada. No fueron modificadas en este paso.
+
 - Ejecutar `node --check`, `vite build` y pruebas de extremo a extremo. No se declaran realizadas en esta entrega.
