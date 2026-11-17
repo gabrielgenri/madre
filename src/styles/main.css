@@ -64,3 +64,21 @@ textarea{resize:vertical;line-height:1.55}
 .notice{margin:.6rem 0}
 @media(max-width:760px){.shell{grid-template-columns:1fr}.sidebar{position:relative;height:auto;min-height:0;padding:1rem 1.2rem;border-right:0;border-bottom:1px solid #e7e7e3}.brand{margin-bottom:1rem}.sidebar nav{display:flex;overflow:auto}.nav-item{white-space:nowrap}.nav-item.disabled{display:none}.sidebar-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:1rem}.sidebar-bottom .button{width:auto}.main-content{padding:1.5rem 1rem}.topbar{align-items:start;flex-direction:column;gap:.7rem}.intro-row{align-items:start;flex-direction:column}.intro-row .button{width:100%}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Research workspace */
+.dialog.wide:has(.research-grid){width:min(96vw,1180px);max-height:92vh;overflow:auto}
+.research-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;align-items:start}
+.research-panel{background:#f8f8f6;border:1px solid #e7e7e2;border-radius:10px;padding:1rem;min-width:0}
+.research-panel h3{font-size:1.1rem;margin:.1rem 0 .8rem}
+.stack.compact{gap:.5rem}
+.stack.compact label{margin-top:.15rem}
+.stack.compact input,.stack.compact textarea,.stack.compact select{font-size:.82rem;padding:.65rem .7rem}
+.record-list{display:grid;gap:.55rem;margin-top:1rem}
+.record-item{display:grid;gap:.3rem;padding:.75rem;background:#fff;border:1px solid #e7e7e2;border-radius:8px;font-size:.8rem;overflow-wrap:anywhere}
+.record-item strong{font-weight:650;line-height:1.45}
+.record-item span,.record-item a{font-size:.72rem;color:#777}
+.record-item a{color:#4d6277}
+.verify-form{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.45rem}
+.verify-form button{grid-column:1/-1}
+@media(max-width:900px){.research-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.research-grid{grid-template-columns:1fr}.verify-form{grid-template-columns:1fr}.dialog.wide:has(.research-grid){width:96vw;padding:1rem}}
