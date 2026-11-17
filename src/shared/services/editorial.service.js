@@ -53,6 +53,26 @@ export const EditorialService = {
     return data ?? []
   },
 
+  async formats(unitId) {
+    const { data, error } = await client().from('editorial_formats')
+      .select('id,format_type,title,content,status,source_version_id,is_stale,updated_at')
+      .eq('editorial_unit_id', unitId)
+      .order('format_type')
+    if (error) throw error
+    return data ?? []
+  },
+
+  async saveFormat(unitId, values) {
+    const { data, error } = await client().rpc('save_editorial_format', {
+      p_unit_id: unitId,
+      p_format_type: values.format_type,
+      p_title: values.title,
+      p_content: values.content
+    })
+    if (error) throw error
+    return data
+  },
+
   async get(id) {
     const { data, error } = await client().from('editorial_units').select('*').eq('id', id).single()
     if (error) throw error
