@@ -115,9 +115,6 @@ export const EditorialService = {
       claim_id: claimId, status: values.status, rationale: values.rationale.trim() || null, checked_by: user.id
     }).select().single()
     if (error) throw error
-    const { error: updateError } = await client().from('claims')
-      .update({ verification_status: values.status }).eq('id', claimId)
-    if (updateError) throw updateError
     return data
   }
 }
