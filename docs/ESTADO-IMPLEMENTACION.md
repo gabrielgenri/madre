@@ -152,3 +152,21 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - El asesor de seguridad mantiene tres advertencias previas sobre funciones `SECURITY DEFINER` en `public` (`audit_editorial_unit`, `handle_new_user`, `has_role`) y una sobre protección de contraseñas filtradas deshabilitada. No fueron modificadas en este paso.
 
 - Ejecutar `node --check`, `vite build` y pruebas de extremo a extremo. No se declaran realizadas en esta entrega.
+
+## PASO 18 — Circuito formal de revisión y aprobación humana
+
+- Se creó `editorial_review_events`, un historial append-only que registra solicitudes de revisión, pedidos de corrección y aprobaciones con responsable, fecha, versión madre, control de calidad asociado y fundamento escrito.
+- RLS habilitado: los eventos solo son visibles para quienes pueden acceder a la unidad; las inserciones exigen identidad autenticada y rol/relación compatible con el tipo de evento. No se conceden permisos de UPDATE ni DELETE.
+- La RPC `record_editorial_review_event` usa `SECURITY INVOKER`, exige sesión y nota, y registra el evento contra la última versión madre y el control de calidad correspondiente.
+- La base valida que existan los seis formatos completos, vigentes y vinculados a la versión madre actual; que el control de calidad sea posterior a la última modificación de formatos; y que no haya hallazgos críticos.
+- Secuencia permitida: `review_requested` por autor/asignado/editor/admin; `changes_requested` por reviewer/editor/admin; `approved` por editor/admin. La solicitud puede reiterarse después de una devolución.
+- La aprobación humana cambia la unidad de `draft` a `reviewed`. La publicación sigue requiriendo editor/admin y ahora también exige que la unidad ya esté en `reviewed`.
+- El estado editorial se excluye de la captura de versiones de contenido: una aprobación no crea una versión madre nueva ni invalida los seis formatos. Las modificaciones de contenido sí continúan creando versiones.
+- La interfaz muestra historial y acciones según el rol y el estado; el servidor y la base de datos vuelven a validar todos los permisos y precondiciones. La visibilidad de botones no se considera un control de seguridad.
+
+### Verificaciones ejecutadas / pendientes
+
+- Migraciones desplegadas en Supabase y código del servicio/vista/documentación incorporado al repositorio.
+- Pendiente completar prueba transaccional integral con los seis formatos, control de calidad, solicitud, devolución y aprobación; también verificar rechazo con roles sin permiso.
+- El proyecto actualmente solo tiene un usuario con rol `admin` registrado en `user_roles`; no se encontró un usuario con rol `reviewer` ni `editor`. Para probar esos perfiles será necesario asignarlos mediante el procedimiento administrativo de roles, sin elevar permisos desde la interfaz.
+- No se declara prueba de navegador, compilación Vite ni E2E como realizada.
