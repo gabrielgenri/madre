@@ -118,7 +118,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 
 ### Configuración externa pendiente
 
-- Cargar el secreto `OPENAI_API_KEY` en Supabase Dashboard → Edge Functions → Secrets. Hasta que exista, la función responde `503 provider_not_configured` y la generación no estará disponible.
+- Confirmar en Supabase Dashboard → Edge Functions → Secrets que exista `OPENAI_API_KEY`; si falta, cargarlo allí. Sin ese secreto, la función responde `503 provider_not_configured` y la generación no estará disponible.
 - Opcionalmente definir `OPENAI_MODEL`; si no se define, la función usa `gpt-4.1-mini`.
 - Ejecutar una generación real con usuario autenticado, verificar las referencias devueltas y probar el bloqueo por cambio de versión madre.
 - Ejecutar `vite build` y pruebas de navegador. No se declaran realizadas en esta entrega.
