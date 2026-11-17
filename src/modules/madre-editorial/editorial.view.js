@@ -130,7 +130,7 @@ export async function renderWorkspace(root, user, onSignOut) {
     button.disabled = true
     try {
       await EditorialService.update(form.get('id'), { title: form.get('title'), summary: form.get('summary'), content_mother: form.get('content_mother') }, form.get('change_note'))
-      notice.textContent = 'Cambios guardados y nueva versión registrada.'
+      notice.textContent = 'Cambios guardados. Si hubo cambios editoriales, se agregó una versión al historial.'
       detailDialog.close(); await loadUnits()
     } catch (error) { notice.textContent = error.message }
     finally { button.disabled = false }
