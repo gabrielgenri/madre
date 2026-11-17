@@ -197,7 +197,7 @@ function buildQualityReport({ unit, version, formats, research }) {
 export const EditorialService = {
   async list() {
     const { data, error } = await client().from('editorial_units')
-      .select('id,title,summary,status,created_at,updated_at,created_by')
+      .select('id,title,summary,status,created_at,updated_at,created_by,assigned_to,priority,due_at')
       .order('updated_at', { ascending: false })
     if (error) throw error
     return data ?? []
@@ -347,6 +347,44 @@ export const EditorialService = {
     return (data ?? []).map(item => item.role)
   },
 
+  async workQueue(roles = []) {
+    const db = client()
+    const { data: units, error } = await db.from('editorial_units').select('id,title,summary,status,created_at,updated_at,created_by,assigned_to,priority,due_at').order('updated_at', { ascending: false })
+    if (error) throw error
+    const ids = (units ?? []).map(item => item.id)
+    if (!ids.length) return { items: [], assignees: [] }
+    const [reviewResult, workResult] = await Promise.all([
+      db.from('editorial_review_events').select('id,editorial_unit_id,event_type,source_version_id,note,created_at,created_by').in('editorial_unit_id', ids).order('created_at', { ascending: false }),
+      db.from('editorial_work_events').select('id,editorial_unit_id,from_assigned_to,to_assigned_to,from_priority,to_priority,from_due_at,to_due_at,note,created_at,created_by').in('editorial_unit_id', ids).order('created_at', { ascending: false })
+    ])
+    if (reviewResult.error) throw reviewResult.error
+    if (workResult.error) throw workResult.error
+    const latestReview = new Map()
+    for (const event of reviewResult.data ?? []) if (!latestReview.has(event.editorial_unit_id)) latestReview.set(event.editorial_unit_id, event)
+    const latestWork = new Map()
+    for (const event of workResult.data ?? []) if (!latestWork.has(event.editorial_unit_id)) latestWork.set(event.editorial_unit_id, event)
+    let assignees = []
+    if (roles.includes('editor') || roles.includes('admin')) {
+      const [profiles, roleRows] = await Promise.all([db.from('profiles').select('id,display_name').order('display_name'), db.from('user_roles').select('user_id,role')])
+      if (profiles.error) throw profiles.error
+      if (roleRows.error) throw roleRows.error
+      const eligible = new Set((roleRows.data ?? []).filter(row => ['collaborator','writer','reviewer','editor','admin'].includes(row.role)).map(row => row.user_id))
+      assignees = (profiles.data ?? []).filter(profile => eligible.has(profile.id))
+    }
+    return { items: (units ?? []).map(unit => ({ ...unit, latest_review: latestReview.get(unit.id) ?? null, latest_work_event: latestWork.get(unit.id) ?? null })), assignees }
+  },
+
+  async assignWork(unitId, values) {
+    const { data, error } = await client().rpc('assign_editorial_work', { p_unit_id: unitId, p_assigned_to: values.assigned_to || null, p_priority: values.priority, p_due_at: values.due_at || null, p_note: values.note.trim() })
+    if (error) throw error
+    return data
+  },
+
+  async workHistory(unitId) {
+    const { data, error } = await client().from('editorial_work_events').select('id,from_assigned_to,to_assigned_to,from_priority,to_priority,from_due_at,to_due_at,note,created_at,created_by').eq('editorial_unit_id', unitId).order('created_at', { ascending: false })
+    if (error) throw error
+    return data ?? []
+  },
   async reviewHistory(unitId) {
     const { data, error } = await client().from('editorial_review_events')
       .select('id,event_type,note,source_version_id,quality_review_id,created_by,created_at')
