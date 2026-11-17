@@ -353,16 +353,20 @@ export const EditorialService = {
     if (error) throw error
     const ids = (units ?? []).map(item => item.id)
     if (!ids.length) return { items: [], assignees: [] }
-    const [reviewResult, workResult] = await Promise.all([
+    const [reviewResult, workResult, versionResult] = await Promise.all([
       db.from('editorial_review_events').select('id,editorial_unit_id,event_type,source_version_id,note,created_at,created_by').in('editorial_unit_id', ids).order('created_at', { ascending: false }),
-      db.from('editorial_work_events').select('id,editorial_unit_id,from_assigned_to,to_assigned_to,from_priority,to_priority,from_due_at,to_due_at,note,created_at,created_by').in('editorial_unit_id', ids).order('created_at', { ascending: false })
+      db.from('editorial_work_events').select('id,editorial_unit_id,from_assigned_to,to_assigned_to,from_priority,to_priority,from_due_at,to_due_at,note,created_at,created_by').in('editorial_unit_id', ids).order('created_at', { ascending: false }),
+      db.from('editorial_versions').select('id,editorial_unit_id,version_number').in('editorial_unit_id', ids).order('version_number', { ascending: false })
     ])
     if (reviewResult.error) throw reviewResult.error
     if (workResult.error) throw workResult.error
+    if (versionResult.error) throw versionResult.error
     const latestReview = new Map()
     for (const event of reviewResult.data ?? []) if (!latestReview.has(event.editorial_unit_id)) latestReview.set(event.editorial_unit_id, event)
     const latestWork = new Map()
     for (const event of workResult.data ?? []) if (!latestWork.has(event.editorial_unit_id)) latestWork.set(event.editorial_unit_id, event)
+    const latestVersion = new Map()
+    for (const version of versionResult.data ?? []) if (!latestVersion.has(version.editorial_unit_id)) latestVersion.set(version.editorial_unit_id, version.id)
     let assignees = []
     if (roles.includes('editor') || roles.includes('admin')) {
       const [profiles, roleRows] = await Promise.all([db.from('profiles').select('id,display_name').order('display_name'), db.from('user_roles').select('user_id,role')])
@@ -371,7 +375,7 @@ export const EditorialService = {
       const eligible = new Set((roleRows.data ?? []).filter(row => ['collaborator','writer','reviewer','editor','admin'].includes(row.role)).map(row => row.user_id))
       assignees = (profiles.data ?? []).filter(profile => eligible.has(profile.id))
     }
-    return { items: (units ?? []).map(unit => ({ ...unit, latest_review: latestReview.get(unit.id) ?? null, latest_work_event: latestWork.get(unit.id) ?? null })), assignees }
+    return { items: (units ?? []).map(unit => { const review = latestReview.get(unit.id) ?? null; return { ...unit, latest_review: review, latest_review_current: Boolean(review && review.source_version_id === latestVersion.get(unit.id)), latest_work_event: latestWork.get(unit.id) ?? null } }), assignees }
   },
 
   async assignWork(unitId, values) {
