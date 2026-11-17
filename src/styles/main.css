@@ -139,3 +139,40 @@ textarea{resize:vertical;line-height:1.55}
   .format-card{align-items:flex-start;flex-direction:column}
   .format-card .button{width:100%}
 }
+
+
+/* Control de calidad editorial */
+.dialog.wide:has(.quality-panel){width:min(96vw,1040px);max-height:94vh;overflow:auto}
+.quality-panel{display:grid;gap:.85rem;border:1px solid #e1e1da;border-radius:12px;padding:1rem;background:#fafaf8}
+.quality-panel-head{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.quality-panel-head h3{margin:0;font-size:1.2rem}
+.quality-panel-head p{margin:.25rem 0 0}
+.quality-summary{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;padding:.7rem 0;border-bottom:1px solid #e6e6e0;font-size:.78rem}
+.quality-summary strong{font-size:.84rem}
+.quality-summary span{color:#777}
+.quality-checklist,.quality-findings,.quality-observations{display:grid;gap:.5rem;margin-top:.8rem}
+.quality-checklist h4,.quality-findings h4,.quality-observations h4{font-size:.9rem;margin:0 0 .2rem}
+.quality-check{display:flex;align-items:flex-start;gap:.65rem;padding:.55rem .65rem;background:#fff;border:1px solid #e9e9e4;border-radius:8px}
+.quality-check>span{font-weight:800}
+.quality-check>div{display:grid;gap:.15rem}
+.quality-check strong{font-size:.78rem}
+.quality-check small{font-size:.72rem;color:#777;line-height:1.4}
+.quality-pass{color:#47714d}.quality-pending{color:#9a6b2e}
+.quality-finding,.quality-observation{padding:.7rem;border:1px solid #e5e5df;border-radius:8px;background:#fff}
+.quality-finding strong,.quality-observation span{font-size:.75rem;text-transform:none}
+.quality-finding p,.quality-observation p{font-size:.78rem;margin:.25rem 0 0;line-height:1.5}
+.quality-finding small{display:block;color:#777;font-size:.7rem;margin-top:.3rem}
+.quality-finding.severity-critical{border-left:3px solid #a33b2f}
+.quality-finding.severity-warning{border-left:3px solid #a17a38}
+.quality-finding.severity-note{border-left:3px solid #7a8791}
+.quality-observation span{color:#777}
+.quality-observation-form{display:grid;grid-template-columns:minmax(150px,.7fr) 2fr auto;align-items:end;gap:.65rem;padding-top:.8rem;border-top:1px solid #e5e5df}
+.quality-observation-form>div{display:grid;gap:.35rem}
+.quality-observation-form label{font-size:.76rem}
+.quality-observation-form textarea,.quality-observation-form select{font-size:.8rem;padding:.65rem}
+@media(max-width:700px){
+ .quality-observation-form{grid-template-columns:1fr}
+ .quality-observation-form button{width:100%}
+ .quality-panel-head{align-items:stretch}
+ .quality-panel-head button{width:100%}
+}
