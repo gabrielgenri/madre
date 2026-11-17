@@ -28,6 +28,23 @@ function qualityNumberMentions(text) {
   return matches
 }
 
+
+function qualityDateMentions(text) {
+  const matches = []
+  const regex = /\b(\d{1,2}[/-]\d{1,2}[/-](?:19|20)\d{2}|\d{1,2}\s+de\s+(?:enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+de\s+(?:19|20)\d{2}|(?:19|20)\d{2})\b/giu
+  for (const match of text.matchAll(regex)) {
+    const index = match.index ?? 0
+    const before = text.slice(Math.max(0, index - 65), index)
+    const after = text.slice(index + match[0].length, index + match[0].length + 65)
+    const normalizeContext = (value) => value.toLocaleLowerCase('es-AR')
+      .replace(/\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|\b(?:19|20)\d{2}\b/g, '#')
+      .replace(/[^\p{L}#]+/gu, ' ').trim().split(/\s+/).slice(-5).join(' ')
+    const key = normalizeContext(before) + ' # ' + normalizeContext(after)
+    matches.push({ key, value: match[1].toLocaleLowerCase('es-AR') })
+  }
+  return matches
+}
+
 function buildQualityReport({ unit, version, formats, research }) {
   const checklist = []
   const findings = []
@@ -128,6 +145,24 @@ function buildQualityReport({ unit, version, formats, research }) {
   for (const [, values] of divergent) {
     const detail = [...values.entries()].map(([value, types]) => value + ' en ' + [...types].join(', ')).join(' / ')
     finding('warning', 'cross_format_number_mismatch', 'Posible diferencia cuantitativa en pasajes de contexto similar: ' + detail + '. Confirmá si se trata del mismo indicador.')
+  }
+
+  const dateMentions = new Map()
+  for (const format of readyFormats) {
+    for (const mention of qualityDateMentions(format.content)) {
+      const current = dateMentions.get(mention.key) ?? new Map()
+      const formatsForValue = current.get(mention.value) ?? new Set()
+      formatsForValue.add(format.format_type)
+      current.set(mention.value, formatsForValue)
+      dateMentions.set(mention.key, current)
+    }
+  }
+  const dateDivergences = [...dateMentions.entries()].filter(([, values]) => values.size > 1)
+  add('cross-format-dates', 'Fechas repetidas con contexto comparable', dateDivergences.length === 0,
+    dateDivergences.length ? dateDivergences.length + ' posible(s) divergencia(s) de fecha' : 'No se detectaron divergencias literales de fecha con contexto comparable')
+  for (const [, values] of dateDivergences) {
+    const detail = [...values.entries()].map(([value, types]) => value + ' en ' + [...types].join(', ')).join(' / ')
+    finding('warning', 'cross_format_date_mismatch', 'Posible diferencia de fecha en pasajes de contexto similar: ' + detail + '. Confirmá si se refiere al mismo acontecimiento.')
   }
 
   if (readyFormats.length > 1) {
