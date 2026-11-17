@@ -104,3 +104,21 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - Probar alta y edición de cada uno de los seis formatos desde la interfaz con sesión autenticada.
 - Probar permisos RLS con perfiles autor, editor y administrador.
 - Ejecutar `node --check`, `vite build` y pruebas de navegador. No se declaran como realizadas en este paso.
+
+
+## PASO 16 — Generación editorial asistida por IA
+
+- Se desplegó la Edge Function `generate-editorial-format` en Supabase, con verificación JWT habilitada.
+- La función valida la sesión del usuario y consulta unidades, versiones, fuentes, afirmaciones, evidencias y verificaciones mediante un cliente Supabase con el JWT del usuario; las consultas respetan RLS.
+- Se implementaron instrucciones específicas para los seis formatos editoriales y reglas para no inventar hechos, cifras, citas, fuentes ni enlaces; las afirmaciones no verificadas deben conservar su atribución o quedar señaladas.
+- El endpoint devuelve un borrador estructurado, la versión madre utilizada, IDs de fuentes y afirmaciones citadas y alertas editoriales. No escribe en la base de datos.
+- La interfaz permite solicitar la generación, revisar y editar el resultado y guardarlo como borrador mediante la RPC existente. Antes de guardar, compara la versión madre utilizada con la última versión disponible y bloquea el guardado si hubo cambios.
+- La generación y el guardado no revisan, aprueban ni publican automáticamente. La responsabilidad editorial sigue siendo humana.
+- El proveedor previsto es OpenAI. La función lee `OPENAI_API_KEY` desde los secretos del entorno Edge Functions y permite configurar `OPENAI_MODEL`; la clave no se guarda en el repositorio ni en el navegador.
+
+### Configuración externa pendiente
+
+- Cargar el secreto `OPENAI_API_KEY` en Supabase Dashboard → Edge Functions → Secrets. Hasta que exista, la función responde `503 provider_not_configured` y la generación no estará disponible.
+- Opcionalmente definir `OPENAI_MODEL`; si no se define, la función usa `gpt-4.1-mini`.
+- Ejecutar una generación real con usuario autenticado, verificar las referencias devueltas y probar el bloqueo por cambio de versión madre.
+- Ejecutar `vite build` y pruebas de navegador. No se declaran realizadas en esta entrega.
