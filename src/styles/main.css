@@ -176,3 +176,17 @@ textarea{resize:vertical;line-height:1.55}
  .quality-panel-head{align-items:stretch}
  .quality-panel-head button{width:100%}
 }
+
+/* Circuito formal de revisión editorial */
+.review-workflow{display:grid;gap:.7rem;margin:1rem 0;padding:1rem;border:1px solid #e1e1da;border-radius:12px;background:#fafaf8}
+.review-workflow h3{margin:0;font-size:1.1rem}
+.review-workflow>label{font-size:.78rem;font-weight:650}
+.review-workflow textarea{width:100%;min-height:72px}
+.review-history{display:grid;gap:.55rem}
+.review-event{display:grid;gap:.2rem;padding:.7rem;border:1px solid #e5e5df;border-radius:8px;background:#fff}
+.review-event strong{font-size:.82rem}
+.review-event span{font-size:.7rem;color:#777}
+.review-event p{margin:.2rem 0 0;font-size:.8rem;line-height:1.45;overflow-wrap:anywhere}
+.review-actions{display:flex;flex-wrap:wrap;gap:.5rem}
+.review-actions button[hidden]{display:none}
+@media(max-width:620px){.review-actions{display:grid}.review-actions button{width:100%}}
