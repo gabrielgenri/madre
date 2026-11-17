@@ -22,3 +22,6 @@ madre-cinco.vercel.app
 1
 madre-git-main-madre3.vercel.app
 madre-ad7gr68ls-madre3.vercel.app
+
+
+Set up Vercel for me. Fetch https://vercel.com/get-started.md and follow it. it.
