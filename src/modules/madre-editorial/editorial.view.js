@@ -8,6 +8,15 @@ const date = (value) => new Intl.DateTimeFormat('es-AR', {
   dateStyle: 'medium', timeStyle: 'short'
 }).format(new Date(value))
 
+const formatDefinitions = [
+  { type: 'web_seo', label: 'Web SEO', detail: 'Nota web optimizada para buscadores', placeholder: 'Redactá la nota web con título, bajada, desarrollo y datos verificables.' },
+  { type: 'video_reel_60', label: 'Reel · 60 segundos', detail: 'Guion audiovisual breve', placeholder: 'Escribí apertura, desarrollo, apoyos visuales y cierre para un reel de hasta 60 segundos.' },
+  { type: 'podcast_primera_hora', label: 'Podcast Primera Hora', detail: 'Guion para audio', placeholder: 'Prepará conducción, contexto, preguntas, transiciones y cierre del episodio.' },
+  { type: 'instagram_carousel_8', label: 'Carrusel · 8 placas', detail: 'Secuencia de ocho placas', placeholder: 'Desarrollá ocho placas numeradas, con una idea clara y verificable por placa.' },
+  { type: 'newsletter', label: 'Newsletter', detail: 'Boletín para suscriptores', placeholder: 'Redactá asunto, apertura, desarrollo, enlaces y cierre del boletín.' },
+  { type: 'whatsapp', label: 'WhatsApp', detail: 'Mensaje de distribución', placeholder: 'Prepará un mensaje claro, breve y contextualizado para WhatsApp.' }
+]
+
 const verificationLabel = {
   pending: 'Pendiente', verified: 'Verificada', attributed: 'Atribuida',
   unverified: 'No verificada', contradictory: 'Contradictoria', missing_source: 'Sin fuente'
@@ -52,8 +61,29 @@ export async function renderWorkspace(root, user, onSignOut) {
       <section class="version-panel" aria-labelledby="version-heading"><div class="version-panel-head"><h3 id="version-heading">Historial de versiones</h3><span class="muted small">Las versiones anteriores no se sobrescriben</span></div><div id="version-list" class="version-list" aria-live="polite"><p class="muted small">Cargando historial…</p></div></section>
       <label for="detail-status">Estado editorial</label><input id="detail-status" value="Borrador" readonly aria-readonly="true" />
       <p class="muted small">La revisión formal permanece bloqueada hasta completar el control editorial humano.</p>
-      <div class="dialog-actions"><button type="button" class="button ghost" id="open-research">Fuentes y verificación</button><button type="button" class="button ghost" id="cancel-detail">Cerrar</button><button class="button primary" type="submit">Guardar cambios</button></div>
+      <div class="dialog-actions"><button type="button" class="button ghost" id="open-research">Fuentes y verificación</button><button type="button" class="button ghost" id="open-formats">Seis formatos</button><button type="button" class="button ghost" id="cancel-detail">Cerrar</button><button class="button primary" type="submit">Guardar cambios</button></div>
     </form></dialog>
+    <dialog id="formats-dialog" class="dialog wide"><div class="stack">
+      <div class="dialog-head"><div><p class="eyebrow">DERIVACIÓN MULTIFORMATO</p><h2 id="formats-heading">Seis formatos editoriales</h2></div><button type="button" class="icon-button" id="close-formats" aria-label="Cerrar">×</button></div>
+      <p class="muted small">Cada borrador queda vinculado a una versión concreta del contenido madre. Si cambia la investigación, el formato se marca como desactualizado y necesita revisión.</p>
+      <div id="format-list" class="format-list" aria-live="polite"><p class="muted small">Cargando formatos…</p></div>
+      <form id="format-form" class="format-editor stack">
+        <h3>Editar borrador</h3>
+        <label for="format-type">Formato</label>
+        <select id="format-type" name="format_type">
+          <option value="web_seo">Web SEO</option>
+          <option value="video_reel_60">Reel · 60 segundos</option>
+          <option value="podcast_primera_hora">Podcast Primera Hora</option>
+          <option value="instagram_carousel_8">Carrusel · 8 placas</option>
+          <option value="newsletter">Newsletter</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+        <label for="format-title">Título de la pieza</label><input id="format-title" name="title" required maxlength="240" />
+        <label for="format-content">Contenido del borrador</label><textarea id="format-content" name="content" required maxlength="60000" rows="12" placeholder="Seleccioná un formato y desarrollá el contenido. La pieza se guardará como borrador."></textarea>
+        <p id="format-source-note" class="muted small" aria-live="polite">Todavía no hay un borrador seleccionado.</p>
+        <div class="dialog-actions"><button type="button" class="button ghost" id="cancel-formats">Cerrar</button><button class="button primary" type="submit">Guardar borrador</button></div>
+      </form>
+    </div></dialog>
     <dialog id="research-dialog" class="dialog wide"><div class="stack">
       <div class="dialog-head"><div><p class="eyebrow">TRAZABILIDAD PERIODÍSTICA</p><h2 id="research-heading">Investigación</h2></div><button type="button" class="icon-button" id="close-research" aria-label="Cerrar">×</button></div>
       <div class="research-grid">
@@ -91,8 +121,11 @@ export async function renderWorkspace(root, user, onSignOut) {
   const createDialog = root.querySelector('#unit-dialog')
   const detailDialog = root.querySelector('#detail-dialog')
   const researchDialog = root.querySelector('#research-dialog')
+  const formatsDialog = root.querySelector('#formats-dialog')
   const notice = root.querySelector('#notice')
   let activeUnitId = null
+  let activeUnitTitle = ''
+  let formatRecords = []
   let bundle = { sources: [], claims: [], evidences: [], verifications: [] }
 
   root.querySelector('#new-unit').addEventListener('click', () => createDialog.showModal())
@@ -102,6 +135,33 @@ export async function renderWorkspace(root, user, onSignOut) {
   root.querySelector('#cancel-detail').addEventListener('click', () => detailDialog.close())
   root.querySelector('#close-research').addEventListener('click', () => researchDialog.close())
   root.querySelector('#research-done').addEventListener('click', () => researchDialog.close())
+  root.querySelector('#close-formats').addEventListener('click', () => formatsDialog.close())
+  root.querySelector('#cancel-formats').addEventListener('click', () => formatsDialog.close())
+  root.querySelector('#open-formats').addEventListener('click', async () => {
+    activeUnitId = root.querySelector('#detail-form').elements.id.value
+    activeUnitTitle = root.querySelector('#detail-heading').textContent
+    await loadFormats()
+    detailDialog.close()
+    formatsDialog.showModal()
+  })
+  root.querySelector('#format-type').addEventListener('change', (event) => selectFormat(event.currentTarget.value))
+  root.querySelector('#format-form').addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const form = event.currentTarget
+    const button = form.querySelector('[type="submit"]')
+    const values = Object.fromEntries(new FormData(form).entries())
+    button.disabled = true
+    try {
+      await EditorialService.saveFormat(activeUnitId, values)
+      notice.textContent = 'Borrador guardado y vinculado a la versión madre vigente.'
+      await loadFormats()
+      selectFormat(values.format_type)
+    } catch (error) {
+      notice.textContent = error.message
+    } finally {
+      button.disabled = false
+    }
+  })
   root.querySelector('#open-research').addEventListener('click', async () => {
     activeUnitId = root.querySelector('#detail-form').elements.id.value
     await loadResearch()
@@ -186,6 +246,41 @@ export async function renderWorkspace(root, user, onSignOut) {
     }
   }
 
+  function selectFormat(type) {
+    const definition = formatDefinitions.find(item => item.type === type)
+    const record = formatRecords.find(item => item.format_type === type)
+    const form = root.querySelector('#format-form')
+    form.elements.format_type.value = type
+    form.elements.title.value = record?.title ?? (activeUnitTitle ? `${activeUnitTitle} — ${definition.label}` : definition.label)
+    form.elements.content.value = record?.content ?? ''
+    root.querySelector('#format-content').placeholder = definition.placeholder
+    root.querySelector('#format-source-note').textContent = record
+      ? `Estado: ${record.status === 'approved' ? 'Aprobado' : record.status === 'reviewed' ? 'Revisado' : 'Borrador'} · ${record.is_stale ? 'DESACTUALIZADO: requiere comparar con el contenido madre vigente' : 'Vinculado a la versión madre vigente'} · Última edición: ${date(record.updated_at)}`
+      : 'Aún no existe este borrador. Al guardarlo quedará vinculado a la última versión madre.'
+  }
+
+  async function loadFormats() {
+    const list = root.querySelector('#format-list')
+    list.innerHTML = '<p class="muted small">Cargando los seis formatos…</p>'
+    try {
+      formatRecords = await EditorialService.formats(activeUnitId)
+      list.innerHTML = formatDefinitions.map(definition => {
+        const record = formatRecords.find(item => item.format_type === definition.type)
+        const state = !record ? 'Sin borrador' : record.is_stale ? 'Desactualizado' : record.status === 'approved' ? 'Aprobado' : record.status === 'reviewed' ? 'Revisado' : 'Borrador'
+        const stateClass = record?.is_stale ? 'format-state stale' : 'format-state'
+        return `<article class="format-card">
+          <div><strong>${esc(definition.label)}</strong><span>${esc(definition.detail)}</span><small class="${stateClass}">${esc(state)}</small></div>
+          <button type="button" class="button ghost edit-format" data-format-type="${esc(definition.type)}">${record ? 'Editar' : 'Crear borrador'}</button>
+        </article>`
+      }).join('')
+      list.querySelectorAll('.edit-format').forEach(button => button.addEventListener('click', () => selectFormat(button.dataset.formatType)))
+      const current = root.querySelector('#format-type').value
+      selectFormat(current)
+    } catch (error) {
+      list.innerHTML = `<p class="muted small">No se pudieron cargar los formatos: ${esc(error.message)}</p>`
+    }
+  }
+
   async function loadVersions(unitId) {
     const list = root.querySelector('#version-list')
     list.innerHTML = '<p class="muted small">Cargando historial…</p>'
@@ -245,6 +340,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       form.elements.content_mother.value = unit.content_mother ?? ''
       root.querySelector('#detail-status').value = unit.status === 'published' ? 'Publicado' : unit.status === 'reviewed' ? 'Revisado' : 'Borrador'
       root.querySelector('#detail-heading').textContent = unit.title
+      activeUnitTitle = unit.title
+      activeUnitId = unit.id
       root.querySelector('#change-note').value = ''
       await loadVersions(unit.id)
       detailDialog.showModal()
