@@ -62,6 +62,28 @@ export const EditorialService = {
     return data ?? []
   },
 
+  async latestVersionId(unitId) {
+    const { data, error } = await client().from('editorial_versions')
+      .select('id,version_number')
+      .eq('editorial_unit_id', unitId)
+      .order('version_number', { ascending: false })
+      .limit(1)
+      .single()
+    if (error) throw error
+    return data
+  },
+
+  async generateFormat(unitId, formatType) {
+    const { data, error } = await client().functions.invoke('generate-editorial-format', {
+      body: { unit_id: unitId, format_type: formatType }
+    })
+    if (error) {
+      const detail = error.context?.json?.error
+      throw new Error(detail || error.message || 'No se pudo generar el borrador.')
+    }
+    return data
+  },
+
   async saveFormat(unitId, values) {
     const { data, error } = await client().rpc('save_editorial_format', {
       p_unit_id: unitId,
