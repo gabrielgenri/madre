@@ -255,6 +255,7 @@ language plpgsql
 security invoker
 set search_path = pg_catalog, public, pg_temp
 as $
+
 declare
   v_count integer := 0;
 begin
