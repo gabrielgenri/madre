@@ -122,3 +122,29 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - Opcionalmente definir `OPENAI_MODEL`; si no se define, la función usa `gpt-4.1-mini`.
 - Ejecutar una generación real con usuario autenticado, verificar las referencias devueltas y probar el bloqueo por cambio de versión madre.
 - Ejecutar `vite build` y pruebas de navegador. No se declaran realizadas en esta entrega.
+
+
+## PASO 17 — Control de calidad editorial y registro de observaciones
+
+- Se incorporaron las tablas `editorial_quality_reviews` y `editorial_quality_observations`, con RLS habilitado, políticas basadas en el acceso a la unidad editorial y permisos de solo lectura/alta para usuarios autenticados.
+- Los reportes y las observaciones son append-only: no se conceden permisos de UPDATE ni DELETE. Cada ejecución guarda versión madre, checklist, hallazgos, métricas, responsable y fecha.
+- La interfaz de los seis formatos incorpora el panel de control de calidad, historial de ejecuciones, checklist visible, alertas clasificadas y registro de observaciones humanas.
+- Los chequeos estructurales detectan formatos faltantes/incompletos, formatos desactualizados, afirmaciones sin evidencia de apoyo vinculada a una fuente, verificaciones pendientes/no verificadas/contradictorias, enlaces que no coinciden con las URLs registradas, extensión orientativa del Reel y WhatsApp, y cantidad de placas del carrusel.
+- La comparación cruzada busca cifras y fechas repetidas en contextos textuales similares y señala posibles divergencias para confirmación. No interpreta equivalencia semántica ni determina qué dato es verdadero.
+- Las notas humanas quedan vinculadas a una ejecución concreta y conservan severidad, autor y fecha. Una nueva ejecución crea un reporte nuevo; no sobrescribe los anteriores.
+- El resultado `checks_complete` significa que no se detectaron alertas estructurales de nivel advertencia/crítico; no equivale a revisión, aprobación ni autorización de publicación.
+
+### Verificación ejecutada
+
+- Supabase confirma ambas tablas, RLS activo y dos políticas por tabla.
+- Se confirmó ausencia de grants para `anon`.
+- Se endurecieron los permisos para que `authenticated` tenga únicamente SELECT e INSERT; no puede modificar ni borrar reportes u observaciones.
+- Prueba transaccional bajo rol `authenticated` y usuario propietario de una unidad: insertó un reporte y una observación, ambas filas fueron visibles con RLS y la transacción terminó en `ROLLBACK`; no dejó datos de prueba.
+- Se agregaron índices para historial por unidad, formato, autor y observaciones por reporte.
+
+### Límites y pendientes
+
+- El control es determinístico y estructural; no usa IA para juzgar veracidad ni sustituye una lectura semántica completa.
+- Las divergencias numéricas y de fechas son heurísticas basadas en fragmentos de texto similares; pueden generar falsos positivos o no detectar paráfrasis.
+- Falta probar el flujo completo en navegador con perfiles autor, revisor y editor.
+- Ejecutar `node --check`, `vite build` y pruebas de extremo a extremo. No se declaran realizadas en esta entrega.
