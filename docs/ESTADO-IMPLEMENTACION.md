@@ -225,10 +225,17 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - No se incorpora un cron externo; los recordatorios de vencimiento se calculan cuando el usuario consulta su centro de notificaciones.
 - La notificación es informativa: abrirla o marcarla como leída no modifica la unidad, no aprueba y no publica.
 
+### Verificación ejecutada
+
+- La migración `editorial_notifications` fue aplicada al proyecto Supabase `cxuoaydhmvafsgtklwny`.
+- Consulta de control: RLS activo, tres políticas instaladas, triggers de planificación y revisión presentes, tabla incluida en `supabase_realtime`, cero filas iniciales.
+- Prueba transaccional de asignación ejecutada con el usuario admin existente: `assign_editorial_work` generó la notificación `work_assigned` con prioridad y fecha límite. La prueba terminó en `ROLLBACK` y no dejó cambios ni notificaciones persistentes.
+- Los asesores de Supabase no detectan advertencias nuevas asociadas a funciones privilegiadas del PASO 20; permanecen tres funciones `SECURITY DEFINER` públicas preexistentes (`audit_editorial_unit`, `handle_new_user`, `has_role`) y la advertencia de protección de contraseñas filtradas deshabilitada.
+- El asesor de rendimiento informa siete claves foráneas sin índice en tablas preexistentes y algunos índices nuevos todavía no utilizados; no identifica claves foráneas sin índice en la nueva tabla de notificaciones.
+
 ### Verificación pendiente
 
-- Aplicar la migración `20261117213000_editorial_notifications.sql` al proyecto Supabase `cxuoaydhmvafsgtklwny`.
-- Verificar RLS con dos usuarios distintos y comprobar que no pueden leer ni modificar notificaciones ajenas.
-- Probar triggers con asignación, reasignación, solicitud, devolución y aprobación bajo perfiles reales.
+- Verificar aislamiento RLS con dos usuarios reales y comprobar que no pueden leer ni modificar notificaciones ajenas.
+- Probar triggers de revisión (solicitud, devolución y aprobación) con perfiles reales; al momento del último relevamiento solo existe una cuenta admin.
 - Probar Realtime con dos sesiones autenticadas y revisar el contador en navegador.
 - Ejecutar `node --check`, `vite build` y pruebas E2E. No se declaran realizadas.
