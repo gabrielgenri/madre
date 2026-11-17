@@ -233,9 +233,13 @@ export async function renderWorkspace(root, user, onSignOut) {
   async function loadQualityHistory() {
     const container = root.querySelector('#quality-report')
     const saveButton = root.querySelector('#save-quality-observation')
+    activeQualityReviewId = null
     container.innerHTML = '<p class="muted small">Cargando historial de controles…</p>'
     try {
-      const history = await EditorialService.qualityHistory(activeUnitId)
+      const [history, latestVersion] = await Promise.all([
+        EditorialService.qualityHistory(activeUnitId),
+        EditorialService.latestVersionId(activeUnitId)
+      ])
       const latest = history[0]
       if (!latest) {
         activeQualityReviewId = null
@@ -243,9 +247,13 @@ export async function renderWorkspace(root, user, onSignOut) {
         container.innerHTML = '<p class="muted small">Todavía no se ejecutó un control para esta unidad.</p>'
         return
       }
-      activeQualityReviewId = latest.id
-      saveButton.disabled = false
-      const statusLabel = latest.status === 'needs_attention' ? 'Requiere atención' : 'Chequeos completados · revisión humana pendiente'
+      const lastFormatChange = Math.max(0, ...formatRecords.map(item => new Date(item.updated_at).getTime()))
+      const reportIsCurrent = latest.source_version_id === latestVersion.id && new Date(latest.created_at).getTime() >= lastFormatChange
+      activeQualityReviewId = reportIsCurrent ? latest.id : null
+      saveButton.disabled = !reportIsCurrent
+      const statusLabel = !reportIsCurrent
+        ? 'Control desactualizado · ejecutar nuevamente'
+        : latest.status === 'needs_attention' ? 'Requiere atención' : 'Chequeos completados · revisión humana pendiente'
       const findings = latest.findings ?? []
       const severityLabel = { critical: 'Crítica', warning: 'Advertencia', note: 'Nota' }
       const checklist = latest.checklist ?? []
@@ -258,6 +266,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         ${history.length > 1 ? `<p class="muted small">Hay ${history.length - 1} controles anteriores en el historial.</p>` : ''}
       `
     } catch (error) {
+      activeQualityReviewId = null
       saveButton.disabled = true
       container.innerHTML = '<p class="muted small">No se pudo cargar el historial: ' + esc(error.message) + '</p>'
     }
@@ -282,6 +291,7 @@ export async function renderWorkspace(root, user, onSignOut) {
       notice.textContent = 'Borrador guardado y vinculado a la versión madre vigente.'
       await loadFormats()
       selectFormat(values.format_type)
+      await loadQualityHistory()
     } catch (error) {
       notice.textContent = error.message
     } finally {
