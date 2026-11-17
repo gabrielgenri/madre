@@ -220,3 +220,27 @@ textarea{resize:vertical;line-height:1.55}
 .work-assignment-grid>div{display:grid;gap:.35rem;min-width:0}
 .work-assignment[hidden]{display:none}
 @media(max-width:700px){.work-assignment-grid{grid-template-columns:1fr}.queue-card{align-items:flex-start;flex-direction:column}.queue-open{width:100%}.queue-metrics{width:100%}}
+
+/* PASO 20 — Centro de notificaciones editoriales */
+.topbar{gap:1rem}
+.notification-center{position:relative;display:flex;align-items:center;margin-left:auto}
+.notification-trigger{display:inline-flex;align-items:center;gap:.55rem;border:1px solid #deded9;background:#fff;border-radius:9px;padding:.65rem .85rem;font-size:.8rem;font-weight:650;color:#171717}
+.notification-trigger:hover{background:#f2f2ef}
+.notification-count{display:inline-grid;place-items:center;min-width:1.25rem;height:1.25rem;padding:0 .25rem;border-radius:99px;background:#171717;color:#fff;font-size:.68rem}
+.notification-panel{position:absolute;z-index:30;right:0;top:calc(100% + .65rem);width:min(92vw,420px);max-height:min(72vh,620px);overflow:auto;background:#fff;border:1px solid #deded9;border-radius:12px;box-shadow:0 18px 55px #0002;padding:.9rem}
+.notification-panel[hidden]{display:none}
+.notification-panel-head{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.2rem .1rem .8rem;border-bottom:1px solid #e8e8e3}
+.notification-panel-head strong{font-size:.95rem}
+.notification-panel-head p{margin:.15rem 0 0}
+.notification-panel-head .button{font-size:.7rem;padding:.5rem .6rem}
+.notification-items{display:grid;gap:.5rem;padding-top:.65rem}
+.notification-item{display:grid;gap:.35rem;text-align:left;width:100%;padding:.8rem;border:1px solid #e8e8e3;border-radius:9px;background:#fff;color:#171717}
+.notification-item:hover{background:#f7f7f4}
+.notification-item.unread{border-left:3px solid #171717;background:#fafaf8}
+.notification-item-top{display:flex;align-items:start;justify-content:space-between;gap:.5rem}
+.notification-item-top strong{font-size:.8rem;line-height:1.35}
+.notification-item-top small{white-space:nowrap;color:#777;font-size:.65rem}
+.notification-body{font-size:.76rem;line-height:1.45;color:#555}
+.notification-item time{font-size:.67rem;color:#888}
+.notification-empty{padding:1rem .3rem}
+@media(max-width:760px){.topbar{align-items:stretch}.notification-center{margin-left:0}.notification-trigger{width:100%;justify-content:center}.notification-panel{left:0;right:auto;width:min(92vw,420px)}}
