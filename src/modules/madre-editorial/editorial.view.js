@@ -41,6 +41,11 @@ export async function renderWorkspace(root, user, onSignOut) {
       <main class="main-content">
         <header class="topbar"><div><p class="eyebrow">NÚCLEO EDITORIAL</p><h1>Madre Editorial</h1></div><span class="status-pill">Entorno conectado</span></header>
         <section class="intro-row"><div><h2>Unidades editoriales</h2><p class="muted">Cada investigación comienza con una unidad común, sus fuentes y sus evidencias.</p></div><button class="button primary" id="new-unit">＋ Nueva unidad</button></section>
+        <section class="work-queue" aria-labelledby="work-queue-heading">
+          <div class="work-queue-head"><div><p class="eyebrow">OPERACIÓN EDITORIAL</p><h2 id="work-queue-heading">Bandeja de trabajo</h2><p class="muted small">Asignaciones, prioridades, fechas límite y decisiones de revisión.</p></div><div id="queue-metrics" class="queue-metrics" aria-live="polite"></div></div>
+          <div class="queue-toolbar"><label for="queue-filter">Ver</label><select id="queue-filter"><option value="all">Todas las unidades</option><option value="mine">Mi trabajo</option><option value="review">Esperando revisión</option><option value="overdue">Vencidas</option><option value="unassigned">Sin asignar</option></select></div>
+          <div id="work-queue-list" class="work-queue-list" aria-live="polite"><p class="muted small">Cargando bandeja…</p></div>
+        </section>
         <div id="notice" class="notice" role="status" aria-live="polite"></div>
         <section id="unit-list" class="unit-list" aria-live="polite"><div class="loading">Cargando unidades…</div></section>
       </main>
@@ -70,6 +75,13 @@ export async function renderWorkspace(root, user, onSignOut) {
           <button type="button" class="button ghost" id="request-changes" data-event="changes_requested" hidden>Solicitar correcciones</button>
           <button type="button" class="button primary" id="approve-review" data-event="approved" hidden>Aprobar como Revisado</button>
         </div>
+      </section>
+      <section class="work-assignment" aria-labelledby="work-assignment-heading">
+        <div><h3 id="work-assignment-heading">Organización del trabajo</h3><p class="muted small">La asignación y los cambios de prioridad quedan registrados. Solo editor/admin pueden administrar esta planificación.</p></div>
+        <div class="work-assignment-grid"><div><label for="work-assignee">Responsable asignado</label><select id="work-assignee"><option value="">Sin asignar</option></select></div><div><label for="work-priority">Prioridad</label><select id="work-priority"><option value="low">Baja</option><option value="normal">Normal</option><option value="high">Alta</option><option value="urgent">Urgente</option></select></div><div><label for="work-due">Fecha límite</label><input id="work-due" type="datetime-local" /></div></div>
+        <label for="work-note">Motivo del cambio</label><input id="work-note" maxlength="1000" minlength="3" placeholder="Ej.: asignación para cierre de edición" />
+        <div class="dialog-actions"><button type="button" class="button ghost" id="save-work-assignment">Guardar planificación</button></div>
+        <h4>Historial de asignaciones</h4><div id="work-history" class="review-history" aria-live="polite"><p class="muted small">Todavía no hay cambios de planificación.</p></div>
       </section>
       <p class="muted small">La publicación continúa reservada a perfiles editor/admin y solo puede realizarse después del estado Revisado.</p>
       <div class="dialog-actions"><button type="button" class="button ghost" id="open-research">Fuentes y verificación</button><button type="button" class="button ghost" id="open-formats">Seis formatos</button><button type="button" class="button ghost" id="cancel-detail">Cerrar</button><button class="button primary" type="submit">Guardar cambios</button></div>
@@ -152,6 +164,8 @@ export async function renderWorkspace(root, user, onSignOut) {
   let activeUnit = null
   let currentRoles = []
   try { currentRoles = await EditorialService.myRoles() } catch { currentRoles = [] }
+  let workAssignees = []
+  let workQueueItems = []
   let formatRecords = []
   let generatedSourceVersionId = null
   let activeQualityReviewId = null
@@ -433,6 +447,89 @@ export async function renderWorkspace(root, user, onSignOut) {
     }
   }
 
+  function canManageWork() { return currentRoles.some(role => ['editor', 'admin'].includes(role)) }
+
+  function workLane(item) {
+    if (item.status === 'published') return 'Publicado'
+    if (item.status === 'reviewed') return 'Revisado'
+    if (item.latest_review?.event_type === 'review_requested') return 'Esperando revisión'
+    if (item.latest_review?.event_type === 'changes_requested') return 'Correcciones solicitadas'
+    return 'En producción'
+  }
+
+  function renderQueue() {
+    const container = root.querySelector('#work-queue-list')
+    const filter = root.querySelector('#queue-filter').value
+    const now = Date.now()
+    const filtered = workQueueItems.filter(item => {
+      if (filter === 'mine') return item.assigned_to === user.id || item.created_by === user.id
+      if (filter === 'review') return item.status === 'draft' && item.latest_review?.event_type === 'review_requested'
+      if (filter === 'overdue') return item.status === 'draft' && item.due_at && new Date(item.due_at).getTime() < now
+      if (filter === 'unassigned') return !item.assigned_to && item.status === 'draft'
+      return true
+    })
+    const rank = { urgent: 0, high: 1, normal: 2, low: 3 }
+    filtered.sort((a,b) => (rank[a.priority] ?? 2) - (rank[b.priority] ?? 2) || (a.due_at ? new Date(a.due_at).getTime() : Infinity) - (b.due_at ? new Date(b.due_at).getTime() : Infinity) || new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    if (!filtered.length) { container.innerHTML = '<p class="muted small">No hay unidades en esta vista.</p>'; return }
+    const names = new Map(workAssignees.map(person => [person.id, person.display_name || ('Integrante ' + person.id.slice(0,8))]))
+    const labels = { low: 'Baja', normal: 'Normal', high: 'Alta', urgent: 'Urgente' }
+    container.innerHTML = filtered.map(item => {
+      const overdue = item.status === 'draft' && item.due_at && new Date(item.due_at).getTime() < now
+      const assignee = item.assigned_to === user.id ? 'Vos' : (names.get(item.assigned_to) || (item.assigned_to ? 'Integrante ' + item.assigned_to.slice(0,8) : 'Sin asignar'))
+      const due = item.due_at ? date(item.due_at) : 'Sin fecha límite'
+      return '<article class="queue-card"><div class="queue-card-main"><div class="queue-card-top"><span class="queue-lane">' + esc(workLane(item)) + '</span><span class="queue-priority priority-' + esc(item.priority || 'normal') + '">' + esc(labels[item.priority] || 'Normal') + '</span></div><strong>' + esc(item.title) + '</strong><p>' + esc(item.summary || 'Sin resumen inicial.') + '</p><div class="queue-meta"><span>Responsable: ' + esc(assignee) + '</span><span class="' + (overdue ? 'queue-overdue' : '') + '">Vence: ' + esc(due) + (overdue ? ' · VENCIDA' : '') + '</span></div></div><button type="button" class="button ghost queue-open" data-id="' + esc(item.id) + '">Abrir unidad</button></article>'
+    }).join('')
+    container.querySelectorAll('.queue-open').forEach(button => button.addEventListener('click', () => openUnit(button.dataset.id)))
+  }
+
+  async function loadWorkQueue() {
+    const container = root.querySelector('#work-queue-list')
+    container.innerHTML = '<p class="muted small">Actualizando bandeja…</p>'
+    try {
+      const result = await EditorialService.workQueue(currentRoles)
+      workQueueItems = result.items; workAssignees = result.assignees
+      const pending = workQueueItems.filter(item => item.status === 'draft' && item.latest_review?.event_type === 'review_requested').length
+      const overdue = workQueueItems.filter(item => item.status === 'draft' && item.due_at && new Date(item.due_at).getTime() < Date.now()).length
+      root.querySelector('#queue-metrics').innerHTML = '<span><strong>' + workQueueItems.length + '</strong> unidades</span><span><strong>' + pending + '</strong> en revisión</span><span><strong>' + overdue + '</strong> vencidas</span>'
+      renderQueue()
+    } catch (error) { container.innerHTML = '<p class="muted small">No se pudo cargar la bandeja: ' + esc(error.message) + '</p>' }
+  }
+
+  async function loadWorkAssignment(unitId) {
+    const section = root.querySelector('.work-assignment')
+    section.hidden = !canManageWork()
+    if (!canManageWork()) return
+    const select = root.querySelector('#work-assignee')
+    select.innerHTML = '<option value="">Sin asignar</option>' + workAssignees.map(person => '<option value="' + esc(person.id) + '">' + esc(person.display_name || ('Integrante ' + person.id.slice(0,8))) + '</option>').join('')
+    const unit = await EditorialService.get(unitId)
+    select.value = unit.assigned_to || ''
+    root.querySelector('#work-priority').value = unit.priority || 'normal'
+    root.querySelector('#work-due').value = unit.due_at ? new Date(new Date(unit.due_at).getTime() - new Date(unit.due_at).getTimezoneOffset()*60000).toISOString().slice(0,16) : ''
+    root.querySelector('#work-note').value = ''
+    const history = await EditorialService.workHistory(unitId)
+    root.querySelector('#work-history').innerHTML = history.length ? history.map(item => {
+      const person = workAssignees.find(person => person.id === item.to_assigned_to)
+      const assignee = item.to_assigned_to === user.id ? 'Vos' : (person?.display_name || (item.to_assigned_to ? 'Integrante ' + item.to_assigned_to.slice(0,8) : 'Sin asignar'))
+      return '<article class="review-event"><strong>' + esc(assignee) + ' · Prioridad ' + esc(item.to_priority) + '</strong><span>' + date(item.created_at) + ' · Responsable ' + esc(item.created_by.slice(0,8)) + '</span><p>' + esc(item.note) + ' · Vencimiento: ' + (item.to_due_at ? date(item.to_due_at) : 'Sin fecha') + '</p></article>'
+    }).join('') : '<p class="muted small">Todavía no hay cambios de planificación.</p>'
+  }
+
+  root.querySelector('#queue-filter').addEventListener('change', renderQueue)
+  root.querySelector('#save-work-assignment').addEventListener('click', async () => {
+    if (!activeUnitId || !canManageWork()) return
+    const button = root.querySelector('#save-work-assignment')
+    const note = root.querySelector('#work-note').value.trim()
+    if (note.length < 3) { notice.textContent = 'Indicá el motivo de la asignación o cambio de planificación.'; return }
+    button.disabled = true
+    try {
+      const dueValue = root.querySelector('#work-due').value
+      await EditorialService.assignWork(activeUnitId, { assigned_to: root.querySelector('#work-assignee').value, priority: root.querySelector('#work-priority').value, due_at: dueValue ? new Date(dueValue).toISOString() : null, note })
+      await loadWorkQueue(); await loadWorkAssignment(activeUnitId); await loadUnits()
+      notice.textContent = 'Planificación guardada y registrada en el historial.'
+    } catch (error) { notice.textContent = error.message }
+    finally { button.disabled = false }
+  })
+
   function canRequestReview(unit) {
     return unit?.status === 'draft' && (
       unit.created_by === user.id || unit.assigned_to === user.id ||
@@ -579,7 +676,7 @@ export async function renderWorkspace(root, user, onSignOut) {
       activeUnitId = unit.id
       root.querySelector('#change-note').value = ''
       root.querySelector('#review-note').value = ''
-      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id)])
+      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id), loadWorkAssignment(unit.id)])
       detailDialog.showModal()
     } catch (error) { notice.textContent = error.message }
   }
@@ -601,5 +698,5 @@ export async function renderWorkspace(root, user, onSignOut) {
       list.querySelector('#retry').addEventListener('click', loadUnits)
     }
   }
-  await loadUnits()
+  await Promise.all([loadUnits(), loadWorkQueue()])
 }
