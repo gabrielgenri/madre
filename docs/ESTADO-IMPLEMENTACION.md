@@ -1,4 +1,4 @@
-# Estado de implementación — primer incremento
+# Estado de implementación — núcleo inicial
 
 ## Implementado en el repositorio
 
@@ -8,24 +8,34 @@
 - Servicio de datos para crear, listar, consultar y editar unidades editoriales.
 - Vista inicial de Madre Editorial.
 - Servicio compartido con reglas editoriales operativas.
-- Documentación técnica y criterios editoriales iniciales. La migración SQL reconstruida permanece pendiente de incorporación al repositorio.
+- Documentación técnica y criterios editoriales iniciales.
+- Migración complementaria de seguridad para impedir que un usuario sin rol editor/admin publique una unidad editorial.
 
 ## Verificado
 
 - `node --check` sobre los archivos JavaScript del starter original y los archivos modificados.
-- La migración remota figura en el historial Supabase con versión `20261114034956` y nombre `madre_core_foundation`. El SQL local es una reconstrucción del esquema observado, no una copia byte a byte del original; todavía no está incorporado al repositorio.
-- Se consultó el esquema remoto: diez tablas públicas, políticas RLS, funciones y triggers, y bucket privado `madre-originals`.
+- El proyecto Supabase `cxuoaydhmvafsgtklwny` está activo y saludable.
+- La migración remota fundacional figura en el historial Supabase con versión `20261114034956` y nombre `madre_core_foundation`.
+- El esquema remoto contiene diez tablas públicas con RLS habilitado, incluyendo `profiles`, `user_roles`, `editorial_units`, fuentes, afirmaciones, evidencias, verificaciones, formatos y auditoría.
+- Las políticas RLS fueron inspeccionadas para `editorial_units` y sus entidades relacionadas.
+- Se incorporó y aplicó el guard de publicación `editorial_units_guard_publish`: la transición a `published` requiere rol `editor` o `admin`.
+- El proyecto mantiene extensiones `vector`, `pgcrypto` y `uuid-ossp` disponibles.
 
 ## Pendiente de verificación
 
-- Instalación de dependencias y `vite build`: el intento de `npm install` no terminó dentro del tiempo disponible; no se declara compilación exitosa.
+- Instalación de dependencias y `vite build`: el intento anterior de `npm install` no terminó dentro del tiempo disponible; no se declara compilación exitosa.
 - Conexión del navegador al proyecto: falta configurar localmente la publishable key.
 - Flujo real de autenticación y CRUD con un usuario.
-- Pruebas de permisos y aislamiento RLS.
+- Pruebas de permisos y aislamiento RLS desde un cliente autenticado real.
 - Prueba integral de extremo a extremo.
+- Incorporación futura de la migración fundacional completa como fuente reproducible del esquema; el archivo remoto `madre_core_foundation` no se puede recuperar byte a byte desde el historial de migraciones mediante las herramientas disponibles.
+
+## Seguridad pendiente
+
+El asesor de Supabase detecta funciones `SECURITY DEFINER` expuestas en el esquema `public` (`audit_editorial_unit`, `handle_new_user`, `has_role`). No se modifica ese diseño automáticamente porque `has_role` participa en las políticas RLS y las otras funciones se utilizan como infraestructura de triggers; queda como tarea explícita de endurecimiento, con pruebas posteriores.
 
 ## Decisiones
 
 - El repositorio ya contenía el Prompt Maestro en `README.md` y el registro `supabase.md`; ambos se preservan.
-- No se habilita el estado Revisado desde la interfaz inicial: todavía no existen checklist, fuentes y evidencias operativas.
+- No se habilita el estado Revisado desde la interfaz inicial: todavía no existen checklist, fuentes y evidencias operativas completas en la UI.
 - No se incluye ninguna clave secreta en el repositorio.
