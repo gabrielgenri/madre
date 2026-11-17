@@ -31,12 +31,21 @@ create index if not exists editorial_notifications_unit_idx
 alter table public.editorial_notifications enable row level security;
 revoke all on public.editorial_notifications from anon;
 revoke all on public.editorial_notifications from authenticated;
-grant select, update on public.editorial_notifications to authenticated;
+grant select, insert, update on public.editorial_notifications to authenticated;
 
 drop policy if exists editorial_notifications_select_own on public.editorial_notifications;
 create policy editorial_notifications_select_own
   on public.editorial_notifications for select to authenticated
   using (recipient_id = (select auth.uid()));
+
+drop policy if exists editorial_notifications_insert_own_reminder on public.editorial_notifications;
+create policy editorial_notifications_insert_own_reminder
+  on public.editorial_notifications for insert to authenticated
+  with check (
+    recipient_id = (select auth.uid())
+    and event_type in ('due_soon', 'overdue')
+    and source_event_id is null
+  );
 
 drop policy if exists editorial_notifications_update_own on public.editorial_notifications;
 create policy editorial_notifications_update_own
@@ -239,9 +248,9 @@ for each row execute function public.notify_editorial_review_event();
 create or replace function public.enqueue_my_editorial_due_notifications()
 returns integer
 language plpgsql
-security definer
+security invoker
 set search_path = public, pg_temp
-as $$
+as $
 declare
   v_count integer := 0;
 begin
@@ -285,3 +294,18 @@ grant execute on function public.enqueue_my_editorial_due_notifications() to aut
 revoke all on function public.guard_editorial_notification_update() from public, anon, authenticated;
 revoke all on function public.notify_editorial_work_event() from public, anon, authenticated;
 revoke all on function public.notify_editorial_review_event() from public, anon, authenticated;
+
+-- Habilitar el stream de inserciones para el centro de notificaciones.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'editorial_notifications'
+  ) then
+    alter publication supabase_realtime add table public.editorial_notifications;
+  end if;
+end;
+$$;
