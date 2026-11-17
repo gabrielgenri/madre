@@ -60,7 +60,18 @@ export async function renderWorkspace(root, user, onSignOut) {
       <label for="change-note">Motivo de esta modificación</label><input id="change-note" name="change_note" required minlength="3" maxlength="500" placeholder="Ej.: incorporación de nueva documentación oficial" />
       <section class="version-panel" aria-labelledby="version-heading"><div class="version-panel-head"><h3 id="version-heading">Historial de versiones</h3><span class="muted small">Las versiones anteriores no se sobrescriben</span></div><div id="version-list" class="version-list" aria-live="polite"><p class="muted small">Cargando historial…</p></div></section>
       <label for="detail-status">Estado editorial</label><input id="detail-status" value="Borrador" readonly aria-readonly="true" />
-      <p class="muted small">La revisión formal permanece bloqueada hasta completar el control editorial humano.</p>
+      <section class="review-workflow" aria-labelledby="review-workflow-heading">
+        <div class="quality-panel-head"><div><h3 id="review-workflow-heading">Revisión y aprobación humana</h3><p class="muted small">La solicitud requiere seis formatos vigentes y un control de calidad actualizado. La decisión final corresponde a un editor.</p></div></div>
+        <div id="review-history" class="review-history" aria-live="polite"><p class="muted small">Cargando historial de revisión…</p></div>
+        <label for="review-note">Nota para el equipo</label>
+        <textarea id="review-note" rows="2" minlength="3" maxlength="3000" placeholder="Motivo de la solicitud, correcciones o fundamento de aprobación…"></textarea>
+        <div class="dialog-actions review-actions">
+          <button type="button" class="button ghost" id="request-review" data-event="review_requested" hidden>Solicitar revisión</button>
+          <button type="button" class="button ghost" id="request-changes" data-event="changes_requested" hidden>Solicitar correcciones</button>
+          <button type="button" class="button primary" id="approve-review" data-event="approved" hidden>Aprobar como Revisado</button>
+        </div>
+      </section>
+      <p class="muted small">La publicación continúa reservada a perfiles editor/admin y solo puede realizarse después del estado Revisado.</p>
       <div class="dialog-actions"><button type="button" class="button ghost" id="open-research">Fuentes y verificación</button><button type="button" class="button ghost" id="open-formats">Seis formatos</button><button type="button" class="button ghost" id="cancel-detail">Cerrar</button><button class="button primary" type="submit">Guardar cambios</button></div>
     </form></dialog>
     <dialog id="formats-dialog" class="dialog wide"><div class="stack">
@@ -138,6 +149,9 @@ export async function renderWorkspace(root, user, onSignOut) {
   const notice = root.querySelector('#notice')
   let activeUnitId = null
   let activeUnitTitle = ''
+  let activeUnit = null
+  let currentRoles = []
+  try { currentRoles = await EditorialService.myRoles() } catch { currentRoles = [] }
   let formatRecords = []
   let generatedSourceVersionId = null
   let activeQualityReviewId = null
@@ -419,6 +433,88 @@ export async function renderWorkspace(root, user, onSignOut) {
     }
   }
 
+  function canRequestReview(unit) {
+    return unit?.status === 'draft' && (
+      unit.created_by === user.id || unit.assigned_to === user.id ||
+      currentRoles.includes('editor') || currentRoles.includes('admin')
+    )
+  }
+
+  async function loadReviewHistory(unitId) {
+    const container = root.querySelector('#review-history')
+    const requestButton = root.querySelector('#request-review')
+    const changesButton = root.querySelector('#request-changes')
+    const approveButton = root.querySelector('#approve-review')
+    container.innerHTML = '<p class="muted small">Cargando historial…</p>'
+    try {
+      const events = await EditorialService.reviewHistory(unitId)
+      const latest = events[0]
+      const labels = {
+        review_requested: 'Revisión solicitada',
+        changes_requested: 'Correcciones solicitadas',
+        approved: 'Aprobado · estado Revisado'
+      }
+      container.innerHTML = events.length ? events.map(item => `
+        <article class="review-event">
+          <strong>${esc(labels[item.event_type] || item.event_type)}</strong>
+          <span>${date(item.created_at)} · Responsable ${esc(item.created_by.slice(0, 8))}</span>
+          <p>${esc(item.note)}</p>
+        </article>`).join('') : '<p class="muted small">Todavía no hay decisiones registradas.</p>'
+
+      const lastType = latest?.event_type ?? null
+      requestButton.hidden = !canRequestReview(activeUnit) || (lastType !== null && lastType !== 'changes_requested')
+      changesButton.hidden = !(activeRolesCanReview() && activeUnit?.status === 'draft' && lastType === 'review_requested')
+      approveButton.hidden = !(activeRolesCanEdit() && activeUnit?.status === 'draft' && lastType === 'review_requested')
+      if (activeUnit?.status !== 'draft') {
+        requestButton.hidden = true
+        changesButton.hidden = true
+        approveButton.hidden = true
+      }
+    } catch (error) {
+      container.innerHTML = '<p class="muted small">No se pudo cargar el historial: ' + esc(error.message) + '</p>'
+      requestButton.hidden = true
+      changesButton.hidden = true
+      approveButton.hidden = true
+    }
+  }
+
+  function activeRolesCanReview() {
+    return currentRoles.some(role => ['reviewer', 'editor', 'admin'].includes(role))
+  }
+
+  function activeRolesCanEdit() {
+    return currentRoles.some(role => ['editor', 'admin'].includes(role))
+  }
+
+  root.querySelector('.review-actions').addEventListener('click', async (event) => {
+    const button = event.target.closest('button[data-event]')
+    if (!button || !activeUnitId) return
+    const note = root.querySelector('#review-note').value.trim()
+    if (note.length < 3) {
+      notice.textContent = 'Escribí una nota de al menos 3 caracteres para registrar la decisión.'
+      return
+    }
+    button.disabled = true
+    try {
+      await EditorialService.recordReviewEvent(activeUnitId, button.dataset.event, note)
+      const refreshed = await EditorialService.get(activeUnitId)
+      activeUnit = refreshed
+      root.querySelector('#detail-status').value = refreshed.status === 'published' ? 'Publicado' : refreshed.status === 'reviewed' ? 'Revisado' : 'Borrador'
+      root.querySelector('#review-note').value = ''
+      await loadReviewHistory(activeUnitId)
+      await loadUnits()
+      notice.textContent = button.dataset.event === 'approved'
+        ? 'Aprobación humana registrada. La unidad pasó a Revisado.'
+        : button.dataset.event === 'changes_requested'
+          ? 'Correcciones solicitadas y decisión registrada.'
+          : 'Solicitud de revisión registrada.'
+    } catch (error) {
+      notice.textContent = error.message
+    } finally {
+      button.disabled = false
+    }
+  })
+
   async function loadVersions(unitId) {
     const list = root.querySelector('#version-list')
     list.innerHTML = '<p class="muted small">Cargando historial…</p>'
@@ -471,6 +567,7 @@ export async function renderWorkspace(root, user, onSignOut) {
   async function openUnit(id) {
     try {
       const unit = await EditorialService.get(id)
+      activeUnit = unit
       const form = root.querySelector('#detail-form')
       form.elements.id.value = unit.id
       form.elements.title.value = unit.title ?? ''
@@ -481,7 +578,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       activeUnitTitle = unit.title
       activeUnitId = unit.id
       root.querySelector('#change-note').value = ''
-      await loadVersions(unit.id)
+      root.querySelector('#review-note').value = ''
+      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id)])
       detailDialog.showModal()
     } catch (error) { notice.textContent = error.message }
   }
