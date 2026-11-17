@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const unitId = typeof body.unit_id === "string" ? body.unit_id : "";
     const formatType = typeof body.format_type === "string" ? body.format_type : "";
-    if (!/^[0-9a-f-]{36}$/i.test(unitId) || !(formatType in formats)) {
+    if (!/^[0-9a-f-]{36}$/i.test(unitId) || !Object.prototype.hasOwnProperty.call(formats, formatType)) {
       return json({ error: "Unidad o formato no válido." }, 400);
     }
 
