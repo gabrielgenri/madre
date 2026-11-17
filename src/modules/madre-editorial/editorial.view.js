@@ -81,7 +81,8 @@ export async function renderWorkspace(root, user, onSignOut) {
         <label for="format-title">Título de la pieza</label><input id="format-title" name="title" required maxlength="240" />
         <label for="format-content">Contenido del borrador</label><textarea id="format-content" name="content" required maxlength="60000" rows="12" placeholder="Seleccioná un formato y desarrollá el contenido. La pieza se guardará como borrador."></textarea>
         <p id="format-source-note" class="muted small" aria-live="polite">Todavía no hay un borrador seleccionado.</p>
-        <div class="dialog-actions"><button type="button" class="button ghost" id="cancel-formats">Cerrar</button><button class="button primary" type="submit">Guardar borrador</button></div>
+        <p id="format-ai-note" class="notice" role="status" aria-live="polite">La generación asistida requiere configuración del proveedor y siempre queda pendiente de revisión humana.</p>
+        <div class="dialog-actions"><button type="button" class="button ghost" id="cancel-formats">Cerrar</button><button type="button" class="button ghost" id="generate-format">Generar con IA</button><button class="button primary" type="submit">Guardar borrador</button></div>
       </form>
     </div></dialog>
     <dialog id="research-dialog" class="dialog wide"><div class="stack">
@@ -129,6 +130,7 @@ export async function renderWorkspace(root, user, onSignOut) {
   let activeUnitId = null
   let activeUnitTitle = ''
   let formatRecords = []
+  let generatedSourceVersionId = null
   let bundle = { sources: [], claims: [], evidences: [], verifications: [] }
 
   root.querySelector('#new-unit').addEventListener('click', () => createDialog.showModal())
@@ -147,7 +149,35 @@ export async function renderWorkspace(root, user, onSignOut) {
     detailDialog.close()
     formatsDialog.showModal()
   })
-  root.querySelector('#format-type').addEventListener('change', (event) => selectFormat(event.currentTarget.value))
+  root.querySelector('#format-type').addEventListener('change', (event) => {
+    generatedSourceVersionId = null
+    root.querySelector('#format-ai-note').textContent = 'La generación asistida requiere configuración del proveedor y siempre queda pendiente de revisión humana.'
+    selectFormat(event.currentTarget.value)
+  })
+  root.querySelector('#generate-format').addEventListener('click', async () => {
+    const button = root.querySelector('#generate-format')
+    const form = root.querySelector('#format-form')
+    const note = root.querySelector('#format-ai-note')
+    button.disabled = true
+    note.textContent = 'Generando borrador con el contenido madre, fuentes y verificaciones disponibles…'
+    try {
+      const result = await EditorialService.generateFormat(activeUnitId, form.elements.format_type.value)
+      form.elements.title.value = result.draft.title
+      form.elements.content.value = result.draft.content
+      generatedSourceVersionId = result.source_version_id
+      const sourceCount = result.draft.source_ids?.length ?? 0
+      const claimCount = result.draft.claim_ids?.length ?? 0
+      const notes = result.draft.editorial_notes?.length
+        ? ' Alertas: ' + result.draft.editorial_notes.join(' · ')
+        : ''
+      note.textContent = `Borrador generado sobre la versión madre ${result.source_version_number}. Referencias internas: ${sourceCount} fuentes y ${claimCount} afirmaciones. Pendiente de revisión humana.${notes}`
+      root.querySelector('#format-source-note').textContent = 'Generado sobre versión ' + result.source_version_number + '. Si cambia el contenido madre antes de guardar, habrá que volver a generar.'
+    } catch (error) {
+      note.textContent = error.message
+    } finally {
+      button.disabled = false
+    }
+  })
   root.querySelector('#format-form').addEventListener('submit', async (event) => {
     event.preventDefault()
     const form = event.currentTarget
@@ -155,7 +185,15 @@ export async function renderWorkspace(root, user, onSignOut) {
     const values = Object.fromEntries(new FormData(form).entries())
     button.disabled = true
     try {
+      if (generatedSourceVersionId) {
+        const latest = await EditorialService.latestVersionId(activeUnitId)
+        if (latest.id !== generatedSourceVersionId) {
+          throw new Error('El contenido madre cambió desde la generación. Volvé a generar el borrador para usar la versión vigente.')
+        }
+      }
       await EditorialService.saveFormat(activeUnitId, values)
+      generatedSourceVersionId = null
+      root.querySelector('#format-ai-note').textContent = 'Borrador guardado. La aprobación y publicación requieren revisión humana.'
       notice.textContent = 'Borrador guardado y vinculado a la versión madre vigente.'
       await loadFormats()
       selectFormat(values.format_type)
