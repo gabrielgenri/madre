@@ -452,8 +452,9 @@ export async function renderWorkspace(root, user, onSignOut) {
   function workLane(item) {
     if (item.status === 'published') return 'Publicado'
     if (item.status === 'reviewed') return 'Revisado'
-    if (item.latest_review?.event_type === 'review_requested') return 'Esperando revisión'
-    if (item.latest_review?.event_type === 'changes_requested') return 'Correcciones solicitadas'
+    if (item.latest_review_current && item.latest_review?.event_type === 'review_requested') return 'Esperando revisión'
+    if (item.latest_review_current && item.latest_review?.event_type === 'changes_requested') return 'Correcciones solicitadas'
+    if (item.latest_review && !item.latest_review_current) return 'Revisión desactualizada'
     return 'En producción'
   }
 
@@ -463,7 +464,7 @@ export async function renderWorkspace(root, user, onSignOut) {
     const now = Date.now()
     const filtered = workQueueItems.filter(item => {
       if (filter === 'mine') return item.assigned_to === user.id || item.created_by === user.id
-      if (filter === 'review') return item.status === 'draft' && item.latest_review?.event_type === 'review_requested'
+      if (filter === 'review') return item.status === 'draft' && item.latest_review_current && item.latest_review?.event_type === 'review_requested'
       if (filter === 'overdue') return item.status === 'draft' && item.due_at && new Date(item.due_at).getTime() < now
       if (filter === 'unassigned') return !item.assigned_to && item.status === 'draft'
       return true
@@ -488,7 +489,7 @@ export async function renderWorkspace(root, user, onSignOut) {
     try {
       const result = await EditorialService.workQueue(currentRoles)
       workQueueItems = result.items; workAssignees = result.assignees
-      const pending = workQueueItems.filter(item => item.status === 'draft' && item.latest_review?.event_type === 'review_requested').length
+      const pending = workQueueItems.filter(item => item.status === 'draft' && item.latest_review_current && item.latest_review?.event_type === 'review_requested').length
       const overdue = workQueueItems.filter(item => item.status === 'draft' && item.due_at && new Date(item.due_at).getTime() < Date.now()).length
       root.querySelector('#queue-metrics').innerHTML = '<span><strong>' + workQueueItems.length + '</strong> unidades</span><span><strong>' + pending + '</strong> en revisión</span><span><strong>' + overdue + '</strong> vencidas</span>'
       renderQueue()
@@ -544,8 +545,12 @@ export async function renderWorkspace(root, user, onSignOut) {
     const approveButton = root.querySelector('#approve-review')
     container.innerHTML = '<p class="muted small">Cargando historial…</p>'
     try {
-      const events = await EditorialService.reviewHistory(unitId)
+      const [events, latestVersion] = await Promise.all([
+        EditorialService.reviewHistory(unitId),
+        EditorialService.latestVersionId(unitId)
+      ])
       const latest = events[0]
+      const latestIsCurrent = Boolean(latest && latest.source_version_id === latestVersion.id)
       const labels = {
         review_requested: 'Revisión solicitada',
         changes_requested: 'Correcciones solicitadas',
@@ -558,8 +563,8 @@ export async function renderWorkspace(root, user, onSignOut) {
           <p>${esc(item.note)}</p>
         </article>`).join('') : '<p class="muted small">Todavía no hay decisiones registradas.</p>'
 
-      const lastType = latest?.event_type ?? null
-      requestButton.hidden = !canRequestReview(activeUnit) || (lastType !== null && lastType !== 'changes_requested')
+      const lastType = latestIsCurrent ? latest?.event_type ?? null : (latest ? 'stale' : null)
+      requestButton.hidden = !canRequestReview(activeUnit) || (lastType !== null && lastType !== 'changes_requested' && lastType !== 'stale')
       changesButton.hidden = !(activeRolesCanReview() && activeUnit?.status === 'draft' && lastType === 'review_requested')
       approveButton.hidden = !(activeRolesCanEdit() && activeUnit?.status === 'draft' && lastType === 'review_requested')
       if (activeUnit?.status !== 'draft') {
