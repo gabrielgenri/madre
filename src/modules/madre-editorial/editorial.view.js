@@ -288,6 +288,8 @@ export async function renderWorkspace(root, user, onSignOut) {
   }
 
   function selectFormat(type) {
+    generatedSourceVersionId = null
+    root.querySelector('#format-ai-note').textContent = 'La generación asistida requiere configuración del proveedor y siempre queda pendiente de revisión humana.'
     const definition = formatDefinitions.find(item => item.type === type)
     const record = formatRecords.find(item => item.format_type === type)
     const form = root.querySelector('#format-form')
