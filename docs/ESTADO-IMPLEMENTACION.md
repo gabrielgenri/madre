@@ -173,3 +173,24 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - Se verificó RLS activo y permisos append-only: authenticated SELECT/INSERT, sin UPDATE/DELETE; anon sin SELECT. El índice de `source_version_id` fue agregado tras detectar una FK sin índice.
 - El proyecto actualmente solo tiene un usuario con rol `admin` registrado en `user_roles`; no se encontró un usuario con rol `reviewer` ni `editor`. Para probar esos perfiles será necesario asignarlos mediante el procedimiento administrativo de roles, sin elevar permisos desde la interfaz.
 - No se declara prueba de navegador, compilación Vite ni E2E como realizada.
+## PASO 19 — Bandeja operativa, asignaciones y prioridades
+
+- Se incorporaron `priority` (`low`, `normal`, `high`, `urgent`) y `due_at` a `editorial_units`; `assigned_to` ya existía y ahora forma parte de la planificación visible.
+- Se creó `editorial_work_events`, un historial append-only de cambios de responsable, prioridad y vencimiento, con actor, fecha y motivo obligatorio.
+- La RPC `assign_editorial_work` es `SECURITY INVOKER`: solo editor/admin puede asignar tareas, modificar prioridades o definir fechas límite. La persona asignada debe tener un rol vigente en Madre.
+- Un trigger impide modificar directamente por REST los campos `assigned_to`, `priority` y `due_at`, y protege la autoría original. El historial de asignaciones no admite UPDATE ni DELETE.
+- Se amplió el acceso de perfiles editor/admin al directorio mínimo de perfiles y roles para elegir responsables. Se separaron las políticas administrativas de roles para evitar políticas SELECT permisivas duplicadas.
+- Los usuarios asignados pueden abrir y trabajar unidades en Borrador: editar contenido madre, agregar fuentes, afirmaciones, evidencias y formatos, y crear versiones. La asignación y la prioridad siguen reservadas a editor/admin.
+- La bandeja permite filtrar todas las unidades, mi trabajo, pendientes de revisión, vencidas y sin asignar. Ordena por prioridad y vencimiento, muestra responsable y fecha límite, y distingue solicitudes de revisión vigentes de las que quedaron obsoletas.
+- Se corrigió un borde del PASO 18: después de cambiar el contenido durante una revisión, la respuesta del revisor sobre la versión anterior queda bloqueada. Se requiere control de calidad actualizado y una nueva solicitud para la nueva versión.
+- Se agregaron índices para la cola, vencimientos e historial. El asesor ya no informa claves foráneas sin índice en la nueva tabla de trabajo ni políticas SELECT múltiples en `user_roles`.
+
+### Verificaciones ejecutadas / pendientes
+
+- Prueba transaccional con rol admin: asignación con prioridad urgente y vencimiento; creación de los seis formatos; control de calidad; solicitud de revisión; modificación del contenido durante la revisión; rechazo de la decisión sobre la solicitud obsoleta; actualización de formatos y control de calidad; nueva solicitud, devolución, reenvío y aprobación. La prueba finalizó con `ROLLBACK` y no dejó datos temporales.
+- RLS de `editorial_work_events` verificado: SELECT/INSERT para authenticated, sin UPDATE/DELETE y sin SELECT para anon. La RPC de asignación es SECURITY INVOKER y sus permisos se limitan a authenticated.
+- Se comprobó sintaxis JavaScript de `editorial.service.js` y `editorial.view.js` con el parser de JavaScript. No equivale a compilación Vite ni prueba de navegador.
+- Sigue pendiente probar el circuito con cuentas reales `writer`, `collaborator`, `reviewer` y `editor`: actualmente solo existe una cuenta con rol `admin`. No se elevó ni inventó ningún rol para simular usuarios.
+- No se declara compilación Vite, prueba de navegador ni E2E como realizada.
+- El asesor de rendimiento conserva siete claves foráneas sin índice en tablas preexistentes y reporta índices aún no utilizados (incluidos algunos nuevos, esperable antes de tener carga real). La advertencia de políticas SELECT múltiples en `user_roles` quedó resuelta.
+- El asesor de seguridad mantiene las advertencias previas sobre `audit_editorial_unit`, `handle_new_user`, `has_role` (SECURITY DEFINER expuestas a anon/authenticated) y la protección de contraseñas filtradas deshabilitada.
