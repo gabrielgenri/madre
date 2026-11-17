@@ -239,7 +239,7 @@ for each row execute function public.notify_editorial_review_event();
 create or replace function public.enqueue_my_editorial_due_notifications()
 returns integer
 language plpgsql
-security invoker
+security definer
 set search_path = public, pg_temp
 as $$
 declare
