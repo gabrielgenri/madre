@@ -114,7 +114,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - El endpoint devuelve un borrador estructurado, la versión madre utilizada, IDs de fuentes y afirmaciones citadas y alertas editoriales. No escribe en la base de datos.
 - La interfaz permite solicitar la generación, revisar y editar el resultado y guardarlo como borrador mediante la RPC existente. Antes de guardar, compara la versión madre utilizada con la última versión disponible y bloquea el guardado si hubo cambios.
 - La generación y el guardado no revisan, aprueban ni publican automáticamente. La responsabilidad editorial sigue siendo humana.
-- El proveedor previsto es OpenAI. La función lee `OPENAI_API_KEY` desde los secretos del entorno Edge Functions y permite configurar `OPENAI_MODEL`; la clave no se guarda en el repositorio ni en el navegador.
+- El proveedor previsto es OpenAI mediante la Responses API. La función lee `OPENAI_API_KEY` desde los secretos del entorno Edge Functions y permite configurar `OPENAI_MODEL` (por defecto `gpt-4.1-mini`); la clave no se guarda en el repositorio ni en el navegador.
 
 ### Configuración externa pendiente
 
