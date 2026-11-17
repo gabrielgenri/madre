@@ -57,7 +57,7 @@ create policy editorial_notifications_update_own
 create or replace function public.guard_editorial_notification_update()
 returns trigger
 language plpgsql
-set search_path = public, pg_temp
+set search_path = pg_catalog, public, pg_temp
 as $$
 begin
   if new.id is distinct from old.id
@@ -84,8 +84,12 @@ create trigger editorial_notifications_guard_update
 before update on public.editorial_notifications
 for each row execute function public.guard_editorial_notification_update();
 
+-- Funciones internas de triggers en un esquema no expuesto por PostgREST.
+create schema if not exists private;
+revoke all on schema private from public, anon, authenticated;
+
 -- Inserción interna desde eventos confiables de planificación y revisión.
-create or replace function public.create_editorial_notification(
+create or replace function private.create_editorial_notification(
   p_recipient uuid,
   p_unit_id uuid,
   p_event_type text,
@@ -115,9 +119,9 @@ begin
   on conflict (recipient_id, dedupe_key) do nothing;
 end;
 $$;
-revoke all on function public.create_editorial_notification(uuid,uuid,text,text,text,uuid,text,jsonb) from public, anon, authenticated;
+revoke all on function private.create_editorial_notification(uuid,uuid,text,text,text,uuid,text,jsonb) from public, anon, authenticated;
 
-create or replace function public.notify_editorial_work_event()
+create or replace function private.notify_editorial_work_event()
 returns trigger
 language plpgsql
 security definer
@@ -133,7 +137,7 @@ begin
     v_body := 'Se te asignó la unidad editorial: ' || coalesce(v_title, 'Sin título') ||
       '. Prioridad: ' || coalesce(new.to_priority, 'normal') ||
       case when new.to_due_at is not null then '. Fecha límite: ' || to_char(new.to_due_at at time zone 'UTC', 'YYYY-MM-DD HH24:MI') || ' UTC' else '' end || '.';
-    perform public.create_editorial_notification(
+    perform private.create_editorial_notification(
       new.to_assigned_to, new.editorial_unit_id, 'work_assigned',
       'Nueva asignación editorial', v_body, new.id,
       'work-assigned:' || new.id::text,
@@ -141,7 +145,7 @@ begin
     );
   elsif new.to_assigned_to is not null and new.to_due_at is distinct from new.from_due_at then
     select title into v_title from public.editorial_units where id = new.editorial_unit_id;
-    perform public.create_editorial_notification(
+    perform private.create_editorial_notification(
       new.to_assigned_to, new.editorial_unit_id, 'work_assigned',
       'Cambió la planificación editorial',
       'Se actualizó la fecha límite o prioridad de: ' || coalesce(v_title, 'Unidad editorial') || '.',
@@ -152,7 +156,7 @@ begin
 
   if new.from_assigned_to is not null and new.from_assigned_to is distinct from new.to_assigned_to then
     select title into v_title from public.editorial_units where id = new.editorial_unit_id;
-    perform public.create_editorial_notification(
+    perform private.create_editorial_notification(
       new.from_assigned_to, new.editorial_unit_id, 'work_reassigned',
       'La asignación fue modificada',
       'La unidad «' || coalesce(v_title, 'Unidad editorial') || '» fue reasignada.',
@@ -166,9 +170,9 @@ $$;
 drop trigger if exists editorial_work_event_notify on public.editorial_work_events;
 create trigger editorial_work_event_notify
 after insert on public.editorial_work_events
-for each row execute function public.notify_editorial_work_event();
+for each row execute function private.notify_editorial_work_event();
 
-create or replace function public.notify_editorial_review_event()
+create or replace function private.notify_editorial_review_event()
 returns trigger
 language plpgsql
 security definer
@@ -191,7 +195,7 @@ begin
       select distinct user_id from public.user_roles
       where role in ('reviewer', 'editor', 'admin') and user_id <> new.created_by
     loop
-      perform public.create_editorial_notification(
+      perform private.create_editorial_notification(
         v_recipient, new.editorial_unit_id, v_event, v_notification_title,
         v_body, new.id, 'review-requested:' || new.id::text || ':' || v_recipient::text,
         jsonb_build_object('source_version_id', new.source_version_id)
@@ -209,7 +213,7 @@ begin
       ) recipients
       where candidate is not null and candidate <> new.created_by
     loop
-      perform public.create_editorial_notification(
+      perform private.create_editorial_notification(
         v_recipient, new.editorial_unit_id, v_event, v_notification_title,
         v_body, new.id, 'changes-requested:' || new.id::text || ':' || v_recipient::text,
         jsonb_build_object('source_version_id', new.source_version_id)
@@ -227,7 +231,7 @@ begin
       ) recipients
       where candidate is not null and candidate <> new.created_by
     loop
-      perform public.create_editorial_notification(
+      perform private.create_editorial_notification(
         v_recipient, new.editorial_unit_id, v_event, v_notification_title,
         v_body, new.id, 'review-approved:' || new.id::text || ':' || v_recipient::text,
         jsonb_build_object('source_version_id', new.source_version_id)
@@ -241,7 +245,7 @@ $$;
 drop trigger if exists editorial_review_event_notify on public.editorial_review_events;
 create trigger editorial_review_event_notify
 after insert on public.editorial_review_events
-for each row execute function public.notify_editorial_review_event();
+for each row execute function private.notify_editorial_review_event();
 
 -- Recordatorios idempotentes al consultar la bandeja de notificaciones.
 -- No requiere cron: cada usuario genera avisos únicamente para sus propias asignaciones.
@@ -292,8 +296,8 @@ revoke all on function public.enqueue_my_editorial_due_notifications() from publ
 grant execute on function public.enqueue_my_editorial_due_notifications() to authenticated;
 
 revoke all on function public.guard_editorial_notification_update() from public, anon, authenticated;
-revoke all on function public.notify_editorial_work_event() from public, anon, authenticated;
-revoke all on function public.notify_editorial_review_event() from public, anon, authenticated;
+revoke all on function private.notify_editorial_work_event() from public, anon, authenticated;
+revoke all on function private.notify_editorial_review_event() from public, anon, authenticated;
 
 -- Habilitar el stream de inserciones para el centro de notificaciones.
 do $$
