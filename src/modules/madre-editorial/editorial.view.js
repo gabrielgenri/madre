@@ -122,6 +122,9 @@ export async function renderWorkspace(root, user, onSignOut) {
   const detailDialog = root.querySelector('#detail-dialog')
   const researchDialog = root.querySelector('#research-dialog')
   const formatsDialog = root.querySelector('#formats-dialog')
+  formatsDialog.addEventListener('close', () => {
+    if (activeUnitId && !detailDialog.open) detailDialog.showModal()
+  })
   const notice = root.querySelector('#notice')
   let activeUnitId = null
   let activeUnitTitle = ''
