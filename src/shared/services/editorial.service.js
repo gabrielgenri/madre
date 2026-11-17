@@ -78,7 +78,14 @@ export const EditorialService = {
       body: { unit_id: unitId, format_type: formatType }
     })
     if (error) {
-      const detail = error.context?.json?.error
+      let detail = ''
+      try {
+        const response = error.context?.clone ? error.context.clone() : error.context
+        const payload = response?.json ? await response.json() : null
+        detail = payload?.error ?? ''
+      } catch {
+        // El SDK puede devolver un error sin cuerpo JSON legible.
+      }
       throw new Error(detail || error.message || 'No se pudo generar el borrador.')
     }
     return data
