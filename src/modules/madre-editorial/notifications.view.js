@@ -51,7 +51,7 @@ export function mountNotifications(root, onOpenUnit) {
   async function refresh() {
     try {
       notifications = await NotificationsService.list({ limit: 40 })
-      const unread = notifications.filter(item => !item.read_at).length
+      const unread = await NotificationsService.unreadCount()
       count.textContent = unread > 99 ? '99+' : String(unread)
       count.hidden = unread === 0
       items.innerHTML = notifications.length ? notifications.map(item => `
