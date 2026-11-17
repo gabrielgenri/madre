@@ -190,3 +190,33 @@ textarea{resize:vertical;line-height:1.55}
 .review-actions{display:flex;flex-wrap:wrap;gap:.5rem}
 .review-actions button[hidden]{display:none}
 @media(max-width:620px){.review-actions{display:grid}.review-actions button{width:100%}}
+/* PASO 19 — bandeja operativa */
+.work-queue{display:grid;gap:1rem;margin:1.25rem 0 2rem;padding:1rem;border:1px solid var(--line,#e3e3dc);border-radius:14px;background:var(--surface,#fff)}
+.work-queue-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.work-queue-head h2{margin:.1rem 0;font-size:1.25rem}
+.queue-metrics{display:flex;gap:.8rem;flex-wrap:wrap}
+.queue-metrics span{display:grid;gap:.1rem;padding:.55rem .7rem;border:1px solid var(--line,#e3e3dc);border-radius:9px;font-size:.7rem;color:var(--muted,#777)}
+.queue-metrics strong{font-size:1rem;color:var(--ink,#222)}
+.queue-toolbar{display:flex;align-items:center;gap:.6rem;max-width:280px}
+.queue-toolbar label{font-size:.75rem;font-weight:650;white-space:nowrap}
+.queue-toolbar select{min-width:0;flex:1}
+.work-queue-list{display:grid;gap:.6rem}
+.queue-card{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem;border:1px solid var(--line,#e3e3dc);border-radius:10px;background:var(--surface-soft,#fafaf8)}
+.queue-card-main{display:grid;gap:.35rem;min-width:0}
+.queue-card-main>strong{font-size:.92rem;overflow-wrap:anywhere}
+.queue-card-main>p{margin:0;color:var(--muted,#777);font-size:.75rem;overflow-wrap:anywhere}
+.queue-card-top,.queue-meta{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap}
+.queue-lane,.queue-priority{font-size:.66rem;font-weight:700}
+.queue-lane{color:var(--muted,#666)}
+.queue-priority{padding:.2rem .45rem;border-radius:999px;background:#efefeb;color:#555}
+.priority-urgent{background:#fbe5e2;color:#9d3028}
+.priority-high{background:#fff0d9;color:#88530b}
+.queue-meta{font-size:.68rem;color:var(--muted,#777)}
+.queue-overdue{color:#a22;font-weight:750}
+.queue-open{flex:0 0 auto}
+.work-assignment{display:grid;gap:.7rem;margin:1rem 0;padding:1rem;border:1px solid var(--line,#e3e3dc);border-radius:12px;background:var(--surface-soft,#fafaf8)}
+.work-assignment h3,.work-assignment h4{margin:0;font-size:.95rem}
+.work-assignment-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.work-assignment-grid>div{display:grid;gap:.35rem;min-width:0}
+.work-assignment[hidden]{display:none}
+@media(max-width:700px){.work-assignment-grid{grid-template-columns:1fr}.queue-card{align-items:flex-start;flex-direction:column}.queue-open{width:100%}.queue-metrics{width:100%}}
