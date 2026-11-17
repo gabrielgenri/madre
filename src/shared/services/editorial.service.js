@@ -340,6 +340,32 @@ export const EditorialService = {
     return data
   },
 
+  async myRoles() {
+    const user = await currentUser()
+    const { data, error } = await client().from('user_roles').select('role').eq('user_id', user.id)
+    if (error) throw error
+    return (data ?? []).map(item => item.role)
+  },
+
+  async reviewHistory(unitId) {
+    const { data, error } = await client().from('editorial_review_events')
+      .select('id,event_type,note,source_version_id,quality_review_id,created_by,created_at')
+      .eq('editorial_unit_id', unitId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data ?? []
+  },
+
+  async recordReviewEvent(unitId, eventType, note) {
+    const { data, error } = await client().rpc('record_editorial_review_event', {
+      p_unit_id: unitId,
+      p_event_type: eventType,
+      p_note: note
+    })
+    if (error) throw error
+    return data
+  },
+
   async get(id) {
     const { data, error } = await client().from('editorial_units').select('*').eq('id', id).single()
     if (error) throw error
