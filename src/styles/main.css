@@ -119,3 +119,23 @@ textarea{resize:vertical;line-height:1.55}
   .version-item { align-items: flex-start; flex-direction: column; }
   .version-item .button { width: 100%; }
 }
+
+
+/* Producción de los seis formatos editoriales */
+.dialog.wide:has(.format-list){width:min(96vw,900px);max-height:92vh;overflow:auto}
+.format-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem}
+.format-card{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.9rem;border:1px solid #e5e5df;border-radius:10px;background:#fff;min-width:0}
+.format-card>div{display:grid;gap:.2rem;min-width:0}
+.format-card strong{font-size:.88rem}
+.format-card span{font-size:.72rem;color:#777}
+.format-card small{font-size:.68rem;font-weight:700}
+.format-state{color:#58715b}
+.format-state.stale{color:#a13f32}
+.format-editor{border-top:1px solid #e5e5df;padding-top:1rem}
+.format-editor h3{margin:0;font-size:1.15rem}
+.format-editor textarea{min-height:220px}
+@media(max-width:620px){
+  .format-list{grid-template-columns:1fr}
+  .format-card{align-items:flex-start;flex-direction:column}
+  .format-card .button{width:100%}
+}
