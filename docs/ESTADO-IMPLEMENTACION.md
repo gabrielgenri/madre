@@ -21,11 +21,21 @@
 - Se incorporó y aplicó el guard de publicación `editorial_units_guard_publish`: la transición a `published` requiere rol `editor` o `admin`.
 - El proyecto mantiene extensiones `vector`, `pgcrypto` y `uuid-ossp` disponibles.
 
+## Investigación editorial incorporada
+
+- La vista de una unidad permite abrir un espacio de investigación.
+- Alta y consulta de fuentes con tipo, URL, autor/organismo, editor, extracto y notas.
+- Alta y consulta de afirmaciones con tipo, importancia y contexto.
+- Registro de evidencias relacionadas con una afirmación y/o fuente, con localizador y relación (apoya, contradice, contextualiza).
+- Consulta del historial de verificaciones y formulario para registrar una revisión humana. La base de datos limita la inserción a roles reviewer/editor/admin; los permisos se validan en RLS.
+- La verificación se conserva como historial en `verifications`; la interfaz muestra la última revisión sin sobrescribir directamente el campo de estado de la afirmación, evitando exigir permisos de edición de claims a un revisor.
+
 ## Pendiente de verificación
 
 - Instalación de dependencias y `vite build`: el intento anterior de `npm install` no terminó dentro del tiempo disponible; no se declara compilación exitosa.
 - Conexión del navegador al proyecto: falta configurar localmente la publishable key.
 - Flujo real de autenticación y CRUD con un usuario.
+- Pruebas en navegador del flujo fuentes → afirmaciones → evidencias → verificación, incluyendo rechazo de usuarios sin rol de revisor.
 - Pruebas de permisos y aislamiento RLS desde un cliente autenticado real.
 - Prueba integral de extremo a extremo.
 - Incorporación futura de la migración fundacional completa como fuente reproducible del esquema; el archivo remoto `madre_core_foundation` no se puede recuperar byte a byte desde el historial de migraciones mediante las herramientas disponibles.
