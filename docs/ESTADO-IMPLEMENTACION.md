@@ -73,3 +73,27 @@ El asesor de Supabase detecta funciones `SECURITY DEFINER` expuestas en el esque
 - Verificar rechazo de usuarios sin permiso de edición mediante RLS.
 - Probar restauración desde navegador y confirmar que crea una versión nueva.
 - Ejecutar `node --check`, `vite build` y pruebas de extremo a extremo. No se declara compilación ni prueba de navegador como exitosas.
+
+
+## PASO 15 — Producción y trazabilidad de los seis formatos
+
+Se utiliza la tabla existente `editorial_formats` y se respetan sus seis tipos permitidos: `web_seo`, `video_reel_60`, `podcast_primera_hora`, `instagram_carousel_8`, `newsletter` y `whatsapp`.
+
+- Se incorporó un espacio de trabajo para consultar y editar un borrador por cada formato de una unidad editorial.
+- Cada guardado utiliza la RPC `save_editorial_format`, que obtiene la última versión madre vigente y registra su ID en `source_version_id`.
+- Guardar una pieza la deja en estado `draft`; no se aprueba ni publica automáticamente.
+- Un trigger sobre `editorial_versions` marca como `is_stale = true` los formatos vinculados a versiones anteriores cuando se registra una nueva versión madre.
+- Al editar y guardar nuevamente una pieza, se vincula a la versión madre vigente y se limpia la marca de desactualización.
+- El guardado se ejecuta con `SECURITY INVOKER`, por lo que conserva la aplicación de RLS existente. La RPC valida autenticación, formato permitido, título y longitud máxima del contenido.
+
+### Límite funcional explícito
+
+Esta entrega implementa persistencia, edición y trazabilidad de borradores para los seis formatos. No integra todavía un proveedor de IA ni genera automáticamente textos terminados. El contenido debe ser redactado y revisado por personas; la automatización de generación asistida será una etapa posterior, sin alterar la regla de aprobación humana.
+
+### Verificación pendiente
+
+- Probar alta y edición de cada uno de los seis formatos con sesión autenticada.
+- Confirmar que una nueva versión madre marca los seis formatos anteriores como desactualizados.
+- Confirmar que volver a guardar un formato lo vincula a la versión más reciente.
+- Probar permisos RLS con perfiles autor, editor y administrador.
+- Ejecutar `node --check`, `vite build` y pruebas de navegador. No se declaran como realizadas en este paso.
