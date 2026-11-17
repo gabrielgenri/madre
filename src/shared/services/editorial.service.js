@@ -30,15 +30,27 @@ export const EditorialService = {
     return data
   },
 
-  async update(id, changes) {
+  async update(id, changes, changeNote) {
     const allowed = {}
     for (const key of ['title', 'summary', 'content_mother']) {
       if (key in changes) allowed[key] = changes[key]
     }
-    const { data, error } = await client().from('editorial_units')
-      .update(allowed).eq('id', id).select().single()
+    const { data, error } = await client().rpc('update_editorial_unit_with_version', {
+      p_unit_id: id,
+      p_changes: allowed,
+      p_change_note: changeNote
+    })
     if (error) throw error
     return data
+  },
+
+  async versions(unitId) {
+    const { data, error } = await client().from('editorial_versions')
+      .select('id,version_number,snapshot,change_note,created_by,created_at')
+      .eq('editorial_unit_id', unitId)
+      .order('version_number', { ascending: false })
+    if (error) throw error
+    return data ?? []
   },
 
   async get(id) {
