@@ -342,7 +342,7 @@ export async function renderWorkspace(root, user, onSignOut) {
       await EditorialService.create({ title: form.get('title'), summary: form.get('summary') })
       createDialog.close(); event.currentTarget.reset()
       notice.textContent = 'Unidad editorial creada.'
-      await loadUnits()
+      await Promise.all([loadUnits(), loadWorkQueue()])
     } catch (error) { notice.textContent = error.message }
     finally { button.disabled = false }
   })
@@ -355,7 +355,7 @@ export async function renderWorkspace(root, user, onSignOut) {
     try {
       await EditorialService.update(form.get('id'), { title: form.get('title'), summary: form.get('summary'), content_mother: form.get('content_mother') }, form.get('change_note'))
       notice.textContent = 'Cambios guardados. Si hubo cambios editoriales, se agregó una versión al historial.'
-      detailDialog.close(); await loadUnits()
+      detailDialog.close(); await Promise.all([loadUnits(), loadWorkQueue()])
     } catch (error) { notice.textContent = error.message }
     finally { button.disabled = false }
   })
@@ -476,7 +476,7 @@ export async function renderWorkspace(root, user, onSignOut) {
     const labels = { low: 'Baja', normal: 'Normal', high: 'Alta', urgent: 'Urgente' }
     container.innerHTML = filtered.map(item => {
       const overdue = item.status === 'draft' && item.due_at && new Date(item.due_at).getTime() < now
-      const assignee = item.assigned_to === user.id ? 'Vos' : (names.get(item.assigned_to) || (item.assigned_to ? 'Integrante ' + item.assigned_to.slice(0,8) : 'Sin asignar'))
+      const assignee = item.assigned_to === user.id ? 'Vos' : (names.get(item.assigned_to) || (item.assigned_to ? 'Otro integrante' : 'Sin asignar'))
       const due = item.due_at ? date(item.due_at) : 'Sin fecha límite'
       return '<article class="queue-card"><div class="queue-card-main"><div class="queue-card-top"><span class="queue-lane">' + esc(workLane(item)) + '</span><span class="queue-priority priority-' + esc(item.priority || 'normal') + '">' + esc(labels[item.priority] || 'Normal') + '</span></div><strong>' + esc(item.title) + '</strong><p>' + esc(item.summary || 'Sin resumen inicial.') + '</p><div class="queue-meta"><span>Responsable: ' + esc(assignee) + '</span><span class="' + (overdue ? 'queue-overdue' : '') + '">Vence: ' + esc(due) + (overdue ? ' · VENCIDA' : '') + '</span></div></div><button type="button" class="button ghost queue-open" data-id="' + esc(item.id) + '">Abrir unidad</button></article>'
     }).join('')
@@ -604,7 +604,7 @@ export async function renderWorkspace(root, user, onSignOut) {
       root.querySelector('#detail-status').value = refreshed.status === 'published' ? 'Publicado' : refreshed.status === 'reviewed' ? 'Revisado' : 'Borrador'
       root.querySelector('#review-note').value = ''
       await loadReviewHistory(activeUnitId)
-      await loadUnits()
+      await Promise.all([loadUnits(), loadWorkQueue()])
       notice.textContent = button.dataset.event === 'approved'
         ? 'Aprobación humana registrada. La unidad pasó a Revisado.'
         : button.dataset.event === 'changes_requested'
@@ -655,7 +655,7 @@ export async function renderWorkspace(root, user, onSignOut) {
           root.querySelector('#change-note').value = ''
           notice.textContent = `Versión ${version.version_number} restaurada como una nueva versión.`
           await loadVersions(unitId)
-          await loadUnits()
+          await Promise.all([loadUnits(), loadWorkQueue()])
         } catch (error) {
           notice.textContent = error.message
           button.disabled = false
