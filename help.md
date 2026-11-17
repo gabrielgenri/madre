@@ -1,5 +1,7 @@
+
+
 1 -- Coolify: el motor detrás de nuestra infraestructura en fencode (y por qué lo recomendamos)
-Descubra cómo fencode usa Coolify para alojar su FTP, agentes de IA con nanobot, y aplicaciones como SaleShow con una infraestructura autohospedada de nivel profesional.
+Descubra cómo fencode usa Coolify para alojar su FTP, agentes de IA con nanobot, y aplicaciones como SaleShow con una infraestructura autohospedada de nivel profesional.   https://www.fencode.dev/en/blog/mcp-vs-langchain-vs-vercel-ai-sdk-2026
 
 Coolify: el motor detrás de nuestra infraestructura en fencode (y por qué lo recomendamos)
 ¿Qué pasaría si pudieras tener la misma infraestructura que usan las grandes empresas de tecnología, pero controlada completamente por ti, a una fracción del costo y sin depender de terceros para cada servicio que necesitas?
