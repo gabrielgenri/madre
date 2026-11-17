@@ -58,7 +58,7 @@ El asesor de Supabase detecta funciones `SECURITY DEFINER` expuestas en el esque
 - Se incorporó el RPC `update_editorial_unit_with_version`, que actualiza los campos editables permitidos y adjunta el motivo del cambio en la misma transacción.
 - La interfaz solicita el motivo de cada modificación y muestra el historial ordenado por número de versión.
 - Restaurar una versión recupera título, resumen y contenido madre mediante el mismo flujo de actualización; nunca sobrescribe ni elimina versiones anteriores y genera una nueva entrada.
-- Las versiones no admiten UPDATE. La tabla ya carecía de política RLS de DELETE; la relación con la unidad conserva su comportamiento de borrado en cascada.
+- Las versiones no admiten UPDATE ni DELETE: un trigger bloquea ambas operaciones, incluso cuando el borrado se intenta por cascada desde la unidad. No hay políticas RLS de modificación sobre el historial.
 - Se incorporaron versiones iniciales para las unidades que ya existían al activar el mecanismo.
 
 ### Verificación de base de datos
