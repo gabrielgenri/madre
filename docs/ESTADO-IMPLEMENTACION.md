@@ -90,10 +90,17 @@ Se utiliza la tabla existente `editorial_formats` y se respetan sus seis tipos p
 
 Esta entrega implementa persistencia, edición y trazabilidad de borradores para los seis formatos. No integra todavía un proveedor de IA ni genera automáticamente textos terminados. El contenido debe ser redactado y revisado por personas; la automatización de generación asistida será una etapa posterior, sin alterar la regla de aprobación humana.
 
+### Verificación ejecutada en base de datos
+
+- Se confirmó la existencia de la RPC `save_editorial_format`, la función de obsolescencia y su trigger.
+- Se ejecutó una prueba transaccional bajo el rol `authenticated` usando el usuario propietario de una unidad existente.
+- La prueba creó un borrador temporal, actualizó el contenido madre y comprobó que el formato pasó a `is_stale = true`.
+- Luego volvió a guardar el formato y comprobó que `is_stale = false` y que `source_version_id` apunta a la versión madre más reciente.
+- La prueba terminó con `ROLLBACK`: no dejó piezas de prueba en la base de datos.
+- Se agregaron índices para las referencias `source_version_id` y `created_by` de `editorial_formats`.
+
 ### Verificación pendiente
 
-- Probar alta y edición de cada uno de los seis formatos con sesión autenticada.
-- Confirmar que una nueva versión madre marca los seis formatos anteriores como desactualizados.
-- Confirmar que volver a guardar un formato lo vincula a la versión más reciente.
+- Probar alta y edición de cada uno de los seis formatos desde la interfaz con sesión autenticada.
 - Probar permisos RLS con perfiles autor, editor y administrador.
 - Ejecutar `node --check`, `vite build` y pruebas de navegador. No se declaran como realizadas en este paso.
