@@ -48,6 +48,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       <label for="detail-title">Título</label><input id="detail-title" name="title" required maxlength="180" />
       <label for="detail-summary">Resumen</label><textarea id="detail-summary" name="summary" rows="3"></textarea>
       <label for="detail-content">Contenido madre</label><textarea id="detail-content" name="content_mother" rows="8" placeholder="Desarrollá aquí el núcleo de información y contexto."></textarea>
+      <label for="change-note">Motivo de esta modificación</label><input id="change-note" name="change_note" required minlength="3" maxlength="500" placeholder="Ej.: incorporación de nueva documentación oficial" />
+      <section class="version-panel" aria-labelledby="version-heading"><div class="version-panel-head"><h3 id="version-heading">Historial de versiones</h3><span class="muted small">Las versiones anteriores no se sobrescriben</span></div><div id="version-list" class="version-list" aria-live="polite"><p class="muted small">Cargando historial…</p></div></section>
       <label for="detail-status">Estado editorial</label><input id="detail-status" value="Borrador" readonly aria-readonly="true" />
       <p class="muted small">La revisión formal permanece bloqueada hasta completar el control editorial humano.</p>
       <div class="dialog-actions"><button type="button" class="button ghost" id="open-research">Fuentes y verificación</button><button type="button" class="button ghost" id="cancel-detail">Cerrar</button><button class="button primary" type="submit">Guardar cambios</button></div>
@@ -127,8 +129,8 @@ export async function renderWorkspace(root, user, onSignOut) {
     const button = event.currentTarget.querySelector('[type="submit"]')
     button.disabled = true
     try {
-      await EditorialService.update(form.get('id'), { title: form.get('title'), summary: form.get('summary'), content_mother: form.get('content_mother') })
-      notice.textContent = 'Cambios guardados.'
+      await EditorialService.update(form.get('id'), { title: form.get('title'), summary: form.get('summary'), content_mother: form.get('content_mother') }, form.get('change_note'))
+      notice.textContent = 'Cambios guardados y nueva versión registrada.'
       detailDialog.close(); await loadUnits()
     } catch (error) { notice.textContent = error.message }
     finally { button.disabled = false }
@@ -184,6 +186,55 @@ export async function renderWorkspace(root, user, onSignOut) {
     }
   }
 
+  async function loadVersions(unitId) {
+    const list = root.querySelector('#version-list')
+    list.innerHTML = '<p class="muted small">Cargando historial…</p>'
+    try {
+      const versions = await EditorialService.versions(unitId)
+      if (!versions.length) {
+        list.innerHTML = '<p class="muted small">Todavía no hay versiones registradas.</p>'
+        return
+      }
+      list.innerHTML = versions.map(item => `
+        <article class="version-item">
+          <div><strong>Versión ${esc(item.version_number)}</strong><span>${date(item.created_at)}</span><p>${esc(item.change_note || 'Sin motivo consignado')}</p></div>
+          <button type="button" class="button ghost restore-version" data-version-id="${esc(item.id)}">Restaurar</button>
+        </article>`).join('')
+      list.querySelectorAll('.restore-version').forEach(button => button.addEventListener('click', async () => {
+        const version = versions.find(item => item.id === button.dataset.versionId)
+        if (!version?.snapshot) return
+        if (!window.confirm(`¿Restaurar la versión ${version.version_number}? Se creará una versión nueva; el historial anterior se conservará.`)) return
+        const reason = window.prompt('Indicá el motivo de esta restauración:')
+        if (reason === null || reason.trim().length < 3) {
+          notice.textContent = 'La restauración requiere un motivo de al menos 3 caracteres.'
+          return
+        }
+        button.disabled = true
+        try {
+          await EditorialService.update(unitId, {
+            title: version.snapshot.title ?? '',
+            summary: version.snapshot.summary ?? '',
+            content_mother: version.snapshot.content_mother ?? ''
+          }, `Restauración de versión ${version.version_number}: ${reason.trim()}`)
+          const restored = await EditorialService.get(unitId)
+          const form = root.querySelector('#detail-form')
+          form.elements.title.value = restored.title ?? ''
+          form.elements.summary.value = restored.summary ?? ''
+          form.elements.content_mother.value = restored.content_mother ?? ''
+          root.querySelector('#change-note').value = ''
+          notice.textContent = `Versión ${version.version_number} restaurada como una nueva versión.`
+          await loadVersions(unitId)
+          await loadUnits()
+        } catch (error) {
+          notice.textContent = error.message
+          button.disabled = false
+        }
+      }))
+    } catch (error) {
+      list.innerHTML = `<p class="muted small">No se pudo cargar el historial: ${esc(error.message)}</p>`
+    }
+  }
+
   async function openUnit(id) {
     try {
       const unit = await EditorialService.get(id)
@@ -194,6 +245,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       form.elements.content_mother.value = unit.content_mother ?? ''
       root.querySelector('#detail-status').value = unit.status === 'published' ? 'Publicado' : unit.status === 'reviewed' ? 'Revisado' : 'Borrador'
       root.querySelector('#detail-heading').textContent = unit.title
+      root.querySelector('#change-note').value = ''
+      await loadVersions(unit.id)
       detailDialog.showModal()
     } catch (error) { notice.textContent = error.message }
   }
