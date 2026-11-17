@@ -49,3 +49,27 @@ El asesor de Supabase detecta funciones `SECURITY DEFINER` expuestas en el esque
 - El repositorio ya contenía el Prompt Maestro en `README.md` y el registro `supabase.md`; ambos se preservan.
 - No se habilita el estado Revisado desde la interfaz inicial: todavía no existen checklist, fuentes y evidencias operativas completas en la UI.
 - No se incluye ninguna clave secreta en el repositorio.
+
+
+## PASO 14 — Versionado editorial y control de cambios
+
+- Se reutiliza la tabla existente `editorial_versions`; no se crea una estructura paralela.
+- Un trigger de base de datos registra una instantánea al crear una unidad y ante cambios en título, slug, resumen, contenido madre, estado o metadatos.
+- Se incorporó el RPC `update_editorial_unit_with_version`, que actualiza los campos editables permitidos y adjunta el motivo del cambio en la misma transacción.
+- La interfaz solicita el motivo de cada modificación y muestra el historial ordenado por número de versión.
+- Restaurar una versión recupera título, resumen y contenido madre mediante el mismo flujo de actualización; nunca sobrescribe ni elimina versiones anteriores y genera una nueva entrada.
+- Las versiones no admiten UPDATE. La tabla ya carecía de política RLS de DELETE; la relación con la unidad conserva su comportamiento de borrado en cascada.
+- Se incorporaron versiones iniciales para las unidades que ya existían al activar el mecanismo.
+
+### Verificación de base de datos
+
+- La migración `editorial_version_history_and_restore` fue aplicada.
+- Se comprobó la existencia del RPC, la función de captura y el trigger.
+- La consulta de control confirmó dos versiones iniciales y cero unidades sin versión al momento de la comprobación.
+
+### Pendiente de verificación funcional
+
+- Probar una edición autenticada y comprobar el incremento del número de versión.
+- Verificar rechazo de usuarios sin permiso de edición mediante RLS.
+- Probar restauración desde navegador y confirmar que crea una versión nueva.
+- Ejecutar `node --check`, `vite build` y pruebas de extremo a extremo. No se declara compilación ni prueba de navegador como exitosas.
