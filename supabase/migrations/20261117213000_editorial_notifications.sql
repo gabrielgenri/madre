@@ -143,10 +143,7 @@ begin
       'work-assigned:' || new.id::text,
       jsonb_build_object('priority', new.to_priority, 'due_at', new.to_due_at)
     );
-  elsif new.to_assigned_to is not null and (
-    new.to_due_at is distinct from new.from_due_at
-    or new.to_priority is distinct from new.from_priority
-  ) then
+  elsif new.to_assigned_to is not null and new.to_due_at is distinct from new.from_due_at then
     select title into v_title from public.editorial_units where id = new.editorial_unit_id;
     perform private.create_editorial_notification(
       new.to_assigned_to, new.editorial_unit_id, 'work_assigned',
