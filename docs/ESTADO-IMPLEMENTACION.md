@@ -229,7 +229,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 
 - Esquema, constraints y políticas RLS de las tablas de calidad inspeccionados.
 - Se confirmó que el scope `cross_format` y los estados `needs_attention` / `checks_complete` permiten persistir el informe sin alterar el esquema.
-- Edge Function `editorial-critical-review` desplegada y activa en Supabase, versión 1, con `verify_jwt = true`.
+- Edge Function `editorial-critical-review` desplegada y activa en Supabase, versión 3, con `verify_jwt = true` y validación de rol editorial (`writer`, `collaborator`, `reviewer`, `editor`, `admin`).
 - Sintaxis de los cuatro módulos JavaScript modificados/nuevos validada mediante parseo estático.
 - Pendiente: invocación autenticada con `OPENAI_API_KEY` disponible, ejecución con datos reales, comprobación de decisiones humanas desde navegador, `vite build`, revisión responsive y pruebas multiusuario.
 - No se declara una revisión real ejecutada ni una aprobación editorial automática.
