@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>MADRE — Sistema Editorial (Prompt Maestro)</title>
+<title>MADRE — Prompt Maestro del Sistema Editorial</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
@@ -192,10 +192,107 @@
   .code-defectuoso .cursor-corte{display:inline-block;width:9px;height:16px;background:var(--defect-border);vertical-align:text-bottom;margin-left:2px;animation:parpadeo 1s steps(2,start) infinite;}
   @keyframes parpadeo{to{visibility:hidden;}}
 
-  /* Bloque "actividad en curso" (para el corte del Paso 20) */
+  /* Actividad cortada */
   .actividad-corte{background:#fafafa;border:1px dashed var(--line);border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;color:var(--muted);}
   .actividad-corte .act-line{display:flex;align-items:center;gap:8px;margin:6px 0;opacity:.85;}
   .actividad-corte .act-line .act-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9c9c9;flex:0 0 auto;}
+
+  /* === PROMPT MAESTRO — documento rector === */
+  .prompt-maestro-bloque{
+    background:#ffffff;
+    border:2px solid #111;
+    border-radius:14px;
+    padding:32px 28px;
+    margin-top:40px;
+    box-shadow:0 4px 16px rgba(0,0,0,.06);
+  }
+  .prompt-portada{
+    text-align:center;
+    padding-bottom:24px;
+    border-bottom:2px solid #111;
+    margin-bottom:28px;
+  }
+  .prompt-portada h1{
+    font-family:"Playfair Display",Georgia,serif;
+    font-size:1.85rem;
+    font-weight:700;
+    letter-spacing:1px;
+    color:#111;
+    margin:0 0 8px;
+    padding:0;
+    border:none;
+    line-height:1.25;
+  }
+  .prompt-portada h2{
+    font-family:"Playfair Display",Georgia,serif;
+    font-size:1.1rem;
+    font-weight:500;
+    color:#555;
+    margin:0 0 18px;
+    padding:0;
+    border:none;
+    letter-spacing:.5px;
+  }
+  .prompt-portada .badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
+  .prompt-seccion{
+    margin:28px 0;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .prompt-seccion:first-of-type{
+    border-top:none;
+    padding-top:0;
+    margin-top:0;
+  }
+  .prompt-seccion h2{
+    font-size:1.15rem;
+    font-weight:700;
+    color:#111;
+    margin:0 0 12px;
+    padding:0;
+    border:none;
+    letter-spacing:.2px;
+  }
+  .prompt-seccion h3{
+    font-size:1rem;
+    font-weight:700;
+    color:#222;
+    margin:18px 0 8px;
+  }
+  .prompt-seccion h4{
+    font-size:.94rem;
+    font-weight:700;
+    color:#333;
+    margin:14px 0 6px;
+  }
+  .principio-final{
+    background:#111;
+    color:#f5f5f5;
+    border-radius:14px;
+    padding:32px 28px;
+    margin-top:36px;
+    text-align:center;
+  }
+  .principio-final h2{
+    font-family:"Playfair Display",Georgia,serif;
+    color:#fff;
+    font-size:1.3rem;
+    margin:0 0 16px;
+    letter-spacing:1px;
+  }
+  .principio-final .frase{
+    font-size:1rem;
+    font-weight:700;
+    letter-spacing:1px;
+    margin:14px 0;
+    color:#9ec1ff;
+  }
+  .principio-final p{
+    margin:10px 0;
+    line-height:1.7;
+    color:#e8e8e8;
+  }
+  .principio-final strong{color:#fff;}
 
   @media print{
     body{background:#fff;}
@@ -204,13 +301,18 @@
     .canvas{max-width:100%;margin:0;padding:0;}
     .mensaje.asistente .contenido-ia{box-shadow:none;border:none;padding:0;}
     .mensaje.usuario .burbuja{background:#f4f4f4;border:1px solid #ddd;}
-    .capa,.flujo,.tabla-flujo,.entidad,.cierre,.modulo,.formato,.aviso-corte,.code-defectuoso,.grid-num .item,.metricas,.grid-formatos,.diagrama-version,.check-list,.caja-verif,.grid-bandeja .b-item,.actividad-corte{break-inside:avoid;}
+    .capa,.flujo,.tabla-flujo,.entidad,.cierre,.modulo,.formato,.aviso-corte,.code-defectuoso,.grid-num .item,.metricas,.grid-formatos,.diagrama-version,.check-list,.caja-verif,.grid-bandeja .b-item,.actividad-corte,.prompt-seccion,.prompt-portada,.principio-final{break-inside:avoid;}
     .turno{page-break-inside:auto;}
     h1,h2,h3{break-after:avoid;}
     .cierre{background:#fff;color:#111;border:2px solid #111;}
     .cierre h2{color:#111;}
     .cierre blockquote{background:#f4f4f4;border-left:4px solid #111;color:#111;}
     .code-defectuoso .cursor-corte{animation:none;background:#000;}
+    .prompt-maestro-bloque{border-width:1px;box-shadow:none;}
+    .principio-final{background:#fff;color:#111;border:2px solid #111;}
+    .principio-final h2{color:#111;}
+    .principio-final p{color:#111;}
+    .principio-final .frase{color:#1a4fa0;}
   }
   @media (max-width:640px){
     .capa .items{grid-template-columns:1fr;}
@@ -227,6 +329,8 @@
     .metricas .metrica{flex-direction:column;align-items:flex-start;gap:2px;}
     .caja-verif .fila{flex-direction:column;align-items:flex-start;gap:4px;}
     .grid-bandeja .b-item{flex-direction:column;gap:6px;}
+    .prompt-maestro-bloque{padding:22px 18px;}
+    .prompt-portada h1{font-size:1.5rem;}
   }
 </style>
 </head>
@@ -259,9 +363,7 @@
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <p>Perfecto. Vamos a construir el <strong>prompt maestro para el desarrollo del sistema web Madre</strong> de manera progresiva, sin saltarnos etapas.</p>
-
         <p>Tomaré <strong>"Mejorar Prompt" como fuente inicial</strong>, respetando lo que allí está definido y separando posteriormente:</p>
         <ol>
           <li><strong>Lo que ya está decidido</strong> en la fuente.</li>
@@ -269,66 +371,31 @@
           <li><strong>Lo que falta definir</strong>.</li>
           <li><strong>Las decisiones técnicas</strong> que deberán quedar expresadas en el prompt final.</li>
         </ol>
-
         <p>La fuente establece como núcleo de Madre un motor de transformación de contenidos que recibe una entrada y la atomiza en <strong>6 formatos</strong>: artículo web/SEO, Reel de 60 segundos, podcast, carrusel de 8 diapositivas, newsletter y WhatsApp. También plantea Supabase, pgvector, Edge Functions, seguridad de API keys, flujo editorial con revisión humana, Editor Crítico, transcripción y almacenamiento/historial. <span class="fuente">Mejorar-Prompt</span></p>
-
-        <p>Además, hay una cuestión fundamental que incorporaremos desde el comienzo: <strong>Madre no será simplemente un generador de textos</strong>. La arquitectura deberá integrar el proceso editorial: investigación → producción → verificación → edición humana → publicación y seguimiento. La Guía de Estilo define explícitamente este flujo y señala que Madre debe distinguir estados como <strong>borrador, en verificación, revisada, publicada y corregida</strong>. <span class="fuente">Crear guía de estilo</span></p>
-
+        <p>Además, hay una cuestión fundamental que incorporaremos desde el comienzo: <strong>Madre no será simplemente un generador de textos</strong>. La arquitectura deberá integrar el proceso editorial: investigación → producción → verificación → edición humana → publicación y seguimiento.</p>
         <h3>PASO 1 — Definir qué estamos construyendo</h3>
-
         <blockquote>
           <p><strong>MADRE</strong> es el sistema web editorial inteligente que transforma información, documentos, fuentes y hechos en conocimiento periodístico verificable y posteriormente lo atomiza en múltiples formatos de comunicación, manteniendo trazabilidad, control editorial humano, memoria documental y capacidad de publicación multicanal.</p>
         </blockquote>
-
-        <h3>Arquitectura conceptual inicial</h3>
-
         <div class="flujo">
-          <p><strong>ENTRADA</strong></p>
-          <p>Hecho · noticia · documento · audio · entrevista · comunicado · investigación · URL · datos · búsqueda</p>
-          <span class="arrow">↓</span>
-          <p><strong>MADRE / PROCESAMIENTO</strong></p>
-          <p>Investigación → Contextualización → Memoria documental → Análisis → Producción → Verificación → Edición crítica</p>
-          <span class="arrow">↓</span>
-          <p><strong>NÚCLEO EDITORIAL</strong></p>
-          <p>Estado de la pieza → Checklist → Fuentes → Evidencias → Versionado → Responsable → Aprobación</p>
-          <span class="arrow">↓</span>
-          <p><strong>ATOMIZACIÓN</strong></p>
-          <p>Artículo Web · Reel · Podcast · Carrusel · Newsletter · WhatsApp</p>
-          <span class="arrow">↓</span>
-          <p><strong>DISTRIBUCIÓN</strong></p>
-          <p>Web / CMS / WordPress · Redes · Newsletter · Mensajería · Archivo · Observatorios</p>
-          <span class="arrow">↓</span>
-          <p><strong>MEMORIA</strong></p>
-          <p>Biblioteca · Archivo histórico · Datos · Embeddings · Historial · Correcciones</p>
+          <p><strong>ENTRADA</strong> → Procesamiento → Núcleo editorial → Atomización → Distribución → Memoria</p>
         </div>
-
-        <h3>Próximo paso</h3>
-        <p>En el <strong>Paso 2</strong> podemos convertir "Mejorar Prompt" en una <strong>especificación funcional completa de Madre</strong>.</p>
-
+        <p><strong>No escribiría todavía el prompt definitivo.</strong> Primero tenemos que cerrar la arquitectura conceptual y funcional.</p>
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 2 · Definición funcional (con bloque defectuoso)
-       ========================================================= -->
+  <!-- PASO 2 · Definición funcional (con bloque defectuoso) -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 2</span> · Definir funcionalmente qué es Madre</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h2>PASO 2 — DEFINIR FUNCIONALMENTE QUÉ ES MADRE</h2>
-
         <blockquote>
           <p><strong>Madre es un sistema editorial inteligente que recibe información, hechos, documentos, audios, fuentes y datos; los organiza, contextualiza, verifica y transforma bajo reglas editoriales definidas, para producir conocimiento periodístico y posteriormente atomizarlo en distintos formatos y canales.</strong></p>
         </blockquote>
-
         <p><strong>La IA no es Madre.</strong> La IA es un <strong>motor dentro de Madre</strong>.</p>
-
-        <h3>Flujo general</h3>
-        <p>ENTRADA → INGESTA → CONTEXTO → PROCESAMIENTO → EDITOR CRÍTICO → CONTROL HUMANO → ESTADOS → ATOMIZACIÓN → DISTRIBUCIÓN → MEMORIA.</p>
-
         <h3>Los seis formatos quedan fijados</h3>
         <ol>
           <li>Artículo Web + SEO</li>
@@ -338,18 +405,15 @@
           <li>Newsletter</li>
           <li>WhatsApp</li>
         </ol>
-
         <h3>Dos capas que no debemos confundir</h3>
         <ul>
-          <li><strong>Capa editorial:</strong> qué sabemos, de dónde surge, qué está verificado, qué falta comprobar, qué contexto tiene, qué puede publicarse.</li>
+          <li><strong>Capa editorial:</strong> qué sabemos, de dónde surge, qué está verificado, qué falta comprobar.</li>
           <li><strong>Capa de atomización:</strong> cómo transformamos ese contenido para cada canal.</li>
         </ul>
-
         <div class="aviso-corte">
-          La fuente original se corta aquí, a mitad del bloque <code>&lt;code&gt;</code>. El contenido del ejemplo JSON del "núcleo editorial estructurado" quedó incompleto en el documento original.
+          La fuente original se corta aquí, a mitad del bloque <code>&lt;code&gt;</code>. El contenido del ejemplo JSON del "núcleo editorial estructurado" quedó incompleto.
         </div>
-
-        <div class="code-defectuoso" role="alert" aria-label="Bloque de código defectuoso en la fuente original">
+        <div class="code-defectuoso" role="alert">
           <div class="code-head">
             <span>Texto sin formato · ejemplo del núcleo editorial estructurado</span>
             <span class="badge-cortado">✂ CORTADO</span>
@@ -365,7 +429,6 @@
   }
 }</pre>
         </div>
-
       </div>
     </div>
   </section>
@@ -376,7 +439,7 @@
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-        <p class="op"><em>Contenido puente: 6 formatos canónicos (3), motor de IA / callIA (4), Guía de Estilo versionada (5), Editor Crítico (6), transcripción de audio (7), Biblioteca Riojana y memoria semántica (8), Observatorios (9) y Centro de Distribución (10).</em></p>
+        <p class="op"><em>Contenido puente: 6 formatos canónicos (3), motor de IA / callIA (4), Guía de Estilo versionada (5), Editor Crítico (6), transcripción de audio (7), Biblioteca Riojana (8), Observatorios (9) y Centro de Distribución (10).</em></p>
       </div>
     </div>
   </section>
@@ -387,40 +450,14 @@
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
-        <h1>PASO 11. ARQUITECTURA GENERAL DE SOFTWARE E INTEGRACIÓN DEL ECOSISTEMA MADRE</h1>
-
-        <h2>11.1. Principios</h2>
-        <ol>
-          <li>Modularidad</li>
-          <li>Interoperabilidad</li>
-          <li>Centralización de la seguridad</li>
-          <li>Independencia de desarrollo</li>
-          <li>Integridad editorial</li>
-        </ol>
-
-        <h2>11.2. Las cuatro capas</h2>
-
-        <div class="capa">
-          <h2>CAPA 1 · INTERFAZ Y EXPERIENCIA</h2>
-          <div class="items"><span>Madre Editorial</span><span>Biblioteca Riojana</span><span>Editor Crítico</span><span>Observatorios</span><span>Transcripción de Audio</span><span>Centro de Distribución</span></div>
-        </div>
+        <h1>PASO 11. ARQUITECTURA GENERAL DE SOFTWARE</h1>
+        <div class="capa"><h2>CAPA 1 · INTERFAZ Y EXPERIENCIA</h2><div class="items"><span>Madre Editorial</span><span>Biblioteca Riojana</span><span>Editor Crítico</span><span>Observatorios</span><span>Transcripción</span><span>Centro de Distribución</span></div></div>
         <div class="arrow-big">⇅</div>
-        <div class="capa">
-          <h2>CAPA 2 · NÚCLEO COMPARTIDO</h2>
-          <div class="items"><span>Autenticación y sesión</span><span>Cliente Supabase</span><span>Motor de IA / callIA</span><span>Guía de estilo</span><span>Permisos y roles</span><span>Persistencia y versiones</span><span>Notificaciones y errores</span><span>Auditoría y trazabilidad</span></div>
-        </div>
+        <div class="capa"><h2>CAPA 2 · NÚCLEO COMPARTIDO</h2><div class="items"><span>Auth y sesión</span><span>Supabase</span><span>IA / callIA</span><span>Guía de estilo</span><span>Roles</span><span>Versiones</span><span>Auditoría</span></div></div>
         <div class="arrow-big">⇅</div>
-        <div class="capa">
-          <h2>CAPA 3 · DATOS Y PERSISTENCIA</h2>
-          <div class="items"><span>PostgreSQL (Supabase)</span><span>pgvector</span><span>Storage</span><span>Historial y versionado</span><span>Backups</span><span>Búsqueda semántica</span><span>Índices de fuentes</span><span>Auditoría persistente</span></div>
-        </div>
+        <div class="capa"><h2>CAPA 3 · DATOS Y PERSISTENCIA</h2><div class="items"><span>PostgreSQL</span><span>pgvector</span><span>Storage</span><span>Historial</span><span>Backups</span><span>Búsqueda semántica</span></div></div>
         <div class="arrow-big">⇅</div>
-        <div class="capa">
-          <h2>CAPA 4 · SEGURIDAD, INTEGRACIÓN Y DISTRIBUCIÓN</h2>
-          <div class="items"><span>RLS</span><span>Edge Functions seguras</span><span>Gestión de API keys</span><span>WordPress / CMS</span><span>Redes sociales</span><span>Newsletter y WhatsApp</span><span>Observatorios externos</span><span>Logs y monitoreo</span></div>
-        </div>
-
+        <div class="capa"><h2>CAPA 4 · SEGURIDAD Y DISTRIBUCIÓN</h2><div class="items"><span>RLS</span><span>Edge Functions</span><span>API keys</span><span>WordPress</span><span>Redes</span><span>Logs</span></div></div>
       </div>
     </div>
   </section>
@@ -432,14 +469,14 @@
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
         <h2>PASO 12. MODELO DE DATOS CONCRETO</h2>
-        <p><code>piezas</code>, <code>fuentes</code>, <code>versiones</code>, <code>publicaciones</code>, <code>canales</code> y <code>usuarios</code>. Estados editoriales: borrador → en_verificacion → revisada → publicada → corregida / archivada.</p>
+        <p>Entidades: <code>piezas</code>, <code>fuentes</code>, <code>versiones</code>, <code>publicaciones</code>, <code>canales</code>, <code>usuarios</code>. Estados editoriales: borrador → en_verificacion → revisada → publicada → corregida / archivada.</p>
       </div>
     </div>
   </section>
 
-  <!-- PASO 13 · Cierre del prompt maestro -->
+  <!-- PASO 13 · Cierre -->
   <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 13</span> · Cierre del prompt maestro</time></div>
+    <div class="separador"><time><span class="dia">PASO 13</span> · Cierre</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
@@ -451,63 +488,33 @@
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 14 · Versionado editorial
-       ========================================================= -->
+  <!-- PASO 14 · Versionado editorial -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 14</span> · Versionado editorial</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h2>PASO 14 — Versionado editorial</h2>
         <p>Tabla <code>editorial_versions</code> con instantánea, motivo, autor y fecha. Restaurar genera nueva versión sin borrar historial.</p>
-
         <div class="badge success">PASO 14 incorporado</div>
-
         <div class="metricas">
           <div class="metrica"><span class="label">Unidades sin versión inicial</span><span class="valor">0</span></div>
           <div class="metrica"><span class="label">Versiones iniciales registradas</span><span class="valor">2</span></div>
           <div class="metrica"><span class="label">Triggers de versionado e inmutabilidad</span><span class="valor">2</span></div>
-          <div class="metrica"><span class="label">Políticas RLS que permiten modificar versiones</span><span class="valor">0</span></div>
-          <div class="metrica"><span class="label">Índices duplicados del versionado</span><span class="valor">0</span></div>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 15 · Producción de los seis formatos
-       ========================================================= -->
+  <!-- PASO 15 · Producción de los 6 formatos -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 15</span> · Producción de los seis formatos</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h2>PASO 15 — Producción de los seis formatos</h2>
-        <p>Identificadores oficiales en Supabase:</p>
-        <ol>
-          <li>Web SEO (<code>web_seo</code>)</li>
-          <li>Reel (<code>video_reel_60</code>)</li>
-          <li>Podcast Primera Hora (<code>podcast_primera_hora</code>)</li>
-          <li>Carrusel 8 placas (<code>instagram_carousel_8</code>)</li>
-          <li>Newsletter (<code>newsletter</code>)</li>
-          <li>WhatsApp (<code>whatsapp</code>)</li>
-        </ol>
-
+        <p>Identificadores oficiales: <code>web_seo</code>, <code>video_reel_60</code>, <code>podcast_primera_hora</code>, <code>instagram_carousel_8</code>, <code>newsletter</code>, <code>whatsapp</code>.</p>
         <div class="badge success">PASO 15 implementado en Supabase y GitHub</div>
-
-        <div class="grid-formatos">
-          <div class="ft"><p class="ft-title">Web SEO</p><p class="ft-desc">Nota periodística</p></div>
-          <div class="ft"><p class="ft-title">Reel</p><p class="ft-desc">Guion de 60 segundos</p></div>
-          <div class="ft"><p class="ft-title">Podcast</p><p class="ft-desc">Primera Hora</p></div>
-          <div class="ft"><p class="ft-title">Carrusel</p><p class="ft-desc">8 placas</p></div>
-          <div class="ft"><p class="ft-title">Newsletter</p><p class="ft-desc">Boletín editorial</p></div>
-          <div class="ft"><p class="ft-title">WhatsApp</p><p class="ft-desc">Distribución directa</p></div>
-        </div>
-
         <div class="diagrama-version">
           <div class="dv-box">Contenido madre · Versión 1</div>
           <div class="dv-arrow">↓</div>
@@ -519,295 +526,1039 @@
             <div class="dv-item"><p class="dv-nombre">Newsletter</p><span class="badge success">Vinculado</span></div>
             <div class="dv-item"><p class="dv-nombre">WhatsApp</p><span class="badge success">Vinculado</span></div>
           </div>
-          <div class="dv-arrow">↓</div>
-          <div class="dv-alerta">
-            Nueva versión del contenido madre<br>
-            <span class="badge warning" style="margin-top:6px;">Los formatos anteriores quedan desactualizados</span>
-          </div>
+          <div class="dv-alerta">Nueva versión del contenido madre → formatos anteriores desactualizados</div>
         </div>
-
-        <p><strong>Prueba transaccional superada</strong> en PostgreSQL con rol <code>authenticated</code>.</p>
-
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 16 · Generación asistida por IA
-       ========================================================= -->
+  <!-- PASO 16 · Generación IA -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 16</span> · Generación editorial asistida por IA</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h2>PASO 16 — Generación editorial asistida por IA</h2>
-        <p>Edge Function <code>generate-editorial-format</code> v4 con <code>verify_jwt=true</code>. Contexto periodístico completo (contenido madre, fuentes, afirmaciones, evidencias). Seis instrucciones específicas por formato. Trazabilidad de versión y fuentes. Control editorial: si cambió el contenido madre, bloquea el guardado.</p>
-
+        <p>Edge Function <code>generate-editorial-format</code> v4 con <code>verify_jwt=true</code>. Contexto periodístico completo, seis instrucciones específicas por formato, trazabilidad y control editorial.</p>
         <div class="badge success">PASO 16 desplegado</div>
-
         <p>Integración vía <strong>Responses API de OpenAI</strong>. <span class="pill-openai">OpenAI API</span></p>
-
         <div class="badge warning">Configuración pendiente</div>
-        <p>Falta confirmar el secreto <code>OPENAI_API_KEY</code> en Supabase → Edge Functions → Secrets. Modelo por defecto: <code>gpt-4.1-mini</code>.</p>
-
+        <p>Falta confirmar el secreto <code>OPENAI_API_KEY</code> en Supabase → Edge Functions → Secrets.</p>
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 17 · Control de calidad editorial
-       ========================================================= -->
+  <!-- PASO 17 · Control de calidad -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 17</span> · Control de calidad editorial</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h2>PASO 17 — Control de calidad editorial</h2>
-        <p>Instancia de control <strong>previa a la revisión humana</strong>. Los resultados son <strong>alertas para revisar, no dictámenes automáticos de verdad o falsedad</strong>.</p>
-
-        <div class="badge success">PASO 17 implementado en Supabase y GitHub</div>
-
-        <h3>Controles incorporados</h3>
-        <ul>
-          <li><strong>Fuentes:</strong> unidades sin fuentes y enlaces que no coinciden.</li>
-          <li><strong>Afirmaciones:</strong> sin evidencia, pendientes o contradictorias.</li>
-          <li><strong>Versionado:</strong> formatos desactualizados.</li>
-          <li><strong>Seis formatos:</strong> piezas faltantes o incompletas.</li>
-          <li><strong>Reglas específicas:</strong> Reel, WhatsApp y carrusel de 8 placas.</li>
-          <li><strong>Consistencia:</strong> cifras y fechas divergentes.</li>
-        </ul>
-
-        <h3>Registro y seguridad</h3>
-        <ul>
-          <li><code>editorial_quality_reviews</code></li>
-          <li><code>editorial_quality_observations</code></li>
-        </ul>
-
-        <p style="display:flex;flex-wrap:wrap;gap:8px;">
-          <span class="badge success">RLS activo</span>
-          <span class="badge success">Historial append-only</span>
-          <span class="badge success">Sin acceso anónimo</span>
-        </p>
-
+        <p>Instancia previa a la revisión humana. Alertas para revisar, no dictámenes de verdad o falsedad.</p>
+        <div class="badge success">PASO 17 implementado</div>
+        <p>Tablas <code>editorial_quality_reviews</code> y <code>editorial_quality_observations</code>. RLS activo, historial append-only, sin acceso anónimo.</p>
         <div class="caja-verif">
           <div class="fila"><span class="lbl">Tablas creadas</span><span class="badge success">2 verificadas</span></div>
           <div class="fila"><span class="lbl">Políticas RLS</span><span class="badge success">4 activas</span></div>
           <div class="fila"><span class="lbl">Índices</span><span class="badge success">6 incorporados</span></div>
-          <div class="fila"><span class="lbl">Prueba autenticada</span><span class="badge success">Correcta</span></div>
-          <div class="fila"><span class="lbl">Permisos UPDATE / DELETE</span><span class="badge success">Denegados</span></div>
-          <div class="fila"><span class="lbl">Acceso anon</span><span class="badge success">Denegado</span></div>
         </div>
-
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 18 · Revisión y aprobación editorial
-       ========================================================= -->
+  <!-- PASO 18 · Revisión y aprobación -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 18</span> · Revisión y aprobación editorial</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h2>PASO 18 — Revisión y aprobación editorial</h2>
-
-        <p>Circuito formal de revisión humana: solicitud, devolución, reenvío y decisión editorial registrada. La aprobación no es automática.</p>
-
+        <p>Solicitud → devolución → reenvío → aprobación → publicación, con registro humano en cada paso.</p>
         <div class="badge success">PASO 18 implementado y desplegado</div>
-
-        <ol>
-          <li><strong>Solicitud de revisión:</strong> el autor o responsable asignado envía el material.</li>
-          <li><strong>Devolución:</strong> reviewer, editor o admin pueden solicitar correcciones con fundamento registrado.</li>
-          <li><strong>Reenvío:</strong> tras corregir, el autor vuelve a solicitar revisión.</li>
-          <li><strong>Aprobación:</strong> solo editor o admin, hacia <code>reviewed</code>.</li>
-          <li><strong>Publicación:</strong> exige <code>reviewed</code> y aprobación humana registrada para la versión vigente.</li>
-        </ol>
-
-        <ul>
-          <li>No se puede aprobar si faltan formatos, hay desactualizados, control de calidad viejo o alertas críticas.</li>
-          <li>Si se modifica el contenido de una unidad revisada/publicada, vuelve a <code>draft</code> y rehace el circuito.</li>
-        </ul>
-
-        <p>✅ <strong>Prueba transaccional completada</strong> (creación, seis formatos, solicitud, devolución, reenvío, aprobación, rechazo de transición directa, reapertura del circuito, <code>ROLLBACK</code> final).</p>
-
-        <p><strong>Pendiente:</strong> solo hay un usuario <code>admin</code>; faltan perfiles <code>reviewer</code> y <code>editor</code>. Sin compilación Vite ni pruebas de navegador.</p>
-
-        <h3>Próximo paso: PASO 19</h3>
-        <p>Bandeja de trabajo editorial por roles: asignaciones, cola de revisión, prioridades, vencimientos y seguimiento de correcciones.</p>
-
+        <p>✅ <strong>Prueba transaccional completada</strong> con <code>ROLLBACK</code> final.</p>
+        <p><strong>Pendiente:</strong> solo existe usuario <code>admin</code>; faltan perfiles <code>reviewer</code> y <code>editor</code>.</p>
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 19 · Bandeja operativa editorial
-       ========================================================= -->
+  <!-- PASO 19 · Bandeja operativa -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 19</span> · Bandeja operativa editorial</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <div class="badge success">PASO 19 completado y desplegado</div>
-
-        <p>La bandeja operativa de Madre ya está incorporada al repositorio y conectada con Supabase.</p>
-
         <div class="grid-bandeja">
-          <div class="b-item">
-            <span class="b-icon">📥</span>
-            <div class="b-body">
-              <p class="b-titulo">Bandeja de trabajo</p>
-              <p class="b-desc">Filtros por todas las unidades, mi trabajo, pendientes de revisión, vencidas y sin asignar. Orden por prioridad y fecha límite.</p>
-            </div>
-          </div>
-          <div class="b-item">
-            <span class="b-icon">👥</span>
-            <div class="b-body">
-              <p class="b-titulo">Asignación de responsables</p>
-              <p class="b-desc">Editor/admin pueden asignar unidades a integrantes con roles activos en Madre. Los asignados pueden trabajar sobre sus unidades en borrador.</p>
-            </div>
-          </div>
-          <div class="b-item">
-            <span class="b-icon">📋</span>
-            <div class="b-body">
-              <p class="b-titulo">Prioridades y vencimientos</p>
-              <p class="b-desc">Cuatro niveles: baja, normal, alta y urgente. Fecha límite configurable y detección de tareas vencidas.</p>
-            </div>
-          </div>
-          <div class="b-item">
-            <span class="b-icon">🕓</span>
-            <div class="b-body">
-              <p class="b-titulo">Historial de planificación</p>
-              <p class="b-desc">Cada cambio de responsable, prioridad o vencimiento queda registrado con autor, fecha y motivo. Historial sin modificaciones ni borrados.</p>
-            </div>
-          </div>
+          <div class="b-item"><span class="b-icon">📥</span><div class="b-body"><p class="b-titulo">Bandeja de trabajo</p><p class="b-desc">Filtros por todas, mi trabajo, pendientes, vencidas y sin asignar.</p></div></div>
+          <div class="b-item"><span class="b-icon">👥</span><div class="b-body"><p class="b-titulo">Asignación de responsables</p><p class="b-desc">Editor/admin asignan; asignados trabajan sus borradores.</p></div></div>
+          <div class="b-item"><span class="b-icon">📋</span><div class="b-body"><p class="b-titulo">Prioridades y vencimientos</p><p class="b-desc">Baja, normal, alta, urgente. Fecha límite y detección de vencidas.</p></div></div>
+          <div class="b-item"><span class="b-icon">🕓</span><div class="b-body"><p class="b-titulo">Historial de planificación</p><p class="b-desc">Registro inmutable de cambios con autor, fecha y motivo.</p></div></div>
         </div>
-
-        <h3>Seguridad y trazabilidad</h3>
-        <ul>
-          <li>La asignación está protegida en la base de datos, no solo en la interfaz.</li>
-          <li>Los cambios directos de responsable, prioridad y vencimiento están bloqueados para usuarios sin rol editor/admin.</li>
-          <li>Los colaboradores asignados pueden editar contenido, fuentes, afirmaciones, evidencias y formatos.</li>
-          <li>Una solicitud de revisión vinculada a una versión anterior no puede aprobarse.</li>
-        </ul>
-
-        <div class="badge success">Pruebas transaccionales superadas</div>
-        <p>Asignación, prioridad, vencimiento, seis formatos, control de calidad, devolución, reenvío y aprobación. Rechazo de asignación sin rol autorizado. <code>ROLLBACK</code> final sin datos persistentes.</p>
-
-        <p><strong>Pendiente:</strong> solo hay un usuario <code>admin</code>. Falta probar con <code>writer</code>, <code>collaborator</code>, <code>reviewer</code> y <code>editor</code>. Sin Vite build ni prueba de navegador.</p>
-
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 20 · Sistema de notificaciones editoriales
-       ========================================================= -->
+  <!-- PASO 20 · Notificaciones -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 20</span> · Sistema de notificaciones editoriales</time></div>
-
-    <div class="mensaje usuario">
-      <h4 class="rol">Tú</h4>
-      <div class="burbuja">avanzar Paso 20</div>
-    </div>
-
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
         <h1>PASO 20 — SISTEMA DE NOTIFICACIONES EDITORIALES DE MADRE</h1>
-
         <p style="display:flex;flex-wrap:wrap;gap:8px;">
           <span class="badge success">Nueva etapa de desarrollo</span>
           <span class="badge info">Continuidad del PASO 19</span>
         </p>
-
-        <p>El objetivo de este paso es convertir a Madre en un sistema de trabajo editorial activo: cada integrante debe recibir avisos oportunos cuando se le asigna una tarea, cuando una producción requiere su intervención o cuando cambia el estado de una unidad editorial.</p>
-
-        <p>La notificación no debe ser solamente un mensaje informativo. Debe permitir identificar qué ocurrió, quién intervino, qué acción se necesita y a qué unidad editorial corresponde.</p>
-
+        <p>El objetivo es convertir a Madre en un sistema de trabajo editorial activo: cada integrante debe recibir avisos oportunos cuando se le asigna una tarea, cuando una producción requiere su intervención o cuando cambia el estado de una unidad editorial.</p>
+        <p>La notificación debe permitir identificar qué ocurrió, quién intervino, qué acción se necesita y a qué unidad editorial corresponde.</p>
         <p><strong>Principio rector: ninguna tarea editorial importante debe quedar dependiendo de que alguien entre manualmente a revisar la bandeja.</strong></p>
-
-        <p>La implementación respetará la arquitectura existente: JavaScript modular, Supabase, Auth, RLS, historial y permisos por roles.</p>
-
+        <p>La implementación respeta la arquitectura existente: JavaScript modular, Supabase, Auth, RLS, historial y permisos por roles.</p>
         <div class="aviso-corte">
-          La fuente original se corta aquí, justo después de la introducción y del principio rector. A continuación aparecen únicamente indicadores de actividad del asistente (implementación, diseño, ajustes, búsqueda web) sin el detalle técnico completo: tipos de notificación, tabla creada, permisos, archivos modificados y verificaciones. Cuando se retome la conversación original, se completará esta sección.
+          La fuente original se corta aquí, después del principio rector. A continuación aparecen únicamente indicadores de actividad del asistente. El detalle técnico completo (tablas, políticas, archivos, verificaciones) quedó fuera de la fuente disponible.
         </div>
-
-        <div class="actividad-corte" aria-label="Actividad del asistente (fuente cortada)">
+        <div class="actividad-corte">
           <p style="margin:0 0 8px;font-weight:600;color:#555;">Actividad registrada después de la introducción:</p>
           <div class="act-line"><span class="act-dot"></span> Implementado el sistema de notificaciones editoriales del paso 20</div>
           <div class="act-line"><span class="act-dot"></span> Diseñó notificaciones editoriales</div>
           <div class="act-line"><span class="act-dot"></span> Ajustados estilos y permisos</div>
           <div class="act-line"><span class="act-dot"></span> Implementaste notificaciones editoriales seguras con migración, servicio, UI y estilos</div>
-          <div class="act-line"><span class="act-dot"></span> Buscando en la web (Supabase)</div>
         </div>
-
-        <p><strong>Estado del paso:</strong> el sistema fue declarado implementado según la actividad del asistente, pero el detalle técnico completo (tablas, políticas, archivos y verificaciones) no quedó incluido en la fuente. Se completará cuando esté disponible.</p>
-
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASO 21 · Dashboard de Gestión Editorial
-       ========================================================= -->
+  <!-- PASO 21 · Dashboard -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 21</span> · Dashboard de Gestión Editorial</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-
-        <p>Continúo con el <strong>PASO 21 — Dashboard de Gestión Editorial</strong>.</p>
-
         <div class="badge success">PASO 21 incorporado al repositorio</div>
-
-        <h2>Qué quedó construido</h2>
-
         <div class="grid-num">
           <div class="item"><p class="num">01</p><p class="titulo">Indicadores operativos</p><p class="desc">Producción, revisiones, vencimientos, revisadas y publicadas.</p></div>
           <div class="item"><p class="num">02</p><p class="titulo">Carga del equipo</p><p class="desc">Unidades en borrador por responsable.</p></div>
           <div class="item"><p class="num">03</p><p class="titulo">Actividad reciente</p><p class="desc">Eventos de planificación y revisión durante 14 días.</p></div>
-          <div class="item"><p class="num">04</p><p class="titulo">Seguimiento</p><p class="desc">Acceso directo a unidades vencidas o pendientes de revisión.</p></div>
+          <div class="item"><p class="num">04</p><p class="titulo">Seguimiento</p><p class="desc">Acceso a unidades vencidas o pendientes de revisión.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PROMPT MAESTRO DE DESARROLLO E IMPLEMENTACIÓN
+       Documento rector final
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">DOCUMENTO RECTOR</span> · Prompt Maestro de Desarrollo</time></div>
+
+    <div class="prompt-maestro-bloque">
+
+      <div class="prompt-portada">
+        <h1>PROMPT MAESTRO DE DESARROLLO E IMPLEMENTACIÓN</h1>
+        <h2>MADRE — Ecosistema Editorial Inteligente</h2>
+        <div class="badges">
+          <span class="badge success">Documento rector de desarrollo</span>
+          <span class="badge info">Proyecto desde cero</span>
+        </div>
+      </div>
+
+      <p>Este prompt está concebido para iniciar el proyecto desde cero. La instrucción al agente no es analizar un sistema existente ni limitarse a diseñar una propuesta: debe <strong>arquitecturar, programar, integrar, probar y entregar una aplicación web funcional</strong>.</p>
+
+      <p>Incorpora la arquitectura, los once pasos de diseño, el Plan Maestro, los seis formatos editoriales y la Guía de Estilo Editorial de referencia.</p>
+
+      <!-- 1 -->
+      <div class="prompt-seccion">
+        <h2>1. ROL DEL AGENTE Y MISIÓN</h2>
+        <p>Actúa como un equipo interdisciplinario de desarrollo tecnológico integrado por:</p>
+        <ul>
+          <li>Arquitecto de Software Senior.</li>
+          <li>Ingeniero Full Stack Senior.</li>
+          <li>Especialista en JavaScript y aplicaciones SPA.</li>
+          <li>Especialista en Supabase, PostgreSQL y seguridad.</li>
+          <li>Ingeniero de Inteligencia Artificial y sistemas RAG.</li>
+          <li>Especialista en UX/UI y accesibilidad WCAG.</li>
+          <li>Especialista en procesamiento documental y transcripción.</li>
+          <li>Ingeniero de datos y visualización de información.</li>
+          <li>Especialista en SEO y tecnologías para medios digitales.</li>
+          <li>Especialista en QA, pruebas automatizadas y despliegue.</li>
+        </ul>
+        <p>Tu misión es <strong>desarrollar e implementar desde cero MADRE</strong>, un ecosistema editorial inteligente, modular, escalable y preparado para producción.</p>
+        <p>No debes limitarte a producir un documento de arquitectura, una maqueta, un prototipo visual o fragmentos de código. Debes construir una aplicación web funcional, implementar su backend, diseñar su base de datos, desarrollar sus módulos, integrar los servicios necesarios, ejecutar pruebas y documentar los resultados. Debes trabajar progresivamente, pero con visión integral del producto. La prioridad es entregar funcionalidades reales, conectadas entre sí y verificables.</p>
+      </div>
+
+      <!-- 2 -->
+      <div class="prompt-seccion">
+        <h2>2. DEFINICIÓN DEL PRODUCTO</h2>
+        <p>MADRE es un sistema web editorial inteligente que transforma información, documentos, fuentes, hechos, audios y datos en conocimiento periodístico verificable y posteriormente lo atomiza en múltiples formatos de comunicación, manteniendo trazabilidad, control editorial humano, memoria documental y capacidad de publicación multicanal.</p>
+        <p>MADRE no es un generador de textos con inteligencia artificial. Es un ecosistema de trabajo editorial que integra:</p>
+        <ol>
+          <li>Ingesta de información.</li>
+          <li>Organización y clasificación.</li>
+          <li>Investigación.</li>
+          <li>Recuperación de antecedentes.</li>
+          <li>Contextualización.</li>
+          <li>Contraste de fuentes.</li>
+          <li>Verificación de afirmaciones.</li>
+          <li>Construcción de una Unidad Editorial Madre.</li>
+          <li>Generación de contenidos multiplataforma.</li>
+          <li>Revisión editorial humana.</li>
+          <li>Distribución multicanal.</li>
+          <li>Memoria documental.</li>
+          <li>Observatorios de información económica, territorial y de audiencias.</li>
+        </ol>
+        <blockquote>
+          <p><strong>Principio rector:</strong> La IA es un componente de MADRE. No es MADRE. La inteligencia artificial asiste en las tareas de investigación, organización, análisis, redacción y edición. No reemplaza la verificación profesional, la responsabilidad editorial ni la autorización humana.</p>
+        </blockquote>
+      </div>
+
+      <!-- 3 -->
+      <div class="prompt-seccion">
+        <h2>3. OBJETIVO GENERAL</h2>
+        <p>Construir una plataforma editorial que permita ingresar una noticia, documento, investigación, entrevista, comunicado, dato o tema de interés público y desarrollar un proceso integral que transforme esa información en una producción periodística documentada, verificable y reutilizable.</p>
+        <p>El sistema debe permitir:</p>
+        <ul>
+          <li>Trabajar con una entrada o múltiples fuentes.</li>
+          <li>Conservar el material original.</li>
+          <li>Identificar hechos, afirmaciones, opiniones e interpretaciones.</li>
+          <li>Buscar información complementaria.</li>
+          <li>Recuperar documentos históricos.</li>
+          <li>Identificar contradicciones y vacíos.</li>
+          <li>Relacionar afirmaciones con evidencias.</li>
+          <li>Generar una Unidad Editorial Madre.</li>
+          <li>Producir exactamente seis formatos.</li>
+          <li>Editar y versionar cada formato.</li>
+          <li>Ejecutar controles editoriales.</li>
+          <li>Aprobar mediante intervención humana.</li>
+          <li>Preparar publicaciones para distintos canales.</li>
+          <li>Conservar la memoria y trazabilidad de todo el proceso.</li>
+        </ul>
+      </div>
+
+      <!-- 4 -->
+      <div class="prompt-seccion">
+        <h2>4. PRINCIPIOS NO NEGOCIABLES</h2>
+        <p>El desarrollo debe respetar las siguientes reglas:</p>
+        <ol>
+          <li>No inventar información, fuentes, citas, datos ni documentos.</li>
+          <li>No presentar interpretaciones como hechos.</li>
+          <li>No confundir una declaración con la comprobación de lo declarado.</li>
+          <li>No confundir una fuente recuperada con una fuente verificada.</li>
+          <li>No ocultar contradicciones.</li>
+          <li>No eliminar automáticamente las dudas.</li>
+          <li>No completar vacíos informativos mediante suposiciones.</li>
+          <li>No generar afirmaciones nuevas sin respaldo.</li>
+          <li>No publicar contenidos por decisión autónoma de la IA.</li>
+          <li>No permitir que la regeneración automática destruya ediciones humanas.</li>
+          <li>No exponer claves de proveedores en el frontend.</li>
+          <li>No utilizar datos simulados como si fueran información real.</li>
+          <li>No considerar terminada una integración que no fue probada.</li>
+          <li>No implementar controles de seguridad exclusivamente en la interfaz.</li>
+          <li>No alterar silenciosamente documentos, fuentes o versiones originales.</li>
+        </ol>
+        <p><strong>Principio fundamental:</strong> MADRE NUNCA DEBE CONFUNDIR LO QUE RECIBE CON LO QUE SABE.</p>
+      </div>
+
+      <!-- 5 -->
+      <div class="prompt-seccion">
+        <h2>5. ARQUITECTURA GENERAL DEL ECOSISTEMA</h2>
+        <p>Construir una aplicación SPA modular con navegación centralizada y módulos independientes que compartan servicios, autenticación, base de datos, memoria y reglas editoriales. La arquitectura se organiza en cuatro capas.</p>
+
+        <h3>5.1. Capa de presentación</h3>
+        <p>Shell principal con navegación y módulos:</p>
+        <ul>
+          <li>Inicio / Dashboard.</li>
+          <li>Madre Editorial.</li>
+          <li>Biblioteca Riojana.</li>
+          <li>Editor Crítico.</li>
+          <li>Transcripción.</li>
+          <li>Observatorio Económico.</li>
+          <li>Observatorio Territorial.</li>
+          <li>Observatorio de Audiencias.</li>
+          <li>Distribución.</li>
+          <li>Administración.</li>
+        </ul>
+        <p>Cada módulo debe tener una interfaz funcional y adaptarse a dispositivos móviles.</p>
+
+        <h3>5.2. Núcleo compartido</h3>
+        <p>Crear servicios reutilizables para: configuración general, cliente Supabase, autenticación, perfiles y permisos, comunicación con IA, persistencia, gestión de archivos, guía de estilo, notificaciones, auditoría, manejo de errores, versionado y componentes visuales comunes.</p>
+        <p>Los módulos no deben duplicar estas funcionalidades.</p>
+
+        <h3>5.3. Backend</h3>
+        <p>Utilizar Supabase como infraestructura principal: Auth, PostgreSQL, Row Level Security, Storage, Edge Functions, pgvector, sistema de migraciones e integraciones externas.</p>
+
+        <h3>5.4. Capa de datos y memoria</h3>
+        <p>Organizar los datos de: unidades editoriales, hechos y afirmaciones, fuentes y evidencias, documentos y archivos, versiones, revisiones, Biblioteca Riojana, indicadores y observaciones, distribuciones, usuarios, roles y auditoría.</p>
+      </div>
+
+      <!-- 6 -->
+      <div class="prompt-seccion">
+        <h2>6. TECNOLOGÍAS Y ESTÁNDARES</h2>
+        <h3>Frontend</h3>
+        <ul>
+          <li>HTML5.</li>
+          <li>CSS moderno.</li>
+          <li>JavaScript ES Modules.</li>
+          <li>SPA modular.</li>
+          <li>Tailwind CSS compilado.</li>
+          <li>Componentes reutilizables.</li>
+          <li>Navegación mediante rutas.</li>
+          <li>Diseño responsive y mobile-first.</li>
+        </ul>
+        <h3>Backend</h3>
+        <ul>
+          <li>Supabase.</li>
+          <li>PostgreSQL.</li>
+          <li>Supabase Auth.</li>
+          <li>RLS.</li>
+          <li>Storage.</li>
+          <li>Edge Functions en TypeScript.</li>
+          <li>pgvector.</li>
+        </ul>
+        <h3>Inteligencia artificial</h3>
+        <ul>
+          <li>Proveedor de IA intercambiable.</li>
+          <li>Integración mediante proxy seguro.</li>
+          <li>Respuestas estructuradas.</li>
+          <li>JSON Schema.</li>
+          <li>Validación de respuestas.</li>
+          <li>Control de errores, límites y reintentos.</li>
+        </ul>
+        <h3>Tipografías</h3>
+        <ul>
+          <li>Playfair Display para títulos editoriales.</li>
+          <li>Inter para interfaces y contenido general.</li>
+        </ul>
+        <h3>Calidad</h3>
+        <ul>
+          <li>WCAG AA.</li>
+          <li>Buenas prácticas de rendimiento.</li>
+          <li>Código modular.</li>
+          <li>Separación de responsabilidades.</li>
+          <li>Seguridad por diseño.</li>
+          <li>Documentación técnica.</li>
+          <li>Pruebas automatizadas.</li>
+        </ul>
+        <p>No introducir dependencias pesadas sin justificación técnica. Antes de elegir versiones concretas, comprobar compatibilidad, mantenimiento y documentación oficial vigente.</p>
+      </div>
+
+      <!-- 7 -->
+      <div class="prompt-seccion">
+        <h2>7. IDENTIDAD VISUAL Y EXPERIENCIA DE USUARIO</h2>
+        <p>Diseñar una interfaz editorial minimalista basada en:</p>
+        <ul>
+          <li>Blanco.</li>
+          <li>Negro.</li>
+          <li>Escala de grises.</li>
+          <li>Jerarquías tipográficas claras.</li>
+          <li>Espacios amplios.</li>
+          <li>Composición ordenada.</li>
+          <li>Lectura cómoda.</li>
+          <li>Navegación sencilla.</li>
+          <li>Interacciones discretas.</li>
+        </ul>
+        <p>Evitar interfaces recargadas, exceso de tarjetas, colores innecesarios y paneles de información redundantes. La experiencia debe ser profesional, contemporánea, institucional y orientada al trabajo editorial.</p>
+        <h3>7.1. Principios UX</h3>
+        <ul>
+          <li>Mobile-first.</li>
+          <li>Navegación consistente.</li>
+          <li>Accesibilidad WCAG AA.</li>
+          <li>Estados de carga.</li>
+          <li>Estados vacíos.</li>
+          <li>Mensajes de error comprensibles.</li>
+          <li>Confirmación de operaciones sensibles.</li>
+          <li>Guardado automático cuando corresponda.</li>
+          <li>Recuperación de borradores.</li>
+          <li>Detección de conflictos de edición.</li>
+          <li>Indicadores claros de estado editorial.</li>
+        </ul>
+        <p>El usuario debe poder identificar en todo momento: qué está haciendo el sistema, qué información está procesando, qué datos están verificados, qué información está pendiente y qué acciones requieren su autorización.</p>
+      </div>
+
+      <!-- 8 -->
+      <div class="prompt-seccion">
+        <h2>8. MÓDULO PRINCIPAL: MADRE EDITORIAL</h2>
+        <p>Es el corazón del sistema. Debe permitir ingresar información desde distintas fuentes:</p>
+        <ul>
+          <li>Texto libre.</li>
+          <li>Hechos o titulares.</li>
+          <li>Comunicados.</li>
+          <li>Documentos PDF, DOC, DOCX, TXT.</li>
+          <li>URL.</li>
+          <li>Entrevistas.</li>
+          <li>Archivos de audio.</li>
+          <li>Investigaciones.</li>
+          <li>Datos estadísticos.</li>
+          <li>Múltiples documentos.</li>
+          <li>Conjuntos de fuentes.</li>
+          <li>Temas e ideas para investigar.</li>
+        </ul>
+
+        <h3>8.1. Ingesta</h3>
+        <p>Al recibir información:</p>
+        <ol>
+          <li>Conservar el original.</li>
+          <li>Registrar origen, fecha y usuario.</li>
+          <li>Extraer el texto cuando corresponda.</li>
+          <li>Clasificar el material.</li>
+          <li>Identificar entidades, actores, fechas y lugares.</li>
+          <li>Extraer afirmaciones.</li>
+          <li>Diferenciar hechos, declaraciones, opiniones e hipótesis.</li>
+          <li>Detectar datos faltantes.</li>
+          <li>Identificar preguntas que requieren investigación.</li>
+        </ol>
+
+        <h3>8.2. Normalización</h3>
+        <p>Transformar las entradas en información estructurada sin alterar su significado. Cada elemento debe poder clasificarse como: Hecho, Afirmación, Declaración, Opinión, Interpretación, Dato estadístico, Hipótesis, Cita textual, Pregunta pendiente, Evidencia, Fuente.</p>
+
+        <h3>8.3. Investigación</h3>
+        <p>El sistema debe disponer de herramientas para:</p>
+        <ul>
+          <li>Consultar fuentes web.</li>
+          <li>Recuperar documentos.</li>
+          <li>Buscar antecedentes en Biblioteca Riojana.</li>
+          <li>Identificar información complementaria.</li>
+          <li>Comparar versiones.</li>
+          <li>Buscar datos relacionados.</li>
+          <li>Registrar referencias y enlaces.</li>
+          <li>Identificar contradicciones.</li>
+        </ul>
+        <p>Toda investigación debe conservar la referencia de origen y la fecha de consulta. No simular búsquedas ni afirmar que se consultó una fuente cuando no hubo acceso efectivo.</p>
+
+        <h3>8.4. Verificación</h3>
+        <p>Implementar estados de verificación:</p>
+        <div class="estados">
+          <span class="estado publicada">[VERIFICADO]</span>
+          <span class="estado revisada">[ATRIBUIDO]</span>
+          <span class="estado verificacion">[NO VERIFICADO]</span>
+          <span class="estado corregida">[CONTRADICTORIO]</span>
+          <span class="estado borrador">[FALTA FUENTE]</span>
+        </div>
+        <p>Cada afirmación debe tener: texto, tipo, fuente relacionada, evidencia disponible, fecha, estado, observaciones y responsable de revisión.</p>
+        <p>La jerarquía de fuentes debe orientar la investigación, pero ninguna categoría garantiza por sí sola la verdad. Distinguir siempre: la existencia de una declaración, la autenticidad de un documento, la veracidad de lo declarado y la interpretación periodística de la información.</p>
+        <p>Una afirmación marcada <code>[VERIFICAR]</code> debe impedir que el contenido pase a Revisado.</p>
+      </div>
+
+      <!-- 9 -->
+      <div class="prompt-seccion">
+        <h2>9. UNIDAD EDITORIAL MADRE</h2>
+        <p>Construir un objeto central que reúna toda la información de una producción:</p>
+        <p><strong>UNIDAD EDITORIAL MADRE</strong></p>
+        <ul>
+          <li>Identidad.</li>
+          <li>Título.</li>
+          <li>Tipo de producción.</li>
+          <li>Fecha de creación.</li>
+          <li>Fecha de actualización.</li>
+          <li>Autor.</li>
+          <li>Responsable editorial.</li>
+          <li>Estado.</li>
+          <li>Versión.</li>
+          <li>Hecho central.</li>
+          <li>Hechos relacionados.</li>
+          <li>Afirmaciones.</li>
+          <li>Actores.</li>
+          <li>Fuentes.</li>
+          <li>Evidencias.</li>
+          <li>Contexto.</li>
+          <li>Antecedentes.</li>
+          <li>Datos.</li>
+          <li>Contradicciones.</li>
+          <li>Preguntas pendientes.</li>
+          <li>Contenido Madre.</li>
+          <li>Verificación.</li>
+          <li>Checklist.</li>
+          <li>Metadatos SEO.</li>
+          <li>Territorio.</li>
+          <li>Observatorios relacionados.</li>
+          <li>Seis formatos.</li>
+          <li>Revisiones.</li>
+          <li>Historial.</li>
+          <li>Trazabilidad.</li>
+        </ul>
+        <p>La Unidad Editorial debe ser la fuente común de todos los formatos derivados. Cada formato debe conservar su relación con la Unidad Editorial y con la versión que le dio origen.</p>
+      </div>
+
+      <!-- 10 -->
+      <div class="prompt-seccion">
+        <h2>10. ATOMIZACIÓN: EXACTAMENTE SEIS FORMATOS</h2>
+        <p>El sistema debe producir seis formatos multiplataforma. No agregar formatos adicionales al alcance inicial. Todos deben derivar de la misma Unidad Editorial Madre.</p>
+
+        <h3>FORMATO 1. ARTÍCULO WEB / SEO</h3>
+        <p>Generar: título, bajada, introducción, desarrollo periodístico, subtítulos, contexto, datos, declaraciones atribuidas, conclusión o cierre, fuentes, slug, meta descripción, palabras clave, etiquetas, categoría y datos estructurados Schema.org cuando correspondan. Aplicar la estructura periodística adecuada al género. La noticia informativa debe priorizar la información central mediante pirámide invertida.</p>
+
+        <h3>FORMATO 2. GUION DE VIDEO / REEL DE 60 SEGUNDOS</h3>
+        <p>Generar guion temporalizado: 0–5 s apertura; 5–15 s hecho central; 15–35 s explicación; 35–50 s contexto y datos; 50–60 s cierre y CTA. Incluir locución, texto en pantalla, indicaciones visuales, ritmo, recursos sugeridos y CTA. No inventar imágenes documentales ni declaraciones.</p>
+
+        <h3>FORMATO 3. PODCAST «PRIMERA HORA»</h3>
+        <p>Generar presentación, introducción, desarrollo, contextualización, datos relevantes, testimonios y declaraciones atribuidas, y cierre. Preparar guion apto para síntesis de voz. La generación de audio TTS debe ser un servicio separado del proceso de redacción. No presentar audio sintético como testimonio real.</p>
+
+        <h3>FORMATO 4. CARRUSEL DE INSTAGRAM</h3>
+        <p>Generar exactamente ocho diapositivas:</p>
+        <ol>
+          <li>Portada.</li>
+          <li>Hecho central.</li>
+          <li>Actores involucrados.</li>
+          <li>Dato relevante.</li>
+          <li>Contexto.</li>
+          <li>Explicación.</li>
+          <li>Consecuencias.</li>
+          <li>Cierre o pregunta.</li>
+        </ol>
+        <p>Cada diapositiva debe contener número, título, texto, indicación visual y fuente cuando corresponda.</p>
+
+        <h3>FORMATO 5. NEWSLETTER</h3>
+        <p>Generar asunto, preencabezado, título, introducción, síntesis, datos relevantes, enlace al artículo y cierre. Legible, directo y apto para correo electrónico.</p>
+
+        <h3>FORMATO 6. WHATSAPP</h3>
+        <p>Mensaje de difusión con apertura atractiva, información central, contexto mínimo, lenguaje claro y enlace cuando corresponda. Evitar exageraciones, clickbait y pérdida del sentido original.</p>
+
+        <h3>10.1. Reglas comunes de atomización</h3>
+        <ul>
+          <li>Los seis formatos deben compartir los mismos hechos y evidencias.</li>
+          <li>Las declaraciones deben mantener su atribución.</li>
+          <li>Las incertidumbres deben conservarse.</li>
+          <li>Las advertencias no deben desaparecer.</li>
+          <li>Ningún formato puede inventar información.</li>
+          <li>Cada formato debe poder editarse individualmente.</li>
+          <li>Cada versión debe conservar su historial.</li>
+          <li>Los cambios en el núcleo deben marcar las salidas potencialmente desactualizadas.</li>
+          <li>La regeneración nunca debe sobrescribir silenciosamente ediciones humanas.</li>
+        </ul>
+      </div>
+
+      <!-- 11 -->
+      <div class="prompt-seccion">
+        <h2>11. MOTOR DE IA Y ARQUITECTURA DE SEGURIDAD</h2>
+        <p>Implementar un servicio centralizado de IA.</p>
+        <div class="flujo">
+          <p><strong>MÓDULOS FRONTEND → SERVICIO callIA() → SUPABASE EDGE FUNCTION → PROVEEDOR DE IA → VALIDACIÓN DE RESPUESTA → APLICACIÓN</strong></p>
+        </div>
+        <p>Crear una Edge Function de proxy, por ejemplo <code>ia-proxy</code>. Debe: verificar autenticación, validar permisos, validar entradas, aplicar límites de uso, administrar claves secretas, controlar errores, validar respuestas, registrar operaciones relevantes y devolver respuestas estructuradas.</p>
+        <p>Nunca colocar API Keys en HTML, JavaScript público, localStorage, archivos descargables o repositorios públicos. Las credenciales deben almacenarse como secretos del entorno backend.</p>
+        <p>Diseñar el servicio para que el proveedor de IA pueda cambiarse sin reconstruir todos los módulos.</p>
+
+        <h3>11.1. Respuestas estructuradas</h3>
+        <p>Utilizar JSON Schema para definir y validar las salidas. Cada función de IA debe tener: entrada documentada, salida esperada, esquema de validación, manejo de errores, control de tokens o consumo, registro de ejecución y política de reintentos. No aceptar como respuesta válida un JSON incompleto o incompatible con el esquema.</p>
+
+        <h3>11.2. Investigación asistida</h3>
+        <p>La IA debe distinguir entre: información recibida, información recuperada, información declarada, información corroborada, información inferida e información desconocida. No debe completar datos faltantes mediante invenciones.</p>
+      </div>
+
+      <!-- 12 -->
+      <div class="prompt-seccion">
+        <h2>12. EDITOR CRÍTICO</h2>
+        <p>Desarrollar una segunda instancia de análisis asistido por IA. Su función es revisar las producciones y advertir:</p>
+        <ul>
+          <li>Sesgos.</li>
+          <li>Contradicciones.</li>
+          <li>Problemas de atribución.</li>
+          <li>Afirmaciones sin respaldo.</li>
+          <li>Datos incorrectos o inconsistentes.</li>
+          <li>Errores de nombres y fechas.</li>
+          <li>Problemas de claridad.</li>
+          <li>Repeticiones.</li>
+          <li>Lenguaje discriminatorio o estigmatizante.</li>
+          <li>Posibles riesgos jurídicos.</li>
+          <li>Omisiones relevantes.</li>
+          <li>Descontextualización de citas.</li>
+        </ul>
+        <p>Cada observación debe incluir: fragmento observado, tipo de problema, justificación, gravedad estimada, evidencia relacionada y recomendación.</p>
+        <p>El Editor Crítico no debe modificar, aprobar ni publicar silenciosamente. Debe ofrecer sugerencias para que el responsable humano decida.</p>
+      </div>
+
+      <!-- 13 -->
+      <div class="prompt-seccion">
+        <h2>13. BIBLIOTECA RIOJANA</h2>
+        <p>Construir un sistema de memoria documental activa. No debe ser una simple carpeta de archivos. Debe permitir:</p>
+        <ul>
+          <li>Crear fichas documentales.</li>
+          <li>Incorporar documentos.</li>
+          <li>Registrar fuentes.</li>
+          <li>Clasificar contenidos.</li>
+          <li>Relacionar fichas.</li>
+          <li>Buscar antecedentes.</li>
+          <li>Recuperar producciones anteriores.</li>
+          <li>Consultar versiones.</li>
+          <li>Identificar documentos relacionados.</li>
+          <li>Generar borradores asistidos por IA.</li>
+          <li>Exportar información.</li>
+        </ul>
+
+        <h3>13.1. Estructura de ficha</h3>
+        <p>ID, título, categoría, departamento, localidad, fecha de incorporación, fecha del hecho, fecha de publicación original, resumen, contenido atemporal, fuentes, archivos, estado, responsable, checklist, relaciones e historial.</p>
+
+        <h3>13.2. Búsqueda</h3>
+        <p>Implementar: búsqueda textual, filtros, búsqueda por categorías, búsqueda territorial, búsqueda por fechas y búsqueda semántica mediante embeddings y pgvector. La similitud semántica permite recuperar antecedentes, pero no constituye evidencia de veracidad.</p>
+
+        <h3>13.3. Estados</h3>
+        <div class="estados">
+          <span class="estado borrador">Borrador</span>
+          <span class="estado revisada">Revisado</span>
+          <span class="estado publicada">Publicado</span>
+          <span class="estado archivada">Archivado</span>
+        </div>
+        <p>Para pasar a Revisado se requiere título, contenido, checklist completa y ausencia de marcas <code>[VERIFICAR]</code>. Para publicar se requiere autorización del rol correspondiente.</p>
+      </div>
+
+      <!-- 14 -->
+      <div class="prompt-seccion">
+        <h2>14. TRANSCRIPCIÓN DE AUDIO</h2>
+        <p>Desarrollar un módulo de transcripción para entrevistas, conferencias, testimonios, audios de trabajo y registros periodísticos. Debe permitir:</p>
+        <ul>
+          <li>Cargar audio.</li>
+          <li>Conservar archivo original.</li>
+          <li>Procesar el audio.</li>
+          <li>Obtener transcripción.</li>
+          <li>Corregir texto.</li>
+          <li>Identificar segmentos dudosos.</li>
+          <li>Asociar marcas temporales cuando estén disponibles.</li>
+          <li>Relacionar transcripción con Unidad Editorial Madre.</li>
+        </ul>
+        <p>La transcripción automática debe identificarse como no verificada hasta su revisión. No completar palabras inaudibles ni inventar declaraciones.</p>
+      </div>
+
+      <!-- 15 -->
+      <div class="prompt-seccion">
+        <h2>15. OBSERVATORIOS</h2>
+        <p>Construir tres observatorios conectados con la memoria y la producción editorial.</p>
+
+        <h3>15.1. Observatorio Económico</h3>
+        <p>Orientado a organizar información sobre: empleo, desocupación, ingresos, salarios, precios, producción, consumo, inversión, actividad económica, finanzas públicas y desarrollo productivo.</p>
+
+        <h3>15.2. Observatorio Territorial</h3>
+        <p>Orientado a organizar información sobre: población, vivienda, servicios, agua, energía, conectividad, educación, salud, infraestructura, transporte, desigualdad y condiciones territoriales.</p>
+
+        <h3>15.3. Observatorio de Audiencias</h3>
+        <p>Orientado a organizar: visitas, lecturas, tiempo de permanencia, tráfico, distribución por canales, interacciones, suscripciones, aperturas de newsletter, rendimiento de contenidos y consultas. No confundir métricas digitales con representatividad de la opinión pública.</p>
+
+        <h3>15.4. Modelo metodológico</h3>
+        <p>Cada indicador debe conservar: nombre, definición, fórmula, unidad, período, frecuencia, territorio, fuente, metodología, fecha de actualización, vigencia, responsable y calidad del dato.</p>
+        <p>Distinguir: dato original, variable, indicador, observación, serie temporal, interpretación y producción editorial.</p>
+
+        <h3>15.5. Territorio</h3>
+        <p>La Rioja debe ser una unidad de análisis central. Permitir organizar información por: Argentina, Norte Grande, Provincia de La Rioja, Departamentos, Localidades y Barrios. Las escalas deben ser comparables cuando las fuentes y metodologías lo permitan. No inventar datos territoriales.</p>
+      </div>
+
+      <!-- 16 -->
+      <div class="prompt-seccion">
+        <h2>16. FLUJO EDITORIAL Y CONTROL HUMANO</h2>
+        <p>Implementar el flujo principal:</p>
+        <div class="estados">
+          <span class="estado borrador">BORRADOR</span>
+          <span class="estado revisada">REVISADO</span>
+          <span class="estado publicada">PUBLICADO</span>
+        </div>
+        <p>El sistema puede incorporar estados internos adicionales como: En investigación, En verificación, Con observaciones, Pendiente de respuesta, Corregido, Archivado.</p>
+
+        <h3>16.1. Requisitos para Revisado</h3>
+        <ul>
+          <li>Título.</li>
+          <li>Contenido.</li>
+          <li>Checklist completa.</li>
+          <li>Sin afirmaciones pendientes marcadas <code>[VERIFICAR]</code>.</li>
+          <li>Fuentes y atribuciones registradas.</li>
+          <li>Revisión editorial realizada.</li>
+        </ul>
+
+        <h3>16.2. Requisitos para Publicado</h3>
+        <ul>
+          <li>Usuario con rol editor o administrador.</li>
+          <li>Estado Revisado.</li>
+          <li>Autorización humana explícita.</li>
+          <li>Registro de auditoría.</li>
+        </ul>
+        <p>Una modificación sustantiva posterior a la revisión debe invalidar la aprobación anterior o exigir una nueva revisión. La IA nunca puede aprobar ni publicar por sí misma.</p>
+
+        <h3>16.3. Roles</h3>
+        <p>Implementar como mínimo: Colaborador, Redactor, Revisor, Editor y Administrador. Los permisos deben estar definidos en backend y reforzados mediante RLS.</p>
+      </div>
+
+      <!-- 17 -->
+      <div class="prompt-seccion">
+        <h2>17. DISTRIBUCIÓN MULTICANAL</h2>
+        <p>Desarrollar un módulo que prepare y gestione la distribución. Canales contemplados: Sitio web / WordPress, Redes sociales, Video / Reel, Podcast, Newsletter y WhatsApp. Cada canal debe tener un estado independiente.</p>
+        <p>Estados propuestos:</p>
+        <div class="estados">
+          <span class="estado borrador">No preparado</span>
+          <span class="estado revisada">Preparado</span>
+          <span class="estado verificacion">Pendiente de autorización</span>
+          <span class="estado publicada">Autorizado</span>
+          <span class="estado corregida">Error</span>
+          <span class="estado archivada">Cancelado</span>
         </div>
 
-        <p><strong>Tiempo de aprobación:</strong> promedio de horas entre solicitud y aprobación de una misma versión, cuando existen registros suficientes en los últimos 30 días.</p>
+        <h3>17.1. WordPress</h3>
+        <p>Implementar integración con la API REST de WordPress. Reglas obligatorias:</p>
+        <ul>
+          <li>Crear exclusivamente borradores (<code>draft</code>).</li>
+          <li>Requerir usuario autenticado.</li>
+          <li>Exigir rol editor o administrador.</li>
+          <li>Exigir estado editorial Revisado.</li>
+          <li>Verificar ausencia de <code>[VERIFICAR]</code>.</li>
+          <li>Solicitar confirmación humana.</li>
+          <li>Registrar la operación.</li>
+          <li>Conservar la respuesta del servicio.</li>
+        </ul>
+        <p>Nunca publicar directamente desde Madre. La publicación definitiva se realiza desde WordPress mediante intervención humana.</p>
 
-        <h2>Estado de las comprobaciones</h2>
-
-        <table class="tabla-flujo">
-          <thead><tr><th>Control</th><th>Resultado</th></tr></thead>
-          <tbody>
-            <tr><td>Archivos incorporados a GitHub</td><td><span class="badge success">Correcto</span></td></tr>
-            <tr><td>Integración con Madre Editorial</td><td><span class="badge success">Correcto</span></td></tr>
-            <tr><td>Sintaxis JavaScript de los tres módulos</td><td><span class="badge success">Validada</span></td></tr>
-            <tr><td>Migración nueva para Paso 21</td><td>No necesaria</td></tr>
-            <tr><td>Compilación Vite</td><td>Pendiente</td></tr>
-            <tr><td>Prueba visual en navegador</td><td>Pendiente</td></tr>
-            <tr><td>Pruebas con diferentes roles</td><td>Pendiente</td></tr>
-          </tbody>
-        </table>
-
-        <h2>Repositorio y pull request</h2>
-
-        <p>
-          <a href="https://github.com/gabrielgenri/madre" target="_blank" rel="noopener noreferrer">Repositorio Madre</a>
-          ·
-          <a href="https://github.com/gabrielgenri/madre/pull/1" target="_blank" rel="noopener noreferrer">Pull request #1</a>
-        </p>
-
-        <div class="badge warning">Requiere sincronización</div>
-
-        <p>El PR sigue abierto y en borrador. Al comprobarlo, GitHub informó que la rama tiene 10 commits de retraso respecto de <code>main</code> y está divergida. No hice un merge ni forcé cambios sobre <code>main</code>.</p>
-
-        <h2>Próximo paso: PASO 22</h2>
-        <p>Propongo construir el <strong>Editor Crítico</strong>: instancia de análisis asistido para sesgos, afirmaciones sin respaldo, problemas de atribución, riesgos legales y diferencias entre los seis formatos. La decisión editorial seguirá siendo humana.</p>
-
+        <h3>17.2. Otras integraciones</h3>
+        <p>Diseñar adaptadores para futuros canales. No afirmar que redes sociales, correo electrónico, WhatsApp o TTS están conectados hasta completar sus integraciones y pruebas reales.</p>
       </div>
+
+      <!-- 18 -->
+      <div class="prompt-seccion">
+        <h2>18. METADATOS, SEO Y ESTRUCTURACIÓN</h2>
+        <p>El sistema debe generar metadatos para cada producción:</p>
+        <ul>
+          <li>Título SEO.</li>
+          <li>Slug.</li>
+          <li>Meta descripción.</li>
+          <li>Etiquetas.</li>
+          <li>Categorías.</li>
+          <li>Entidades.</li>
+          <li>Territorio.</li>
+          <li>Tema.</li>
+          <li>Fecha.</li>
+          <li>Fuentes.</li>
+          <li>Enlaces internos.</li>
+          <li>Datos estructurados Schema.org cuando corresponda.</li>
+        </ul>
+        <p>Los metadatos deben ser coherentes con el contenido real. No incorporar palabras clave, lugares, actores o declaraciones inexistentes. Permitir relacionar etiquetas y temas con los observatorios.</p>
+      </div>
+
+      <!-- 19 -->
+      <div class="prompt-seccion">
+        <h2>19. MODELO DE DATOS Y BASE DE DATOS</h2>
+        <p>Diseñar una base relacional en PostgreSQL. Como mínimo, evaluar e implementar las siguientes entidades:</p>
+        <ul style="columns:2;column-gap:24px;">
+          <li><code>profiles</code></li>
+          <li><code>roles</code></li>
+          <li><code>permissions</code></li>
+          <li><code>editorial_units</code></li>
+          <li><code>editorial_inputs</code></li>
+          <li><code>editorial_facts</code></li>
+          <li><code>editorial_claims</code></li>
+          <li><code>sources</code></li>
+          <li><code>evidences</code></li>
+          <li><code>editorial_context</code></li>
+          <li><code>editorial_formats</code></li>
+          <li><code>editorial_versions</code></li>
+          <li><code>editorial_reviews</code></li>
+          <li><code>editorial_audit</code></li>
+          <li><code>library_records</code></li>
+          <li><code>library_relations</code></li>
+          <li><code>library_files</code></li>
+          <li><code>library_embeddings</code></li>
+          <li><code>observatories</code></li>
+          <li><code>variables</code></li>
+          <li><code>indicators</code></li>
+          <li><code>observations</code></li>
+          <li><code>data_sources</code></li>
+          <li><code>territories</code></li>
+          <li><code>methodologies</code></li>
+          <li><code>distributions</code></li>
+          <li><code>distribution_events</code></li>
+          <li><code>media_assets</code></li>
+          <li><code>integrations</code></li>
+        </ul>
+        <p>Definir: claves primarias, claves foráneas, índices, restricciones, relaciones, fechas, estados, políticas RLS, triggers y funciones SQL cuando correspondan. Evitar duplicaciones innecesarias. El diseño debe permitir crecimiento sin perder integridad.</p>
+        <p>Crear migraciones versionadas y reproducibles. No depender de cambios manuales no documentados en la base de datos.</p>
+      </div>
+
+      <!-- 20 -->
+      <div class="prompt-seccion">
+        <h2>20. PERSISTENCIA, VERSIONADO Y AUDITORÍA</h2>
+        <p>Implementar persistencia remota mediante Supabase. Utilizar almacenamiento local exclusivamente para preferencias y borradores temporales cuando corresponda. No utilizar localStorage como base principal de datos editoriales.</p>
+        <p>Implementar: guardado automático, control de concurrencia, detección de conflictos, versionado, recuperación, historial y registro de cambios.</p>
+        <p>Cada operación importante debe conservar: usuario, acción, fecha y hora, entidad afectada, estado anterior, estado nuevo, versión y observaciones. La memoria debe distinguir información histórica de información vigente.</p>
+      </div>
+
+      <!-- 21 -->
+      <div class="prompt-seccion">
+        <h2>21. SEGURIDAD</h2>
+        <p>Aplicar seguridad desde el diseño. Requisitos obligatorios:</p>
+        <ul>
+          <li>Autenticación.</li>
+          <li>Autorización.</li>
+          <li>RLS.</li>
+          <li>Validación backend.</li>
+          <li>Secretos fuera del frontend.</li>
+          <li>CORS restrictivo.</li>
+          <li>Validación de entradas.</li>
+          <li>Protección de archivos.</li>
+          <li>Límites de consumo.</li>
+          <li>Control de sesiones.</li>
+          <li>Manejo de errores.</li>
+          <li>Auditoría.</li>
+          <li>Principio de mínimo privilegio.</li>
+        </ul>
+        <p>Las restricciones de la interfaz no sustituyen los controles del servidor. Realizar pruebas de acceso indebido, escalamiento de privilegios y exposición de datos.</p>
+      </div>
+
+      <!-- 22 -->
+      <div class="prompt-seccion">
+        <h2>22. ACCESIBILIDAD Y RENDIMIENTO</h2>
+        <p>Garantizar: navegación por teclado, etiquetas accesibles, contraste suficiente, jerarquías semánticas, textos alternativos, formularios comprensibles, estados de foco visibles, compatibilidad con lectores de pantalla y diseño adaptable.</p>
+        <p>Optimizar: carga inicial, carga diferida de módulos, consultas paginadas, índices de búsqueda, tamaño de recursos, procesos de IA, recuperación ante errores y reintentos controlados.</p>
+        <p>Probar el funcionamiento en dispositivos móviles y conexiones lentas.</p>
+      </div>
+
+      <!-- 23 -->
+      <div class="prompt-seccion">
+        <h2>23. ESTRUCTURA DEL PROYECTO</h2>
+        <p>Adoptar una organización modular equivalente a:</p>
+        <div class="flujo" style="font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;white-space:pre;">
+madre-ecosistema/
+├── index.html
+├── assets/
+│   ├── css/
+│   ├── fonts/
+│   └── js/
+│       ├── core/
+│       ├── components/
+│       └── services/
+├── madre/
+├── biblioteca/
+├── editor-critico/
+├── transcripcion/
+├── observatorios/
+│   ├── economico/
+│   ├── territorial/
+│   └── audiencias/
+├── distribucion/
+├── admin/
+├── supabase/
+│   ├── migrations/
+│   ├── functions/
+│   └── config.toml
+├── tests/
+├── docs/
+└── README.md
+        </div>
+        <p>La estructura puede ajustarse si existe una justificación técnica, pero debe conservar la separación entre módulos, servicios compartidos, backend y documentación.</p>
+      </div>
+
+      <!-- 24 -->
+      <div class="prompt-seccion">
+        <h2>24. PLAN DE DESARROLLO E IMPLEMENTACIÓN</h2>
+        <p>Desarrollar por fases, manteniendo desde el comienzo una arquitectura integral.</p>
+
+        <h3>FASE 0. Preparación</h3>
+        <p>Crear el proyecto, configurar herramientas, definir estructura, configurar control de versiones, preparar documentación, definir variables de entorno y establecer convenciones de código. <strong>Entregable:</strong> proyecto inicial ejecutable.</p>
+
+        <h3>FASE 1. Núcleo y backend</h3>
+        <p>Configurar Supabase, diseñar base de datos, implementar migraciones, Auth, perfiles y roles, RLS, Storage, proxy de IA, servicios compartidos y auditoría. <strong>Entregable:</strong> núcleo operativo y seguro.</p>
+
+        <h3>FASE 2. Madre Editorial</h3>
+        <p>Crear interfaz de ingesta, implementar procesamiento, construir Unidad Editorial, fuentes y evidencias, investigación, verificación, generar seis formatos, edición y versiones. <strong>Entregable:</strong> cadena editorial funcional.</p>
+
+        <h3>FASE 3. Biblioteca Riojana</h3>
+        <p>Fichas, documentos, relaciones, búsqueda, embeddings, memoria semántica e historial. <strong>Entregable:</strong> memoria documental operativa.</p>
+
+        <h3>FASE 4. Editor Crítico y Transcripción</h3>
+        <p>Revisión asistida, detección de inconsistencias, gestión de observaciones, carga de audio, transcripción, corrección y vinculación editorial. <strong>Entregable:</strong> herramientas de apoyo cognitivo.</p>
+
+        <h3>FASE 5. Observatorios</h3>
+        <p>Modelo de datos, catálogo de indicadores, carga de fuentes, validación, series temporales, paneles y relaciones editoriales. <strong>Entregable:</strong> observatorios funcionales con datos identificables.</p>
+
+        <h3>FASE 6. Distribución</h3>
+        <p>Estados por canal, autorizaciones, WordPress, preparación de contenidos, historial y métricas de distribución. <strong>Entregable:</strong> distribución controlada.</p>
+
+        <h3>FASE 7. Validación y producción</h3>
+        <p>Pruebas funcionales, de seguridad, editoriales, de rendimiento y accesibilidad. Documentación, despliegue y monitoreo. <strong>Entregable:</strong> versión de producción validada.</p>
+      </div>
+
+      <!-- 25 -->
+      <div class="prompt-seccion">
+        <h2>25. PRUEBAS OBLIGATORIAS</h2>
+        <p>No considerar terminado un módulo sin pruebas.</p>
+
+        <h3>25.1. Pruebas funcionales</h3>
+        <p>Probar: autenticación, roles, ingesta, documentos, fuentes, Unidad Editorial, verificación, seis formatos, edición, versiones, Biblioteca, búsquedas, Observatorios, Distribución y Auditoría.</p>
+
+        <h3>25.2. Pruebas editoriales</h3>
+        <p>Utilizar casos de prueba que incluyan: comunicado institucional, denuncia no comprobada, fuentes contradictorias, documento histórico, estadística sin metodología, entrevista con fragmentos inaudibles, noticia que cambia con el tiempo, información sensible y error posterior a la publicación. Verificar que el sistema no convierta incertidumbre en certeza.</p>
+
+        <h3>25.3. Pruebas de seguridad</h3>
+        <p>Accesos entre usuarios, permisos incorrectos, acceso directo a endpoints, exposición de claves, RLS, archivos, sesiones, CORS y publicación no autorizada.</p>
+
+        <h3>25.4. Prueba integral de extremo a extremo</h3>
+        <p>Ejecutar este escenario:</p>
+        <ol>
+          <li>Ingresar un documento sobre una situación de interés público en La Rioja.</li>
+          <li>Conservar el original.</li>
+          <li>Extraer hechos y afirmaciones.</li>
+          <li>Recuperar antecedentes de Biblioteca Riojana.</li>
+          <li>Incorporar fuentes.</li>
+          <li>Relacionar evidencias.</li>
+          <li>Identificar contradicciones.</li>
+          <li>Construir la Unidad Editorial Madre.</li>
+          <li>Generar los seis formatos.</li>
+          <li>Ejecutar el Editor Crítico.</li>
+          <li>Corregir observaciones.</li>
+          <li>Aprobar mediante un editor humano.</li>
+          <li>Enviar un borrador a WordPress.</li>
+          <li>Registrar la respuesta.</li>
+          <li>Conservar la versión y el historial.</li>
+        </ol>
+        <p>Esta prueba debe demostrar que los módulos funcionan como un ecosistema integrado.</p>
+      </div>
+
+      <!-- 26 -->
+      <div class="prompt-seccion">
+        <h2>26. GUÍA DE ESTILO EDITORIAL</h2>
+        <p>Incorporar como norma transversal la Guía de Estilo Editorial de referencia. La guía establece criterios para: identidad editorial, rigor y veracidad, identidad riojana, independencia de criterio, pluralidad, memoria y contexto, claridad, precisión, lenguaje respetuoso, estructura de noticias, titulares y bajadas, fuentes y atribuciones, verificación, cobertura territorial, géneros periodísticos, ética, derechos, fotografía y video, convenciones lingüísticas, SEO, actualización, inteligencia artificial, correcciones, responsabilidades editoriales y checklist de publicación.</p>
+
+        <h3>26.1. Aplicación operativa</h3>
+        <p>La guía no debe quedar como un archivo aislado. Debe incorporarse al sistema mediante un servicio editorial compartido. Todos los módulos que generen o modifiquen contenidos deben poder consultar las reglas aplicables. El sistema debe utilizarlas para: orientar instrucciones de IA, revisar titulares, evaluar estructuras, detectar lenguaje estigmatizante, verificar atribuciones, recomendar correcciones, controlar metadatos y evaluar la publicación.</p>
+
+        <h3>26.2. Criterios editoriales fundamentales</h3>
+        <ul>
+          <li>Claridad antes que complejidad.</li>
+          <li>Precisión antes que espectacularidad.</li>
+          <li>Hechos diferenciados de interpretaciones.</li>
+          <li>Fuentes identificables.</li>
+          <li>Titulares fieles al contenido.</li>
+          <li>Cobertura territorial riojana.</li>
+          <li>Pluralidad de voces.</li>
+          <li>Respeto por las personas.</li>
+          <li>Contexto histórico y social.</li>
+          <li>Transparencia en las correcciones.</li>
+          <li>Responsabilidad humana.</li>
+        </ul>
+        <p>La guía de referencia es una propuesta institucional que requiere validación de la dirección del medio. El sistema debe permitir administrar versiones y modificaciones sin alterar retroactivamente las producciones históricas.</p>
+      </div>
+
+      <!-- 27 -->
+      <div class="prompt-seccion">
+        <h2>27. DOCUMENTACIÓN Y ENTREGABLES</h2>
+        <p>Crear y mantener:</p>
+        <ul>
+          <li>README.md.</li>
+          <li>Documento de arquitectura.</li>
+          <li>Diagrama de módulos.</li>
+          <li>Diagrama de base de datos.</li>
+          <li>Diccionario de datos.</li>
+          <li>Documentación de Edge Functions.</li>
+          <li>Esquemas JSON.</li>
+          <li>Manual de instalación.</li>
+          <li>Manual de configuración.</li>
+          <li>Manual de usuario.</li>
+          <li>Matriz de permisos.</li>
+          <li>Registro de pruebas.</li>
+          <li>Registro de errores conocidos.</li>
+          <li>Guía de despliegue.</li>
+          <li>Guía de mantenimiento.</li>
+        </ul>
+        <p>Las credenciales, contraseñas y secretos nunca deben incluirse en la documentación pública.</p>
+      </div>
+
+      <!-- 28 -->
+      <div class="prompt-seccion">
+        <h2>28. REGLAS DE TRABAJO DEL AGENTE</h2>
+        <p>Estas instrucciones son obligatorias durante todo el desarrollo.</p>
+        <ol>
+          <li>Trabaja sobre el proyecto real, no entregues solamente ejemplos.</li>
+          <li>Crea los archivos necesarios.</li>
+          <li>Implementa las funcionalidades completas.</li>
+          <li>Integra frontend y backend.</li>
+          <li>Ejecuta las pruebas disponibles.</li>
+          <li>Corrige errores detectados.</li>
+          <li>No simules conexiones.</li>
+          <li>No declares terminado lo que no funciona.</li>
+          <li>No reemplaces código sin revisar sus dependencias.</li>
+          <li>No elimines información ni migraciones sin justificación.</li>
+          <li>Mantén la arquitectura modular.</li>
+          <li>Documenta las decisiones técnicas relevantes.</li>
+          <li>Prioriza seguridad y trazabilidad.</li>
+          <li>Conserva la experiencia de usuario consistente.</li>
+          <li>No sacrifiques rigor editorial para acelerar la generación.</li>
+          <li>No utilices datos de demostración como información real.</li>
+          <li>No publiques automáticamente.</li>
+          <li>Si una integración requiere credenciales o acceso externo, prepara su implementación y solicita lo necesario para probarla.</li>
+          <li>Si una dependencia externa no está disponible, informa la limitación y continúa con las tareas independientes.</li>
+          <li>No detengas el desarrollo para solicitar confirmación de decisiones técnicas ordinarias que puedas resolver justificadamente.</li>
+        </ol>
+        <p>Cuando una decisión afecte el alcance, la seguridad, la identidad institucional o el comportamiento editorial, documenta la decisión y solicita definición si no existe una regla previa.</p>
+      </div>
+
+      <!-- 29 -->
+      <div class="prompt-seccion">
+        <h2>29. CRITERIOS DE ACEPTACIÓN DEL PRODUCTO</h2>
+        <p>MADRE no puede considerarse terminado por tener una interfaz atractiva o un botón que invoque una IA. Debe demostrar que:</p>
+        <ul>
+          <li>Recibe información desde distintas fuentes.</li>
+          <li>Conserva originales.</li>
+          <li>Organiza hechos y afirmaciones.</li>
+          <li>Identifica fuentes y evidencias.</li>
+          <li>Investiga y recupera antecedentes.</li>
+          <li>Diferencia hechos, opiniones e hipótesis.</li>
+          <li>Detecta contradicciones.</li>
+          <li>Construye una Unidad Editorial Madre.</li>
+          <li>Produce exactamente seis formatos.</li>
+          <li>Mantiene coherencia entre ellos.</li>
+          <li>Permite edición y versionado.</li>
+          <li>Dispone de Biblioteca Riojana.</li>
+          <li>Incorpora Editor Crítico.</li>
+          <li>Permite transcripción.</li>
+          <li>Gestiona observatorios.</li>
+          <li>Administra estados y autorizaciones.</li>
+          <li>Conserva auditoría.</li>
+          <li>Gestiona distribución.</li>
+          <li>Envía borradores a WordPress.</li>
+          <li>Protege los datos.</li>
+          <li>Funciona en dispositivos móviles.</li>
+          <li>Cuenta con documentación y pruebas.</li>
+        </ul>
+        <p>La cadena editorial integral debe funcionar de principio a fin.</p>
+      </div>
+
+      <!-- 30 -->
+      <div class="prompt-seccion">
+        <h2>30. PRIMERA INSTRUCCIÓN DE EJECUCIÓN</h2>
+        <p><strong>INICIA EL DESARROLLO DE MADRE DESDE CERO.</strong></p>
+        <p>No respondas solamente con una planificación. Comienza creando el proyecto, su estructura, los archivos iniciales y la infraestructura técnica.</p>
+        <p>Ejecuta las siguientes acciones:</p>
+        <ol>
+          <li>Inicializa el repositorio y la estructura modular.</li>
+          <li>Configura el entorno de desarrollo.</li>
+          <li>Implementa el Shell principal.</li>
+          <li>Configura la conexión con Supabase.</li>
+          <li>Diseña y crea las primeras migraciones.</li>
+          <li>Implementa autenticación y roles.</li>
+          <li>Construye los servicios compartidos.</li>
+          <li>Prepara el proxy seguro de IA.</li>
+          <li>Implementa la primera versión funcional del módulo Madre Editorial.</li>
+          <li>Construye la Unidad Editorial y el flujo de ingesta.</li>
+          <li>Implementa la generación de los seis formatos.</li>
+          <li>Ejecuta pruebas y documenta los resultados.</li>
+          <li>Continúa con las fases siguientes hasta completar el ecosistema.</li>
+        </ol>
+        <p>Si no se dispone de credenciales externas, desarrolla la integración hasta el límite técnicamente posible, deja configuradas las variables necesarias y documenta exactamente qué acceso falta para realizar la prueba real. No inventes resultados de pruebas.</p>
+        <p>Al finalizar cada fase, informa:</p>
+        <ul>
+          <li>Qué se implementó.</li>
+          <li>Qué archivos se crearon o modificaron.</li>
+          <li>Qué migraciones se ejecutaron.</li>
+          <li>Qué funcionalidades funcionan.</li>
+          <li>Qué pruebas se realizaron.</li>
+          <li>Qué errores quedan pendientes.</li>
+          <li>Qué integraciones requieren credenciales.</li>
+          <li>Cuál es el siguiente hito.</li>
+        </ul>
+      </div>
+
+      <!-- Principio final -->
+      <div class="principio-final">
+        <h2>PRINCIPIO FINAL</h2>
+        <p>MADRE debe convertirse en una infraestructura de conocimiento periodístico.</p>
+        <p>No debe limitarse a producir más contenidos, sino mejorar la capacidad de investigar, comprender, verificar, contextualizar, conservar memoria y comunicar información relevante.</p>
+        <p>Su arquitectura debe permitir que cada hecho investigado pueda convertirse en conocimiento documentado, que cada producción pueda generar múltiples formatos y que cada publicación conserve su origen, sus evidencias, sus versiones y su responsabilidad editorial.</p>
+        <p class="frase">UN ECOSISTEMA. UNA ARQUITECTURA. UNA MEMORIA COMPARTIDA.</p>
+        <p class="frase">LA IA PRODUCE ASISTENCIA. MADRE ORGANIZA EL CONOCIMIENTO.<br>LAS PERSONAS CONSERVAN LA RESPONSABILIDAD EDITORIAL.</p>
+      </div>
+
     </div>
   </section>
 
