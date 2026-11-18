@@ -223,6 +223,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - Las observaciones humanas continúan sujetas a las políticas RLS y al esquema append-only existente.
 - La Edge Function exige JWT, valida el usuario y consulta datos mediante un cliente con el token del usuario, por lo que se conservan los permisos RLS.
 - La clave `OPENAI_API_KEY` permanece en secretos de Edge Functions; nunca se envía al navegador.
+- CORS utiliza una lista explícita desde el secreto `ALLOWED_ORIGINS` (orígenes separados por comas). El valor de respaldo habilita solo `http://localhost:5173` y `http://127.0.0.1:5173`; debe agregarse el dominio real de despliegue para usar el módulo desde producción.
 
 ### Verificación
 
