@@ -114,7 +114,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         <label for="format-content">Contenido del borrador</label><textarea id="format-content" name="content" required maxlength="60000" rows="12" placeholder="Seleccioná un formato y desarrollá el contenido. La pieza se guardará como borrador."></textarea>
         <p id="format-source-note" class="muted small" aria-live="polite">Todavía no hay un borrador seleccionado.</p>
         <p id="format-ai-note" class="notice" role="status" aria-live="polite">La generación asistida requiere configuración del proveedor y siempre queda pendiente de revisión humana.</p>
-        <div class="dialog-actions"><button type="button" class="button ghost" id="cancel-formats">Cerrar</button><button type="button" class="button ghost" id="generate-format">Generar con IA</button><button class="button primary" type="submit">Guardar borrador</button></div>
+        <div class="dialog-actions"><button type="button" class="button ghost" id="cancel-formats">Cerrar</button><button type="button" class="button ghost" id="generate-format">Generar este formato</button><button type="button" class="button primary" id="generate-all-formats">Generar los seis formatos</button><button class="button primary" type="submit">Guardar borrador</button></div>
       </form>
     </div></dialog>
     <dialog id="research-dialog" class="dialog wide"><div class="stack">
@@ -215,6 +215,32 @@ export async function renderWorkspace(root, user, onSignOut) {
       note.textContent = error.message
     } finally {
       button.disabled = false
+    }
+  })
+
+  root.querySelector('#generate-all-formats').addEventListener('click', async () => {
+    const button = root.querySelector('#generate-all-formats')
+    const singleButton = root.querySelector('#generate-format')
+    const note = root.querySelector('#format-ai-note')
+    button.disabled = true
+    singleButton.disabled = true
+    try {
+      const result = await EditorialService.generateAllFormats(activeUnitId, progress => {
+        const action = progress.phase === 'generating' ? 'Generando' : 'Guardando'
+        note.textContent = action + ' formato ' + progress.current + ' de ' + progress.total + '…'
+      })
+      generatedSourceVersionId = result.source_version_id
+      note.textContent = 'Los seis formatos fueron generados y guardados como borradores sobre la misma versión madre. Todos requieren revisión humana.'
+      await loadFormats()
+      await loadQualityHistory()
+      notice.textContent = 'Generación completa: seis formatos guardados como borradores.'
+    } catch (error) {
+      note.textContent = error.message + ' Revisá los formatos guardados antes de volver a ejecutar para evitar duplicar trabajo.'
+      notice.textContent = 'La generación conjunta no se completó: ' + error.message
+      await loadFormats()
+    } finally {
+      button.disabled = false
+      singleButton.disabled = false
     }
   })
 
