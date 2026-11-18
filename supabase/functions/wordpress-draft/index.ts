@@ -158,11 +158,15 @@ Deno.serve(async (req: Request) => {
     const requestHeaders = { Authorization: authorization, "Content-Type": "application/json" };
 
     let post: any = null;
-    const lookupUrl = endpoint + "?slug=" + encodeURIComponent(slug) + "&status=draft&context=edit&_fields=id,link,status,slug";
+    const lookupUrl = endpoint + "?slug=" + encodeURIComponent(slug) + "&status=any&context=edit&_fields=id,link,status,slug";
     const lookup = await fetch(lookupUrl, { headers: requestHeaders, signal: AbortSignal.timeout(15000) });
     if (lookup.ok) {
       const matches = await lookup.json();
       if (Array.isArray(matches) && matches.length) post = matches[0];
+    }
+
+    if (post && post.status !== "draft") {
+      return json({ error: "Esta versión ya existe en WordPress con estado " + post.status + ". No se creó otro artículo para evitar duplicados.", code: "wordpress_post_already_exists", wordpress: { id: post.id, link: post.link, status: post.status } }, 409, origin);
     }
 
     if (!post) {
