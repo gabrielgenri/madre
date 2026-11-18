@@ -1,14 +1,23 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Content-Type": "application/json; charset=utf-8"
-};
+const allowedOrigins = new Set(
+  (Deno.env.get("ALLOWED_ORIGINS") ?? "http://localhost:5173,http://127.0.0.1:5173")
+    .split(",").map((origin) => origin.trim()).filter(Boolean)
+);
 
-const json = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: corsHeaders });
+function corsHeaders(origin: string | null) {
+  const headers = new Headers({
+    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Content-Type": "application/json; charset=utf-8",
+    "Vary": "Origin"
+  });
+  if (origin && allowedOrigins.has(origin)) headers.set("Access-Control-Allow-Origin", origin);
+  return headers;
+}
+
+const json = (data: unknown, status = 200, origin: string | null = null) =>
+  new Response(JSON.stringify(data), { status, headers: corsHeaders(origin) });
 
 const formatLabels: Record<string, string> = {
   web_seo: "Artículo Web / SEO",
@@ -37,18 +46,20 @@ function safeArray(value: unknown, max = 20): unknown[] {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Método no permitido." }, 405);
+  const origin = req.headers.get("Origin");
+  if (origin && !allowedOrigins.has(origin)) return json({ error: "Origen no autorizado." }, 403, origin);
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(origin) });
+  if (req.method !== "POST") return json({ error: "Método no permitido." }, 405, origin);
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) return json({ error: "Sesión requerida." }, 401);
+    if (!authHeader?.startsWith("Bearer ")) return json({ error: "Sesión requerida." }, 401, origin);
 
     const publishableKeys = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") ?? "{}");
     const publishableKey = publishableKeys.default ?? Deno.env.get("SUPABASE_ANON_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     if (!supabaseUrl || !publishableKey) {
-      return json({ error: "Credenciales internas de Supabase no configuradas." }, 500);
+      return json({ error: "Credenciales internas de Supabase no configuradas." }, 500, origin);
     }
 
     const supabase = createClient(supabaseUrl, publishableKey, {
@@ -57,22 +68,22 @@ Deno.serve(async (req: Request) => {
     });
     const token = authHeader.slice(7);
     const { data: authData, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !authData.user) return json({ error: "La sesión no es válida o expiró." }, 401);
+    if (authError || !authData.user) return json({ error: "La sesión no es válida o expiró." }, 401, origin);
 
     const body = await req.json();
     const unitId = typeof body.unit_id === "string" ? body.unit_id : "";
-    if (!/^[0-9a-f-]{36}$/i.test(unitId)) return json({ error: "Unidad editorial no válida." }, 400);
+    if (!/^[0-9a-f-]{36}$/i.test(unitId)) return json({ error: "Unidad editorial no válida." }, 400, origin);
 
     const apiKey = Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) return json({
       error: "Falta configurar OPENAI_API_KEY en Supabase → Edge Functions → Secrets.",
       code: "provider_not_configured"
-    }, 503);
+    }, 503, origin);
 
     const { data: unit, error: unitError } = await supabase.from("editorial_units")
       .select("id,title,summary,content_mother,status").eq("id", unitId).single();
-    if (unitError || !unit) return json({ error: "No se encontró la unidad o no tenés permiso para consultarla." }, 404);
-    if (!unit.content_mother?.trim()) return json({ error: "Completá el Contenido Madre antes de ejecutar el Editor Crítico." }, 422);
+    if (unitError || !unit) return json({ error: "No se encontró la unidad o no tenés permiso para consultarla." }, 404, origin);
+    if (!unit.content_mother?.trim()) return json({ error: "Completá el Contenido Madre antes de ejecutar el Editor Crítico." }, 422, origin);
 
     const [versionResult, sourceResult, claimResult, formatResult] = await Promise.all([
       supabase.from("editorial_versions").select("id,version_number,created_at")
@@ -88,7 +99,7 @@ Deno.serve(async (req: Request) => {
       if (result.error) throw result.error;
     }
     const version = versionResult.data?.[0];
-    if (!version) return json({ error: "La unidad todavía no tiene una versión madre registrada." }, 409);
+    if (!version) return json({ error: "La unidad todavía no tiene una versión madre registrada." }, 409, origin);
 
     const sources = sourceResult.data ?? [];
     const claims = claimResult.data ?? [];
@@ -200,20 +211,20 @@ ${JSON.stringify(editorialMaterial)}`;
     if (!aiResponse.ok) {
       const detail = await aiResponse.text();
       console.error("OpenAI critical editor error", aiResponse.status, detail.slice(0, 1000));
-      return json({ error: "El proveedor de IA no pudo completar el análisis.", provider_status: aiResponse.status }, 502);
+      return json({ error: "El proveedor de IA no pudo completar el análisis.", provider_status: aiResponse.status }, 502, origin);
     }
 
     const aiData = await aiResponse.json();
     const raw = aiData.output?.filter((item: any) => item.type === "message")
       .flatMap((item: any) => item.content ?? [])
       .find((item: any) => item.type === "output_text")?.text;
-    if (typeof raw !== "string") return json({ error: "El proveedor devolvió un análisis vacío." }, 502);
+    if (typeof raw !== "string") return json({ error: "El proveedor devolvió un análisis vacío." }, 502, origin);
 
     const report = JSON.parse(raw);
     if (typeof report.summary !== "string" || !Array.isArray(report.findings) ||
         !Array.isArray(report.checklist) || !Array.isArray(report.format_comparisons) ||
         !Array.isArray(report.review_questions)) {
-      return json({ error: "El análisis no cumple el formato esperado." }, 502);
+      return json({ error: "El análisis no cumple el formato esperado." }, 502, origin);
     }
 
     const sourceSet = new Set(sources.map((item) => item.id));
@@ -240,11 +251,11 @@ ${JSON.stringify(editorialMaterial)}`;
       detail: cleanText(item?.detail, 500)
     })).filter((item: any) => item.label && item.detail);
     const comparisons = safeArray(report.format_comparisons, 6).map((item: any) => ({
-      format_type: Object.hasOwn(formatLabels, item?.format_type) ? item.format_type : "other",
+      format_type: Object.hasOwn(formatLabels, item?.format_type) ? item.format_type : null,
       consistency: allowedConsistency.has(item?.consistency) ? item.consistency : "not_assessable",
       detail: cleanText(item?.detail, 900),
       evidence_refs: cleanRefs(item?.evidence_refs)
-    })).filter((item: any) => item.detail);
+    })).filter((item: any) => item.detail && item.format_type);
     const reviewQuestions = safeArray(report.review_questions, 10)
       .map((item) => cleanText(item, 400)).filter(Boolean);
 
@@ -267,9 +278,9 @@ ${JSON.stringify(editorialMaterial)}`;
         checklist, findings, format_comparisons: comparisons, review_questions: reviewQuestions
       },
       reference_catalog: { sources: sourceCatalog, claims: claimCatalog, formats: formatCatalog }
-    });
+    }, 200, origin);
   } catch (error) {
     console.error("editorial-critical-review error", error);
-    return json({ error: "No se pudo completar el análisis. Revisá los registros de la función." }, 500);
+    return json({ error: "No se pudo completar el análisis. Revisá los registros de la función." }, 500, origin);
   }
 });
