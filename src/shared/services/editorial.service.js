@@ -256,9 +256,20 @@ export const EditorialService = {
   },
 
   async generateFormat(unitId, formatType) {
-    const { data, error } = await client().functions.invoke('generate-editorial-format', {
-      body: { unit_id: unitId, format_type: formatType }
+    const db = client()
+    const { data: sessionData, error: sessionError } = await db.auth.getSession()
+    if (sessionError) throw sessionError
+
+    const accessToken = sessionData?.session?.access_token
+    if (!accessToken) {
+      throw new Error('No hay una sesión autenticada. Iniciá sesión nuevamente antes de generar con IA.')
+    }
+
+    const { data, error } = await db.functions.invoke('generate-editorial-format', {
+      body: { unit_id: unitId, format_type: formatType },
+      headers: { Authorization: `Bearer ${accessToken}` }
     })
+
     if (error) {
       let detail = ''
       try {
@@ -267,6 +278,9 @@ export const EditorialService = {
         detail = payload?.error ?? ''
       } catch {
         // El SDK puede devolver un error sin cuerpo JSON legible.
+      }
+      if (error.message?.includes('401') || detail.toLowerCase().includes('sesión') || detail.toLowerCase().includes('authorization')) {
+        throw new Error('La sesión no fue aceptada por el servicio de IA. Cerrá sesión, volvé a ingresar y reintentá.')
       }
       throw new Error(detail || error.message || 'No se pudo generar el borrador.')
     }
