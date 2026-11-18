@@ -239,3 +239,37 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - Probar triggers de revisión (solicitud, devolución y aprobación) con perfiles reales; al momento del último relevamiento solo existe una cuenta admin.
 - Probar Realtime con dos sesiones autenticadas y revisar el contador en navegador.
 - Ejecutar `node --check`, `vite build` y pruebas E2E. No se declaran realizadas.
+
+## PASO 21 — Dashboard de gestión editorial
+
+### Alcance incorporado
+
+- Se agregó `src/shared/services/dashboard.service.js`, que consulta unidades editoriales, versiones, eventos de revisión, eventos de planificación y perfiles visibles para la sesión.
+- Se agregó `src/modules/madre-editorial/dashboard.view.js` y su hoja de estilos `dashboard.css`.
+- El panel se monta en el espacio de Madre Editorial y permite actualizar sus indicadores sin recargar la aplicación.
+- Se muestran unidades en producción, solicitudes de revisión vigentes, tareas vencidas, unidades revisadas y publicadas, además de un promedio de horas entre solicitud y aprobación de una misma versión.
+- Se visualiza la distribución de estados, la carga de unidades en borrador por responsable, la actividad de planificación/revisión de los últimos 14 días y una lista de unidades que requieren atención.
+- Los accesos de la lista de atención abren la unidad editorial correspondiente.
+
+### Criterios de datos y seguridad
+
+- No se agregaron tablas, vistas, funciones SQL ni políticas RLS. El dashboard reutiliza las tablas existentes y las consultas quedan sujetas a la sesión y a las políticas RLS ya aplicadas.
+- Los perfiles se utilizan únicamente para mostrar nombres; si la consulta de perfiles no está permitida, el panel conserva las métricas y muestra identificadores abreviados.
+- «Esperando revisión» cuenta solamente solicitudes cuyo `source_version_id` coincide con la última versión de la unidad.
+- El promedio de aprobación se calcula con eventos `review_requested` y `approved` de la misma unidad y versión dentro de los últimos 30 días. Si no hay pares suficientes, muestra «—».
+- La actividad reciente refleja eventos de planificación y revisión registrados; no representa todas las acciones posibles del sistema.
+- El dashboard es informativo. No modifica estados, no asigna responsables y no aprueba ni publica contenidos.
+
+### Archivos
+
+- `src/shared/services/dashboard.service.js`
+- `src/modules/madre-editorial/dashboard.view.js`
+- `src/modules/madre-editorial/dashboard.css`
+- Integración en `src/modules/madre-editorial/editorial.view.js`
+
+### Verificación pendiente
+
+- Ejecutar `npm run build` y `node --check` en un checkout del repositorio.
+- Probar el dashboard con sesiones reales de los distintos roles y confirmar el alcance de datos que permite RLS.
+- Comparar las métricas con registros de prueba conocidos y revisar el comportamiento con un volumen grande de unidades/eventos.
+- Validar la presentación responsive en navegador móvil y escritorio.
