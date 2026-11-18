@@ -272,15 +272,25 @@ export const EditorialService = {
 
     if (error) {
       let detail = ''
+      let code = ''
+      let providerStatus = 0
       try {
         const response = error.context?.clone ? error.context.clone() : error.context
         const payload = response?.json ? await response.json() : null
         detail = payload?.error ?? ''
+        code = payload?.code ?? ''
+        providerStatus = Number(payload?.provider_status ?? 0)
       } catch {
         // El SDK puede devolver un error sin cuerpo JSON legible.
       }
       if (error.message?.includes('401') || detail.toLowerCase().includes('sesión') || detail.toLowerCase().includes('authorization')) {
         throw new Error('La sesión no fue aceptada por el servicio de IA. Cerrá sesión, volvé a ingresar y reintentá.')
+      }
+      if (code === 'provider_busy' || providerStatus === 429 || providerStatus === 503) {
+        throw new Error('Gemini está temporalmente saturado. Esperá unos segundos y volvé a intentar; tu material editorial sigue intacto.')
+      }
+      if (code === 'provider_auth_error') {
+        throw new Error('La clave de Gemini no es válida o no tiene permisos. Revisá GEMINI_API_KEY en los secretos de Supabase.')
       }
       throw new Error(detail || error.message || 'No se pudo generar el borrador.')
     }
