@@ -217,7 +217,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       const notes = result.draft.editorial_notes?.length
         ? ' Alertas: ' + result.draft.editorial_notes.join(' · ')
         : ''
-      note.textContent = `Borrador generado sobre la versión madre ${result.source_version_number}. Referencias internas: ${sourceCount} fuentes y ${claimCount} afirmaciones. Pendiente de revisión humana.${notes}`
+      const modelInfo = result.model_used ? ' Modelo: ' + result.model_used + (result.fallback_attempts?.length ? ' · Intentos de respaldo: ' + result.fallback_attempts.length : '') + '.' : ''
+      note.textContent = `Borrador generado sobre la versión madre ${result.source_version_number}. Referencias internas: ${sourceCount} fuentes y ${claimCount} afirmaciones. Pendiente de revisión humana.${modelInfo}${notes}`
       root.querySelector('#format-source-note').textContent = 'Generado sobre versión ' + result.source_version_number + '. Si cambia el contenido madre antes de guardar, habrá que volver a generar.'
     } catch (error) {
       note.textContent = error.message
@@ -238,7 +239,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         note.textContent = action + ' formato ' + progress.current + ' de ' + progress.total + '…'
       })
       generatedSourceVersionId = result.source_version_id
-      note.textContent = 'Los seis formatos fueron generados y guardados como borradores sobre la misma versión madre. Todos requieren revisión humana.'
+      note.textContent = 'Los seis formatos fueron generados y guardados como borradores sobre la misma versión madre. Modelos utilizados: ' + ((result.models_used || []).join(', ') || 'Gemini') + '. Todos requieren revisión humana.'
       await loadFormats()
       await loadQualityHistory()
       notice.textContent = 'Generación completa: seis formatos guardados como borradores.'
