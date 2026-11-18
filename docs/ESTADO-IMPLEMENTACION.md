@@ -233,3 +233,6 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - Sintaxis de los cuatro módulos JavaScript modificados/nuevos validada mediante parseo estático.
 - Pendiente: invocación autenticada con `OPENAI_API_KEY` disponible, ejecución con datos reales, comprobación de decisiones humanas desde navegador, `vite build`, revisión responsive y pruebas multiusuario.
 - No se declara una revisión real ejecutada ni una aprobación editorial automática.
+### Repositorio
+
+- Pull request de esta entrega: https://github.com/gabrielgenri/madre/pull/2 (abierto, Draft).
