@@ -1,4 +1,6 @@
 import { EditorialService } from '../../shared/services/editorial.service.js'
+import { mountNotifications } from './notifications.view.js'
+import { mountDashboard } from './dashboard.view.js'
 
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (c) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -704,4 +706,6 @@ export async function renderWorkspace(root, user, onSignOut) {
     }
   }
   await Promise.all([loadUnits(), loadWorkQueue()])
+  mountDashboard(root, openUnit)
+  mountNotifications(root, openUnit)
 }
