@@ -303,7 +303,7 @@ export const EditorialService = {
     for (let index = 0; index < types.length; index += 1) {
       onProgress({ phase: 'generating', current: index + 1, total: types.length, format: types[index] })
       const result = await EditorialService.generateFormat(unitId, types[index])
-      generated.push({ format_type: types[index], ...result.draft, source_version_id: result.source_version_id })
+      generated.push({ format_type: types[index], ...result.draft, source_version_id: result.source_version_id, model_used: result.model_used, fallback_attempts: result.fallback_attempts })
     }
     const latest = await EditorialService.latestVersionId(unitId)
     if (generated.some(item => item.source_version_id !== latest.id)) {
@@ -313,7 +313,7 @@ export const EditorialService = {
       onProgress({ phase: 'saving', current: index + 1, total: generated.length, format: generated[index].format_type })
       await EditorialService.saveFormat(unitId, generated[index])
     }
-    return { count: generated.length, source_version_id: latest.id }
+    return { count: generated.length, source_version_id: latest.id, models_used: [...new Set(generated.map(item => item.model_used).filter(Boolean))] }
   },
 
   async saveFormat(unitId, values) {
