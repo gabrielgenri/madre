@@ -194,3 +194,39 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - No se declara compilación Vite, prueba de navegador ni E2E como realizada.
 - El asesor de rendimiento conserva siete claves foráneas sin índice en tablas preexistentes y reporta índices aún no utilizados (incluidos algunos nuevos, esperable antes de tener carga real). La advertencia de políticas SELECT múltiples en `user_roles` quedó resuelta.
 - El asesor de seguridad mantiene las advertencias previas sobre `audit_editorial_unit`, `handle_new_user`, `has_role` (SECURITY DEFINER expuestas a anon/authenticated) y la protección de contraseñas filtradas deshabilitada.
+
+## PASO 22 — Editor Crítico asistido por IA
+
+### Alcance incorporado
+
+- Se creó el módulo independiente `src/modules/editor-critico/` con servicio y vista propios.
+- Se agregó la Edge Function `editorial-critical-review`, protegida con JWT y con consultas Supabase bajo el token del usuario; no utiliza la clave service role.
+- El análisis reúne Contenido Madre, fuentes, afirmaciones, evidencias, verificaciones y los seis formatos existentes.
+- El informe señala posibles sesgos, claridad, correspondencia entre título y contenido, atribuciones, afirmaciones sin respaldo, fechas/nombres dudosos, contradicciones, información pendiente, riesgos legales potenciales y divergencias entre formatos.
+- Cada observación puede incluir referencias a IDs reales de fuentes, afirmaciones y formatos. El backend descarta referencias que no pertenezcan a la unidad consultada.
+- El informe se guarda como una nueva entrada append-only en `editorial_quality_reviews`, diferenciada por `metrics.engine = editor_critico_ai`. Las observaciones y decisiones humanas se registran en `editorial_quality_observations`.
+- La interfaz permite marcar cada observación como resuelta, aceptada para seguimiento o descartada, exigiendo un fundamento. Las decisiones no modifican ni borran el informe original.
+- Antes de guardar, el servicio compara la versión madre analizada con la versión vigente y rechaza el informe si el contenido cambió durante la ejecución.
+
+### Criterios editoriales y límites
+
+- El análisis aplica los principios de rigor y veracidad, independencia, pluralidad, relevancia social, memoria y contexto, claridad y ausencia de sensacionalismo.
+- El modelo recibe el material editorial como datos no confiables; no puede obedecer instrucciones contenidas en fuentes, citas o documentos.
+- No realiza investigación web ni verificación externa, no emite dictámenes jurídicos, no reescribe el contenido y no cambia estados editoriales.
+- Los riesgos legales se presentan como alertas preventivas para evaluación profesional.
+- El resultado es una segunda lectura asistida, nunca una aprobación. La revisión y autorización final siguen siendo humanas.
+
+### Persistencia y seguridad
+
+- Se reutilizan las tablas existentes `editorial_quality_reviews` y `editorial_quality_observations`; no se agregó una tabla ni una migración.
+- Las filas conservan la versión madre, modelo, fecha, hallazgos, comparaciones, preguntas y catálogo de referencias.
+- Las observaciones humanas continúan sujetas a las políticas RLS y al esquema append-only existente.
+- La Edge Function exige JWT, valida el usuario y consulta datos mediante un cliente con el token del usuario, por lo que se conservan los permisos RLS.
+- La clave `OPENAI_API_KEY` permanece en secretos de Edge Functions; nunca se envía al navegador.
+
+### Verificación
+
+- Esquema, constraints y políticas RLS de las tablas de calidad inspeccionados.
+- Se confirmó que el scope `cross_format` y los estados `needs_attention` / `checks_complete` permiten persistir el informe sin alterar el esquema.
+- Pendiente: despliegue y prueba autenticada de la Edge Function, ejecución con datos reales, comprobación de decisiones humanas desde navegador, `node --check`, `vite build`, revisión responsive y pruebas multiusuario.
+- No se declara una revisión real ejecutada ni una aprobación editorial automática.
