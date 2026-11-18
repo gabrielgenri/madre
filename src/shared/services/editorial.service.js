@@ -297,6 +297,25 @@ export const EditorialService = {
     return data
   },
 
+  async generateAllFormats(unitId, onProgress = () => {}) {
+    const types = ['web_seo', 'video_reel_60', 'podcast_primera_hora', 'instagram_carousel_8', 'newsletter', 'whatsapp']
+    const generated = []
+    for (let index = 0; index < types.length; index += 1) {
+      onProgress({ phase: 'generating', current: index + 1, total: types.length, format: types[index] })
+      const result = await EditorialService.generateFormat(unitId, types[index])
+      generated.push({ format_type: types[index], ...result.draft, source_version_id: result.source_version_id })
+    }
+    const latest = await EditorialService.latestVersionId(unitId)
+    if (generated.some(item => item.source_version_id !== latest.id)) {
+      throw new Error('El contenido madre cambió durante la generación. No se guardó el lote; volvé a intentarlo.')
+    }
+    for (let index = 0; index < generated.length; index += 1) {
+      onProgress({ phase: 'saving', current: index + 1, total: generated.length, format: generated[index].format_type })
+      await EditorialService.saveFormat(unitId, generated[index])
+    }
+    return { count: generated.length, source_version_id: latest.id }
+  },
+
   async saveFormat(unitId, values) {
     const { data, error } = await client().rpc('save_editorial_format', {
       p_unit_id: unitId,
