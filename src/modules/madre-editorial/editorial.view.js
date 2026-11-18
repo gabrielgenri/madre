@@ -83,7 +83,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         <div class="dialog-actions"><button type="button" class="button ghost" id="save-work-assignment">Guardar planificación</button></div>
         <h4>Historial de asignaciones</h4><div id="work-history" class="review-history" aria-live="polite"><p class="muted small">Todavía no hay cambios de planificación.</p></div>
       </section>
-      <p class="muted small">La publicación continúa reservada a perfiles editor/admin y solo puede realizarse después del estado Revisado.</p>
+      <section class="quality-panel wordpress-panel" aria-labelledby="wordpress-heading"><div class="quality-panel-head"><div><h3 id="wordpress-heading">Distribución a WordPress</h3><p class="muted small">Solo editor/admin. Madre envía el artículo como borrador; la publicación definitiva se realiza desde WordPress.</p></div><button type="button" class="button primary" id="send-wordpress" hidden>Enviar artículo a WordPress</button></div><div id="wordpress-history" class="review-history" aria-live="polite"><p class="muted small">Cargando historial de distribución…</p></div></section>
       <div class="dialog-actions"><button type="button" class="button ghost" id="open-research">Fuentes y verificación</button><button type="button" class="button ghost" id="open-formats">Seis formatos</button><button type="button" class="button ghost" id="cancel-detail">Cerrar</button><button class="button primary" type="submit">Guardar cambios</button></div>
     </form></dialog>
     <dialog id="formats-dialog" class="dialog wide"><div class="stack">
@@ -628,6 +628,7 @@ export async function renderWorkspace(root, user, onSignOut) {
       const refreshed = await EditorialService.get(activeUnitId)
       activeUnit = refreshed
       root.querySelector('#detail-status').value = refreshed.status === 'published' ? 'Publicado' : refreshed.status === 'reviewed' ? 'Revisado' : 'Borrador'
+      updateWordPressAction()
       root.querySelector('#review-note').value = ''
       await loadReviewHistory(activeUnitId)
       await Promise.all([loadUnits(), loadWorkQueue()])
@@ -640,6 +641,46 @@ export async function renderWorkspace(root, user, onSignOut) {
       notice.textContent = error.message
     } finally {
       button.disabled = false
+    }
+  })
+
+  function updateWordPressAction() {
+    const button = root.querySelector('#send-wordpress')
+    button.hidden = !(activeUnit?.status === 'reviewed' && activeRolesCanEdit())
+  }
+
+  async function loadDistributionHistory(unitId) {
+    const container = root.querySelector('#wordpress-history')
+    container.innerHTML = '<p class="muted small">Consultando envíos…</p>'
+    try {
+      const records = await EditorialService.distributionHistory(unitId)
+      container.innerHTML = records.length ? records.map(item =>
+        '<article class="review-event"><strong>WordPress · Borrador creado</strong>' +
+        '<span>Versión madre vinculada · ' + date(item.created_at) + ' · ID ' + esc(item.external_id) + '</span>' +
+        '<p><a href="' + esc(item.external_url) + '" target="_blank" rel="noopener noreferrer">Abrir borrador en WordPress ↗</a></p></article>'
+      ).join('') : '<p class="muted small">Todavía no se enviaron artículos a WordPress.</p>'
+    } catch (error) {
+      container.innerHTML = '<p class="muted small">No se pudo cargar el historial: ' + esc(error.message) + '</p>'
+    }
+  }
+
+  root.querySelector('#send-wordpress').addEventListener('click', async () => {
+    if (!activeUnitId || activeUnit?.status !== 'reviewed' || !activeRolesCanEdit()) return
+    const confirmed = window.confirm('¿Enviar el artículo Web/SEO a WordPress como BORRADOR? No se publicará automáticamente.')
+    if (!confirmed) return
+    const button = root.querySelector('#send-wordpress')
+    button.disabled = true
+    try {
+      const result = await EditorialService.sendToWordPress(activeUnitId)
+      await loadDistributionHistory(activeUnitId)
+      const link = result?.wordpress?.link
+      notice.textContent = result?.already_sent ? 'Esta versión ya tenía un borrador enviado a WordPress.' : 'Artículo enviado a WordPress y guardado como borrador.'
+      if (link) window.open(link, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      notice.textContent = error.message
+    } finally {
+      button.disabled = false
+      updateWordPressAction()
     }
   })
 
@@ -707,7 +748,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       activeUnitId = unit.id
       root.querySelector('#change-note').value = ''
       root.querySelector('#review-note').value = ''
-      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id), loadWorkAssignment(unit.id)])
+      updateWordPressAction()
+      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id), loadWorkAssignment(unit.id), loadDistributionHistory(unit.id)])
       detailDialog.showModal()
     } catch (error) { notice.textContent = error.message }
   }
