@@ -1,4 +1,5 @@
 import { CriticalEditorService } from './editor-critico.service.js'
+import './editor-critico.css'
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
