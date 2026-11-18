@@ -74,7 +74,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         <div id="status-history" class="review-history" aria-live="polite"></div>
       </section>
       <section class="review-workflow" aria-labelledby="review-workflow-heading">
-        <div class="quality-panel-head"><div><h3 id="review-workflow-heading">Revisión y aprobación humana</h3><p class="muted small">La solicitud requiere seis formatos vigentes y un control de calidad actualizado. La decisión final corresponde a un editor.</p></div></div>
+        <div class="quality-panel-head"><div><h3 id="review-workflow-heading">Revisión y aprobación humana</h3><p class="muted small">La solicitud requiere seis formatos vigentes. El sistema realiza verificaciones internas antes de registrar la decisión; la aprobación final corresponde a un editor.</p></div></div>
         <div id="review-history" class="review-history" aria-live="polite"><p class="muted small">Cargando historial de revisión…</p></div>
         <label for="review-note">Nota para el equipo</label>
         <textarea id="review-note" rows="2" minlength="3" maxlength="3000" placeholder="Motivo de la solicitud, correcciones o fundamento de aprobación…"></textarea>
@@ -98,15 +98,6 @@ export async function renderWorkspace(root, user, onSignOut) {
       <div class="dialog-head"><div><p class="eyebrow">DERIVACIÓN MULTIFORMATO</p><h2 id="formats-heading">Seis formatos editoriales</h2></div><button type="button" class="icon-button" id="close-formats" aria-label="Cerrar">×</button></div>
       <p class="muted small">Cada borrador queda vinculado a una versión concreta del contenido madre. Si cambia la investigación, el formato se marca como desactualizado y necesita revisión.</p>
       <div id="format-list" class="format-list" aria-live="polite"><p class="muted small">Cargando formatos…</p></div>
-      <section class="quality-panel" aria-labelledby="quality-heading">
-        <div class="quality-panel-head"><div><h3 id="quality-heading">Control de calidad editorial</h3><p class="muted small">Revisión estructural, trazabilidad y alertas comparativas. No reemplaza el criterio periodístico.</p></div><button type="button" class="button primary" id="run-quality">Ejecutar control</button></div>
-        <div id="quality-report" aria-live="polite"><p class="muted small">Todavía no se ejecutó un control para esta unidad.</p></div>
-        <form id="quality-observation-form" class="quality-observation-form">
-          <div><label for="quality-severity">Tipo de observación</label><select id="quality-severity" name="severity"><option value="note">Nota</option><option value="warning">Advertencia</option><option value="critical">Crítica</option></select></div>
-          <div><label for="quality-note">Observación editorial</label><textarea id="quality-note" name="note" rows="2" minlength="3" maxlength="3000" required placeholder="Registrá un punto que el equipo deba atender…"></textarea></div>
-          <button type="submit" class="button ghost" id="save-quality-observation" disabled>Registrar observación</button>
-        </form>
-      </section>
       <form id="format-form" class="format-editor stack">
         <h3>Editar borrador</h3>
         <label for="format-type">Formato</label>
@@ -176,7 +167,6 @@ export async function renderWorkspace(root, user, onSignOut) {
   let workQueueItems = []
   let formatRecords = []
   let generatedSourceVersionId = null
-  let activeQualityReviewId = null
   let bundle = { sources: [], claims: [], evidences: [], verifications: [] }
 
   root.querySelector('#new-unit').addEventListener('click', () => createDialog.showModal())
@@ -192,7 +182,6 @@ export async function renderWorkspace(root, user, onSignOut) {
     activeUnitId = root.querySelector('#detail-form').elements.id.value
     activeUnitTitle = root.querySelector('#detail-heading').textContent
     await loadFormats()
-    await loadQualityHistory()
     detailDialog.close()
     formatsDialog.showModal()
   })
@@ -241,7 +230,6 @@ export async function renderWorkspace(root, user, onSignOut) {
       generatedSourceVersionId = result.source_version_id
       note.textContent = 'Los seis formatos fueron generados y guardados como borradores sobre la misma versión madre. Modelos utilizados: ' + ((result.models_used || []).join(', ') || 'Gemini') + '. Todos requieren revisión humana.'
       await loadFormats()
-      await loadQualityHistory()
       notice.textContent = 'Generación completa: seis formatos guardados como borradores.'
     } catch (error) {
       note.textContent = error.message + ' Revisá los formatos guardados antes de volver a ejecutar para evitar duplicar trabajo.'
@@ -252,88 +240,6 @@ export async function renderWorkspace(root, user, onSignOut) {
       singleButton.disabled = false
     }
   })
-
-  root.querySelector('#run-quality').addEventListener('click', async () => {
-    const button = root.querySelector('#run-quality')
-    button.disabled = true
-    root.querySelector('#quality-report').innerHTML = '<p class="muted small">Analizando fuentes, afirmaciones, evidencias y los seis formatos…</p>'
-    try {
-      const review = await EditorialService.runQualityCheck(activeUnitId)
-      activeQualityReviewId = review.id
-      await loadQualityHistory()
-      notice.textContent = review.status === 'needs_attention'
-        ? 'Control registrado: hay alertas que requieren atención editorial.'
-        : 'Control registrado. Los chequeos estructurales finalizaron; continúa la revisión humana.'
-    } catch (error) {
-      root.querySelector('#quality-report').innerHTML = '<p class="muted small">' + esc(error.message) + '</p>'
-    } finally {
-      button.disabled = false
-    }
-  })
-
-  root.querySelector('#quality-observation-form').addEventListener('submit', async (event) => {
-    event.preventDefault()
-    if (!activeQualityReviewId) {
-      notice.textContent = 'Ejecutá primero un control de calidad para asociar la observación.'
-      return
-    }
-    const form = event.currentTarget
-    const button = form.querySelector('[type="submit"]')
-    const values = Object.fromEntries(new FormData(form).entries())
-    button.disabled = true
-    try {
-      await EditorialService.addQualityObservation(activeQualityReviewId, values)
-      form.reset()
-      await loadQualityHistory()
-      notice.textContent = 'Observación editorial registrada en el historial.'
-    } catch (error) {
-      notice.textContent = error.message
-    } finally {
-      button.disabled = false
-    }
-  })
-
-  async function loadQualityHistory() {
-    const container = root.querySelector('#quality-report')
-    const saveButton = root.querySelector('#save-quality-observation')
-    activeQualityReviewId = null
-    container.innerHTML = '<p class="muted small">Cargando historial de controles…</p>'
-    try {
-      const [history, latestVersion] = await Promise.all([
-        EditorialService.qualityHistory(activeUnitId),
-        EditorialService.latestVersionId(activeUnitId)
-      ])
-      const latest = history[0]
-      if (!latest) {
-        activeQualityReviewId = null
-        saveButton.disabled = true
-        container.innerHTML = '<p class="muted small">Todavía no se ejecutó un control para esta unidad.</p>'
-        return
-      }
-      const lastFormatChange = Math.max(0, ...formatRecords.map(item => new Date(item.updated_at).getTime()))
-      const reportIsCurrent = latest.source_version_id === latestVersion.id && new Date(latest.created_at).getTime() >= lastFormatChange
-      activeQualityReviewId = reportIsCurrent ? latest.id : null
-      saveButton.disabled = !reportIsCurrent
-      const statusLabel = !reportIsCurrent
-        ? 'Control desactualizado · ejecutar nuevamente'
-        : latest.status === 'needs_attention' ? 'Requiere atención' : 'Chequeos completados · revisión humana pendiente'
-      const findings = latest.findings ?? []
-      const severityLabel = { critical: 'Crítica', warning: 'Advertencia', note: 'Nota' }
-      const checklist = latest.checklist ?? []
-      const observations = latest.observations ?? []
-      container.innerHTML = `
-        <div class="quality-summary"><strong>${esc(statusLabel)}</strong><span>Versión ${esc(latest.metrics?.version_number ?? '—')} · ${date(latest.created_at)}</span><span>${esc(findings.length)} alertas · ${esc(observations.length)} observaciones humanas</span></div>
-        <div class="quality-checklist"><h4>Checklist</h4>${checklist.map(item => `<div class="quality-check"><span class="${item.passed ? 'quality-pass' : 'quality-pending'}">${item.passed ? '✓' : '○'}</span><div><strong>${esc(item.label)}</strong><small>${esc(item.detail)}</small></div></div>`).join('')}</div>
-        <div class="quality-findings"><h4>Alertas detectadas</h4>${findings.length ? findings.map(item => `<article class="quality-finding severity-${esc(item.severity)}"><strong>${esc(severityLabel[item.severity] || item.severity)} · ${esc(item.code.replaceAll('_', ' '))}</strong><p>${esc(item.message)}</p>${item.format_type ? `<small>Formato: ${esc(item.format_type.replaceAll('_', ' '))}</small>` : ''}</article>`).join('') : '<p class="muted small">No se detectaron alertas estructurales. Esto no equivale a una aprobación editorial.</p>'}</div>
-        <div class="quality-observations"><h4>Observaciones del equipo</h4>${observations.length ? observations.map(item => `<article class="quality-observation"><span>${esc(severityLabel[item.severity] || item.severity)} · ${date(item.created_at)}</span><p>${esc(item.note)}</p></article>`).join('') : '<p class="muted small">Todavía no hay observaciones humanas registradas.</p>'}</div>
-        ${history.length > 1 ? `<p class="muted small">Hay ${history.length - 1} controles anteriores en el historial.</p>` : ''}
-      `
-    } catch (error) {
-      activeQualityReviewId = null
-      saveButton.disabled = true
-      container.innerHTML = '<p class="muted small">No se pudo cargar el historial: ' + esc(error.message) + '</p>'
-    }
-  }
 
   root.querySelector('#format-form').addEventListener('submit', async (event) => {
     event.preventDefault()
@@ -684,6 +590,9 @@ export async function renderWorkspace(root, user, onSignOut) {
     }
     button.disabled = true
     try {
+      // El control se ejecuta internamente: no requiere un panel visible.
+      // La base de datos valida versión vigente, seis formatos y alertas críticas.
+      await EditorialService.runQualityCheck(activeUnitId)
       await EditorialService.recordReviewEvent(activeUnitId, button.dataset.event, note)
       const refreshed = await EditorialService.get(activeUnitId)
       activeUnit = refreshed
