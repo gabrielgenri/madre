@@ -267,3 +267,12 @@ No se deben guardar estas credenciales en GitHub, archivos frontend ni variables
 - La lista puede personalizarse desde secretos del entorno Edge Functions. La API key no se expone al frontend.
 - Se devuelve `model_used` y `fallback_attempts` para trazabilidad operativa.
 - Verificación realizada: Supabase confirmó que la Edge Function quedó activa con JWT obligatorio. Falta una generación real autenticada para validar cuota, disponibilidad y permisos de la clave Gemini del proyecto.
+
+
+## Ajuste de interfaz — Panel de control de calidad retirado
+
+- Se eliminó por completo el panel visible de control de calidad editorial, incluyendo botón de ejecución, checklist, alertas y formulario de observaciones.
+- Para conservar las validaciones del circuito editorial, la aplicación ejecuta el control de calidad internamente justo antes de registrar una solicitud de revisión, una solicitud de correcciones o una aprobación.
+- La base de datos continúa verificando que existan seis formatos completos y vigentes, que el control corresponda a la versión madre actual y que no existan alertas críticas.
+- La revisión y aprobación siguen siendo decisiones humanas; el control automático no aprueba ni cambia el estado editorial.
+- Pendiente: prueba de navegador para confirmar la eliminación visual y el flujo automático de revisión.
