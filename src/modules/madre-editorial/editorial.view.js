@@ -65,6 +65,14 @@ export async function renderWorkspace(root, user, onSignOut) {
       <label for="change-note">Motivo de esta modificación</label><input id="change-note" name="change_note" required minlength="3" maxlength="500" placeholder="Ej.: incorporación de nueva documentación oficial" />
       <section class="version-panel" aria-labelledby="version-heading"><div class="version-panel-head"><h3 id="version-heading">Historial de versiones</h3><span class="muted small">Las versiones anteriores no se sobrescriben</span></div><div id="version-list" class="version-list" aria-live="polite"><p class="muted small">Cargando historial…</p></div></section>
       <label for="detail-status">Estado editorial</label><input id="detail-status" value="Borrador" readonly aria-readonly="true" />
+      <section class="status-change-panel" id="status-change-panel" hidden aria-labelledby="status-change-heading">
+        <h3 id="status-change-heading">Cambiar estado editorial</h3>
+        <p class="muted small">Solo editor/admin. Cada cambio requiere un motivo y queda registrado. El estado Revisado se obtiene exclusivamente mediante la aprobación humana.</p>
+        <label for="status-target">Nuevo estado</label><select id="status-target"></select>
+        <label for="status-note">Motivo del cambio</label><textarea id="status-note" rows="2" minlength="3" maxlength="1000" placeholder="Ej.: publicación confirmada en el sitio / devolución a Borrador para una nueva edición"></textarea>
+        <button type="button" class="button primary" id="apply-status-change">Aplicar cambio</button>
+        <div id="status-history" class="review-history" aria-live="polite"></div>
+      </section>
       <section class="review-workflow" aria-labelledby="review-workflow-heading">
         <div class="quality-panel-head"><div><h3 id="review-workflow-heading">Revisión y aprobación humana</h3><p class="muted small">La solicitud requiere seis formatos vigentes y un control de calidad actualizado. La decisión final corresponde a un editor.</p></div></div>
         <div id="review-history" class="review-history" aria-live="polite"><p class="muted small">Cargando historial de revisión…</p></div>
@@ -614,6 +622,57 @@ export async function renderWorkspace(root, user, onSignOut) {
     return currentRoles.some(role => ['editor', 'admin'].includes(role))
   }
 
+  function updateStatusAction() {
+    const panel = root.querySelector('#status-change-panel')
+    const select = root.querySelector('#status-target')
+    const allowed = activeRolesCanEdit() && ['reviewed', 'published'].includes(activeUnit?.status)
+    panel.hidden = !allowed
+    if (!allowed) return
+    select.innerHTML = activeUnit.status === 'reviewed'
+      ? '<option value="published">Publicado</option>'
+      : '<option value="draft">Borrador</option>'
+    root.querySelector('#status-note').value = ''
+  }
+
+  async function loadStatusHistory(unitId) {
+    const container = root.querySelector('#status-history')
+    try {
+      const events = await EditorialService.statusHistory(unitId)
+      const labels = { draft: 'Borrador', reviewed: 'Revisado', published: 'Publicado' }
+      container.innerHTML = events.length ? '<h4>Historial de estados</h4>' + events.map(item =>
+        '<article class="review-event"><strong>' + esc(labels[item.from_status] || item.from_status) + ' → ' + esc(labels[item.to_status] || item.to_status) + '</strong><span>' + date(item.created_at) + ' · Responsable ' + esc(item.created_by.slice(0,8)) + '</span><p>' + esc(item.note) + '</p></article>'
+      ).join('') : '<p class="muted small">Todavía no hay cambios manuales de estado.</p>'
+    } catch (error) {
+      container.innerHTML = '<p class="muted small">No se pudo cargar el historial de estados: ' + esc(error.message) + '</p>'
+    }
+  }
+
+  root.querySelector('#apply-status-change').addEventListener('click', async () => {
+    if (!activeUnitId || !activeRolesCanEdit()) return
+    const status = root.querySelector('#status-target').value
+    const note = root.querySelector('#status-note').value.trim()
+    if (note.length < 3) { notice.textContent = 'Indicá el motivo del cambio de estado (mínimo 3 caracteres).'; return }
+    const button = root.querySelector('#apply-status-change')
+    const confirmed = window.confirm(status === 'published'
+      ? '¿Confirmás que el artículo ya fue publicado externamente? Madre registrará el estado Publicado, pero no publicará por sí misma en WordPress.'
+      : '¿Devolver esta unidad a Borrador? Tendrá que pasar nuevamente por el circuito editorial.')
+    if (!confirmed) return
+    button.disabled = true
+    try {
+      await EditorialService.changeStatus(activeUnitId, status, note)
+      activeUnit = await EditorialService.get(activeUnitId)
+      root.querySelector('#detail-status').value = activeUnit.status === 'published' ? 'Publicado' : activeUnit.status === 'reviewed' ? 'Revisado' : 'Borrador'
+      updateStatusAction()
+      updateWordPressAction()
+      await Promise.all([loadStatusHistory(activeUnitId), loadReviewHistory(activeUnitId), loadUnits(), loadWorkQueue()])
+      notice.textContent = 'Estado editorial actualizado y decisión registrada en el historial.'
+    } catch (error) {
+      notice.textContent = error.message
+    } finally {
+      button.disabled = false
+    }
+  })
+
   root.querySelector('.review-actions').addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-event]')
     if (!button || !activeUnitId) return
@@ -629,6 +688,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       activeUnit = refreshed
       root.querySelector('#detail-status').value = refreshed.status === 'published' ? 'Publicado' : refreshed.status === 'reviewed' ? 'Revisado' : 'Borrador'
       updateWordPressAction()
+      updateStatusAction()
+      await loadStatusHistory(activeUnitId)
       root.querySelector('#review-note').value = ''
       await loadReviewHistory(activeUnitId)
       await Promise.all([loadUnits(), loadWorkQueue()])
@@ -749,7 +810,8 @@ export async function renderWorkspace(root, user, onSignOut) {
       root.querySelector('#change-note').value = ''
       root.querySelector('#review-note').value = ''
       updateWordPressAction()
-      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id), loadWorkAssignment(unit.id), loadDistributionHistory(unit.id)])
+      updateStatusAction()
+      await Promise.all([loadVersions(unit.id), loadReviewHistory(unit.id), loadStatusHistory(unit.id), loadWorkAssignment(unit.id), loadDistributionHistory(unit.id)])
       detailDialog.showModal()
     } catch (error) { notice.textContent = error.message }
   }
