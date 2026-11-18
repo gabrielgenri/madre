@@ -114,15 +114,17 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - El endpoint devuelve un borrador estructurado, la versión madre utilizada, IDs de fuentes y afirmaciones citadas y alertas editoriales. No escribe en la base de datos.
 - La interfaz permite solicitar la generación, revisar y editar el resultado y guardarlo como borrador mediante la RPC existente. Antes de guardar, compara la versión madre utilizada con la última versión disponible y bloquea el guardado si hubo cambios.
 - La generación y el guardado no revisan, aprueban ni publican automáticamente. La responsabilidad editorial sigue siendo humana.
-- El proveedor previsto es OpenAI mediante la Responses API. La función lee `OPENAI_API_KEY` desde los secretos del entorno Edge Functions y permite configurar `OPENAI_MODEL` (por defecto `gpt-4.1-mini`); la clave no se guarda en el repositorio ni en el navegador.
+- El proveedor es Google Gemini mediante `generateContent`; la clave se lee exclusivamente desde `GEMINI_API_KEY` en Supabase Edge Functions Secrets.
+- La selección de modelos admite `GEMINI_MODEL` como prioridad inicial y `GEMINI_MODELS` como lista configurable separada por comas. Si no se configuran, se intenta esta cadena: `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite`, `gemini-3.1-flash-lite`.
+- Ante cuota/límite (429), sobrecarga (503/5xx), timeout, error de red o modelo no disponible (404), la función pasa al siguiente modelo sin repetir indefinidamente el mismo proveedor. Devuelve el modelo que respondió y el detalle de los intentos de fallback.
+- Si todos fallan, responde con un error recuperable y no guarda ningún borrador parcial.
 
-### Configuración externa pendiente
+### Configuración externa
 
-- Confirmar en Supabase Dashboard → Edge Functions → Secrets que exista `OPENAI_API_KEY`; si falta, cargarlo allí. Sin ese secreto, la función responde `503 provider_not_configured` y la generación no estará disponible.
-- Opcionalmente definir `OPENAI_MODEL`; si no se define, la función usa `gpt-4.1-mini`.
+- Configurar `GEMINI_API_KEY` en Supabase → Edge Functions → Secrets.
+- Opcional: definir `GEMINI_MODEL` para fijar el primer modelo y `GEMINI_MODELS` para controlar la secuencia de respaldo.
 - Ejecutar una generación real con usuario autenticado, verificar las referencias devueltas y probar el bloqueo por cambio de versión madre.
-- Ejecutar `vite build` y pruebas de navegador. No se declaran realizadas en esta entrega.
-
+- Ejecutar `vite build` y pruebas de navegador. No se declaran realizadas.
 
 ## PASO 17 — Control de calidad editorial y registro de observaciones
 
@@ -257,3 +259,11 @@ No se deben guardar estas credenciales en GitHub, archivos frontend ni variables
 - La interfaz muestra los cambios disponibles según el estado y el rol; exige motivo y confirmación para registrar la publicación externa. La acción no publica por sí sola en WordPress.
 - La base de datos aplica una validación adicional para impedir que se omitan las decisiones de aprobación o el registro del cambio de estado.
 - Pendiente: probar los controles desde navegador con perfiles editor/admin y confirmar el flujo con WordPress real.
+
+## MEJORA — Respaldo automático entre modelos Gemini
+
+- La función de generación fue actualizada y desplegada como versión 24.
+- Modelos predeterminados: `gemini-3.8-flash`, `gemini-3.6-flash`, `gemini-3.5-flash-lite` y `gemini-3.1-flash-lite`.
+- La lista puede personalizarse desde secretos del entorno Edge Functions. La API key no se expone al frontend.
+- Se devuelve `model_used` y `fallback_attempts` para trazabilidad operativa.
+- Verificación realizada: Supabase confirmó que la Edge Function quedó activa con JWT obligatorio. Falta una generación real autenticada para validar cuota, disponibilidad y permisos de la clave Gemini del proyecto.
