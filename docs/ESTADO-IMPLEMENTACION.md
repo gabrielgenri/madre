@@ -194,3 +194,14 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - No se declara compilación Vite, prueba de navegador ni E2E como realizada.
 - El asesor de rendimiento conserva siete claves foráneas sin índice en tablas preexistentes y reporta índices aún no utilizados (incluidos algunos nuevos, esperable antes de tener carga real). La advertencia de políticas SELECT múltiples en `user_roles` quedó resuelta.
 - El asesor de seguridad mantiene las advertencias previas sobre `audit_editorial_unit`, `handle_new_user`, `has_role` (SECURITY DEFINER expuestas a anon/authenticated) y la protección de contraseñas filtradas deshabilitada.
+
+## Mejora — Generación conjunta de los seis formatos
+
+- Se agregó la acción **Generar los seis formatos** en el editor de formatos.
+- La acción ejecuta en una sola interacción los seis tipos definidos: Web/SEO, Reel 60 s, Podcast Primera Hora, Carrusel de 8 placas, Newsletter y WhatsApp.
+- La generación se realiza en secuencia para evitar seis solicitudes simultáneas a Gemini y reducir la presión sobre los límites del proveedor.
+- Antes de guardar, se comprueba que el Contenido Madre conserve la misma versión que al iniciar la generación.
+- Los seis resultados se guardan como borradores mediante el RPC existente `save_editorial_format`; no se aprueban ni publican automáticamente.
+- La interfaz muestra el progreso de generación y guardado, actualiza la lista de formatos y comunica errores parciales para que el equipo revise qué piezas llegaron a guardarse.
+- **Pendiente de prueba:** ejecutar la generación completa desde navegador con una unidad real y comprobar que los seis formatos queden guardados.
+- **Estado de publicación:** la unidad ya dispone del flujo existente `draft → reviewed → published` y la revisión/aprobación humana. La opción visible y segura para cambiar a «Publicada» debe conectarse a la autorización de publicación ya protegida por backend; no se habilita un cambio directo desde el selector del navegador.
