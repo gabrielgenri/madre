@@ -55,7 +55,7 @@ export const DashboardService = {
     const published = rows.filter(item => item.status === 'published')
 
     const statusCounts = [
-      { key: 'draft', label: 'En producción', count: draft.length },
+      { key: 'draft', label: 'En producción', count: draft.length - waiting.length },
       { key: 'review', label: 'Esperando revisión', count: waiting.length },
       { key: 'reviewed', label: 'Revisadas', count: reviewed.length },
       { key: 'published', label: 'Publicadas', count: published.length }
@@ -88,7 +88,7 @@ export const DashboardService = {
     const durations = []
     for (const event of reviewsResult.data ?? []) {
       const key = event.editorial_unit_id + ':' + event.source_version_id
-      if (event.event_type === 'review_requested' && !requests.has(key)) requests.set(key, new Date(event.created_at).getTime())
+      if (event.event_type === 'review_requested') requests.set(key, new Date(event.created_at).getTime())
       if (event.event_type === 'approved' && requests.has(key)) {
         const hours = (new Date(event.created_at).getTime() - requests.get(key)) / 3600000
         if (hours >= 0) durations.push(hours)
@@ -99,7 +99,8 @@ export const DashboardService = {
       ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length * 10) / 10
       : null
 
-    const attention = [...overdue, ...waiting].sort((a, b) => {
+    const attentionById = new Map([...waiting, ...overdue].map(unit => [unit.id, unit]))
+    const attention = [...attentionById.values()].sort((a, b) => {
       const aOver = a.due_at && new Date(a.due_at).getTime() < now ? 0 : 1
       const bOver = b.due_at && new Date(b.due_at).getTime() < now ? 0 : 1
       return aOver - bOver || new Date(a.due_at || a.updated_at) - new Date(b.due_at || b.updated_at)
