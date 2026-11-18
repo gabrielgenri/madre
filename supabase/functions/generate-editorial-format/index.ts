@@ -156,14 +156,18 @@ Transformás información editorial existente en un borrador. Reglas obligatoria
         lastProviderMessage = detail.slice(0, 500);
         attempts.push({ model, status: response.status, reason: response.status === 429 ? "rate_limited" : response.status >= 500 ? "temporarily_unavailable" : response.status === 404 ? "model_unavailable" : "provider_error" });
         console.warn("Gemini model failed; trying fallback", model, response.status, detail.slice(0, 300));
-        // Quota, overload, timeout and unavailable-model responses move directly to the next model.
-        if ([400, 401, 403].includes(response.status)) {
-          return json({ error: "Gemini rechazó la solicitud o la credencial. Revisá la clave y los permisos del proyecto.", provider_status: response.status, model, attempts }, 502);
-        }
+        // Cualquier error del modelo se registra y se prueba el siguiente; si la clave es inválida, agotará la cadena.
         continue;
       }
 
-      const aiData = await response.json();
+      let aiData: any;
+      try {
+        aiData = await response.json();
+      } catch {
+        attempts.push({ model, status: 502, reason: "invalid_provider_response" });
+        lastProviderStatus = 502;
+        continue;
+      }
       const raw = aiData.candidates?.[0]?.content?.parts
         ?.map((part: any) => part.text ?? "")
         .join("")
