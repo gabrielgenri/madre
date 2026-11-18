@@ -74,6 +74,14 @@ Deno.serve(async (req: Request) => {
     const unitId = typeof body.unit_id === "string" ? body.unit_id : "";
     if (!/^[0-9a-f-]{36}$/i.test(unitId)) return json({ error: "Unidad editorial no válida." }, 400, origin);
 
+    const { data: roleRows, error: roleError } = await supabase.from("user_roles")
+      .select("role").eq("user_id", authData.user.id);
+    if (roleError) throw roleError;
+    const allowedRoles = new Set(["writer", "collaborator", "reviewer", "editor", "admin"]);
+    if (!(roleRows ?? []).some((item) => allowedRoles.has(item.role))) {
+      return json({ error: "Tu perfil no tiene un rol habilitado para ejecutar el Editor Crítico." }, 403, origin);
+    }
+
     const apiKey = Deno.env.get("OPENAI_API_KEY");
     if (!apiKey) return json({
       error: "Falta configurar OPENAI_API_KEY en Supabase → Edge Functions → Secrets.",
