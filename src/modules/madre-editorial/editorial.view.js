@@ -260,7 +260,6 @@ export async function renderWorkspace(root, user, onSignOut) {
       notice.textContent = 'Borrador guardado y vinculado a la versión madre vigente.'
       await loadFormats()
       selectFormat(values.format_type)
-      await loadQualityHistory()
     } catch (error) {
       notice.textContent = error.message
     } finally {
