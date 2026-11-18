@@ -32,7 +32,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         <nav aria-label="Navegación principal">
           <a class="nav-item active" href="#editorial">Madre Editorial</a>
           <span class="nav-item disabled">Biblioteca Riojana <small>Próximamente</small></span>
-          <span class="nav-item disabled">Editor Crítico <small>Próximamente</small></span>
+          <span class="nav-item">Editor Crítico <small>Dentro de cada unidad</small></span>
           <span class="nav-item disabled">Transcripción <small>Próximamente</small></span>
           <span class="nav-item disabled">Observatorios <small>Próximamente</small></span>
           <span class="nav-item disabled">Distribución <small>Próximamente</small></span>
