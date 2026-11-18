@@ -53,7 +53,8 @@
   .contenido-ia blockquote{margin:16px 0;padding:14px 18px;background:#fafafa;border-left:4px solid var(--accent);border-radius:8px;color:#222;}
   .contenido-ia blockquote p:last-child{margin-bottom:0;}
   .contenido-ia hr{border:0;border-top:1px solid var(--line);margin:24px 0;}
-  .contenido-ia code{background:#f2f2f2;padding:1px 6px;border-radius:4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;}
+  .contenido-ia code{background:#f2f2f2;padding:1px 6px;border-radius:4px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;word-break:break-all;}
+  .contenido-ia a{color:#1a4fa0;text-decoration:underline;text-decoration-style:dotted;}
 
   .flujo{margin:18px 0;padding:16px 18px;background:#fbfbfb;border:1px dashed var(--line);border-radius:10px;font-size:14.5px;line-height:1.55;}
   .flujo p{margin:0 0 6px;}
@@ -115,70 +116,86 @@
   .formato .formato-title{font-weight:700;margin:0 0 4px;font-size:14px;}
   .formato .formato-meta{color:var(--muted);font-size:12px;margin:0 0 6px;}
 
-  /* ===== AVISO Y BLOQUE DE CÓDIGO DEFECTUOSO (ROJO) ===== */
-  .aviso-corte{
-    background:var(--defect-warn);
-    border:1px solid var(--defect-warn-border);
-    border-left:5px solid #d4b106;
-    border-radius:10px;
-    padding:12px 16px;
-    margin:14px 0 8px;
-    font-size:13.5px;
-    color:#7a5c00;
-    font-weight:500;
-  }
-  .aviso-corte::before{content:"⚠️ ";font-weight:700;}
+  /* Badges */
+  .badge{display:inline-block;padding:2px 10px;border-radius:6px;font-size:11.5px;font-weight:600;letter-spacing:.2px;vertical-align:middle;}
+  .badge.success{background:#e8f8ec;color:#1e7a3a;border:1px solid #bde5c8;}
+  .badge.warning{background:#fff8e1;color:#8a6d00;border:1px solid #f0e0a0;}
+  .badge.neutral{background:#f4f4f4;color:#555;border:1px solid #ddd;}
+  .badge.info{background:#e8f0fe;color:#1a4fa0;border:1px solid #c8d8f4;}
 
-  .code-defectuoso{
-    background:var(--defect-bg);
-    border:2px solid var(--defect-border);
-    border-radius:12px;
-    margin:14px 0;
-    overflow:hidden;
-    box-shadow:0 0 0 3px rgba(231,76,60,.10);
-  }
-  .code-defectuoso .code-head{
-    display:flex;align-items:center;justify-content:space-between;
-    background:#fbd6d1;
-    padding:8px 14px;
-    border-bottom:1px solid #f0b8b0;
-    font-size:12.5px;
-    font-weight:700;
-    color:var(--defect-ink);
-  }
-  .code-defectuoso .code-head .badge{
-    background:var(--defect-border);color:#fff;
-    border-radius:6px;padding:2px 9px;
-    font-size:11px;letter-spacing:.5px;text-transform:uppercase;
-  }
-  .code-defectuoso pre{
-    margin:0;padding:16px 18px;
-    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-    font-size:13.5px;line-height:1.6;
-    color:#7a2820;
-    background:#fff7f6;
-    white-space:pre-wrap;word-break:break-word;
-  }
-  .code-defectuoso .corte-line{
-    display:inline-block;
-    background:var(--defect-border);
-    color:#fff;
-    font-weight:700;
-    padding:0 6px;
-    border-radius:4px;
-    margin-left:4px;
-    font-size:11px;
-    letter-spacing:.4px;
-  }
-  .code-defectuoso .cursor-corte{
-    display:inline-block;
-    width:9px;height:16px;
-    background:var(--defect-border);
-    vertical-align:text-bottom;
-    margin-left:2px;
-    animation:parpadeo 1s steps(2,start) infinite;
-  }
+  /* Grid numerado */
+  .grid-num{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0;}
+  .grid-num .item{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fcfcfc;}
+  .grid-num .item .num{font-size:1.5rem;font-weight:700;color:#1a4fa0;line-height:1;margin:0 0 6px;}
+  .grid-num .item .titulo{font-weight:700;margin:0 0 4px;font-size:14.5px;}
+  .grid-num .item .desc{color:var(--muted);font-size:13px;margin:0;}
+
+  /* Grid de formatos */
+  .grid-formatos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0;padding:16px;background:#fafafa;border:1px solid var(--line);border-radius:12px;}
+  .grid-formatos .ft{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:#fff;text-align:center;}
+  .grid-formatos .ft .ft-title{font-weight:700;font-size:14.5px;margin:0 0 4px;color:#111;}
+  .grid-formatos .ft .ft-desc{font-size:12.5px;color:var(--muted);margin:0;}
+
+  /* Diagrama de versiones */
+  .diagrama-version{border:1px solid var(--line);border-radius:12px;padding:18px 16px;margin:16px 0;background:#fcfcfc;}
+  .diagrama-version .dv-box{background:#f0f0f0;border-radius:8px;padding:12px 16px;text-align:center;font-weight:700;font-size:14px;color:#111;margin:0 auto;max-width:320px;}
+  .diagrama-version .dv-arrow{text-align:center;color:var(--muted);font-size:20px;margin:6px 0;}
+  .diagrama-version .dv-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0;}
+  .diagrama-version .dv-item{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:#fff;text-align:center;font-size:13px;}
+  .diagrama-version .dv-item .dv-nombre{font-weight:600;margin:0 0 6px;font-size:13.5px;color:#222;}
+  .diagrama-version .dv-alerta{background:#fff8e1;border:1px solid #f0e0a0;border-radius:8px;padding:12px 16px;text-align:center;font-weight:700;font-size:13.5px;color:#8a6d00;margin-top:8px;}
+
+  /* Lista de verificación */
+  .check-list{list-style:none;padding:0;margin:14px 0;}
+  .check-list .check-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:14px;}
+  .check-list .check-item:last-child{border-bottom:none;}
+  .check-list .check-icon{flex:0 0 auto;width:20px;height:20px;margin-top:1px;}
+  .check-list .check-icon.ok{color:#1e7a3a;}
+  .check-list .check-icon.pend{color:#8a6d00;}
+
+  /* Pill */
+  .pill-openai{display:inline-flex;align-items:center;gap:6px;background:#f0f0f0;border-radius:8px;padding:2px 8px;font-size:11px;color:#555;font-weight:600;vertical-align:middle;margin:0 2px;}
+  .pill-openai::before{content:"";width:10px;height:10px;background:#10a37f;border-radius:2px;display:inline-block;}
+  .pill-supabase{display:inline-flex;align-items:center;gap:6px;background:#f0f0f0;border-radius:8px;padding:2px 8px;font-size:11px;color:#555;font-weight:600;vertical-align:middle;margin:0 2px;}
+  .pill-supabase::before{content:"";width:10px;height:10px;background:#3ecf8e;border-radius:2px;display:inline-block;}
+
+  /* Bloque de métricas */
+  .metricas{border:1px solid var(--line);border-radius:12px;background:#fcfcfc;padding:0;margin:16px 0;overflow:hidden;}
+  .metricas .metrica{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);font-size:14px;}
+  .metricas .metrica:last-child{border-bottom:none;}
+  .metricas .metrica .label{color:#333;flex:1;min-width:0;}
+  .metricas .metrica .valor{font-weight:700;font-size:15px;color:#111;white-space:nowrap;}
+
+  /* Caja de verificaciones */
+  .caja-verif{border:1px solid var(--line);border-radius:12px;background:#fcfcfc;padding:0;margin:16px 0;overflow:hidden;}
+  .caja-verif .fila{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap;}
+  .caja-verif .fila:last-child{border-bottom:none;}
+  .caja-verif .fila .lbl{color:#333;font-weight:600;}
+  .caja-verif .fila .descripcion{width:100%;font-size:13px;color:var(--muted);margin:4px 0 0;padding-top:6px;border-top:1px dashed #eee;}
+
+  /* Tarjetas de bandeja */
+  .grid-bandeja{display:grid;grid-template-columns:1fr;gap:12px;margin:16px 0;}
+  .grid-bandeja .b-item{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fcfcfc;display:flex;gap:14px;align-items:flex-start;}
+  .grid-bandeja .b-item .b-icon{flex:0 0 auto;font-size:22px;line-height:1;margin-top:2px;}
+  .grid-bandeja .b-item .b-body{flex:1;min-width:0;}
+  .grid-bandeja .b-item .b-titulo{font-weight:700;margin:0 0 4px;font-size:14.5px;color:#111;}
+  .grid-bandeja .b-item .b-desc{font-size:13.5px;color:#444;margin:0;}
+
+  /* Aviso + Código defectuoso */
+  .aviso-corte{background:var(--defect-warn);border:1px solid var(--defect-warn-border);border-left:5px solid #d4b106;border-radius:10px;padding:12px 16px;margin:14px 0 8px;font-size:13.5px;color:#7a5c00;font-weight:500;}
+  .aviso-corte::before{content:"⚠️ ";font-weight:700;}
+  .code-defectuoso{background:var(--defect-bg);border:2px solid var(--defect-border);border-radius:12px;margin:14px 0;overflow:hidden;box-shadow:0 0 0 3px rgba(231,76,60,.10);}
+  .code-defectuoso .code-head{display:flex;align-items:center;justify-content:space-between;background:#fbd6d1;padding:8px 14px;border-bottom:1px solid #f0b8b0;font-size:12.5px;font-weight:700;color:var(--defect-ink);}
+  .code-defectuoso .code-head .badge-cortado{background:var(--defect-border);color:#fff;border-radius:6px;padding:2px 9px;font-size:11px;letter-spacing:.5px;text-transform:uppercase;}
+  .code-defectuoso pre{margin:0;padding:16px 18px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.6;color:#7a2820;background:#fff7f6;white-space:pre-wrap;word-break:break-word;}
+  .code-defectuoso .corte-line{display:inline-block;background:var(--defect-border);color:#fff;font-weight:700;padding:0 6px;border-radius:4px;margin-left:4px;font-size:11px;letter-spacing:.4px;}
+  .code-defectuoso .cursor-corte{display:inline-block;width:9px;height:16px;background:var(--defect-border);vertical-align:text-bottom;margin-left:2px;animation:parpadeo 1s steps(2,start) infinite;}
   @keyframes parpadeo{to{visibility:hidden;}}
+
+  /* Bloque "actividad en curso" (para el corte del Paso 20) */
+  .actividad-corte{background:#fafafa;border:1px dashed var(--line);border-radius:12px;padding:14px 18px;margin:14px 0;font-size:13.5px;color:var(--muted);}
+  .actividad-corte .act-line{display:flex;align-items:center;gap:8px;margin:6px 0;opacity:.85;}
+  .actividad-corte .act-line .act-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9c9c9;flex:0 0 auto;}
 
   @media print{
     body{background:#fff;}
@@ -187,7 +204,7 @@
     .canvas{max-width:100%;margin:0;padding:0;}
     .mensaje.asistente .contenido-ia{box-shadow:none;border:none;padding:0;}
     .mensaje.usuario .burbuja{background:#f4f4f4;border:1px solid #ddd;}
-    .capa,.flujo,.tabla-flujo,.entidad,.cierre,.modulo,.formato,.aviso-corte,.code-defectuoso{break-inside:avoid;}
+    .capa,.flujo,.tabla-flujo,.entidad,.cierre,.modulo,.formato,.aviso-corte,.code-defectuoso,.grid-num .item,.metricas,.grid-formatos,.diagrama-version,.check-list,.caja-verif,.grid-bandeja .b-item,.actividad-corte{break-inside:avoid;}
     .turno{page-break-inside:auto;}
     h1,h2,h3{break-after:avoid;}
     .cierre{background:#fff;color:#111;border:2px solid #111;}
@@ -203,7 +220,13 @@
     .tabla-flujo{font-size:12.5px;}
     .entidad table{font-size:12.5px;}
     .formatos{grid-template-columns:1fr;}
+    .grid-num{grid-template-columns:1fr;}
+    .grid-formatos{grid-template-columns:1fr;}
+    .diagrama-version .dv-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
     .modulo .meta{grid-template-columns:1fr;}
+    .metricas .metrica{flex-direction:column;align-items:flex-start;gap:2px;}
+    .caja-verif .fila{flex-direction:column;align-items:flex-start;gap:4px;}
+    .grid-bandeja .b-item{flex-direction:column;gap:6px;}
   }
 </style>
 </head>
@@ -223,14 +246,10 @@
 <main class="canvas" id="contenido">
 
   <!-- =========================================================
-       TURNO 0 · viernes 23:56 · PASO 1
+       PASO 1 · Definición
        ========================================================= -->
   <section class="turno">
-    <div class="separador">
-      <time datetime="2026-11-14T02:56:50.317Z">
-        <span class="dia">viernes</span> 23:56
-      </time>
-    </div>
+    <div class="separador"><time datetime="2026-11-14T02:56:50.317Z"><span class="dia">viernes</span> 23:56</time></div>
 
     <div class="mensaje usuario">
       <h4 class="rol">Tú</h4>
@@ -257,15 +276,9 @@
 
         <h3>PASO 1 — Definir qué estamos construyendo</h3>
 
-        <p>Antes de escribir el prompt técnico, propongo fijar esta definición base:</p>
-
         <blockquote>
           <p><strong>MADRE</strong> es el sistema web editorial inteligente que transforma información, documentos, fuentes y hechos en conocimiento periodístico verificable y posteriormente lo atomiza en múltiples formatos de comunicación, manteniendo trazabilidad, control editorial humano, memoria documental y capacidad de publicación multicanal.</p>
         </blockquote>
-
-        <p>Esto nos permite evitar un error importante del prompt anterior: reducir Madre a <strong>"Motor de Contenidos IA"</strong>.</p>
-
-        <p>La nueva versión debería concebirlo como un <strong>sistema editorial completo</strong>, cuyo motor de IA es solamente uno de sus componentes.</p>
 
         <h3>Arquitectura conceptual inicial</h3>
 
@@ -289,176 +302,49 @@
           <p>Biblioteca · Archivo histórico · Datos · Embeddings · Historial · Correcciones</p>
         </div>
 
-        <p>Esta concepción también coincide con la evolución planteada en <strong>Mejorar Prompt</strong>, donde se propone separar un núcleo compartido —autenticación, Supabase, IA, persistencia y guía de estilo— para permitir que Madre pueda crecer como ecosistema modular. <span class="fuente">Mejorar-Prompt</span></p>
-
-        <p><strong>No escribiría todavía el prompt definitivo.</strong> Primero tenemos que cerrar la arquitectura conceptual y funcional.</p>
-
         <h3>Próximo paso</h3>
-        <p>En el <strong>Paso 2</strong> podemos tomar el contenido de "Mejorar Prompt" y convertirlo en una <strong>especificación funcional completa de Madre</strong>, módulo por módulo, eliminando contradicciones como las distintas versiones de 5/6/8 formatos y definiendo qué debe hacer realmente cada componente.</p>
+        <p>En el <strong>Paso 2</strong> podemos convertir "Mejorar Prompt" en una <strong>especificación funcional completa de Madre</strong>.</p>
 
       </div>
     </div>
   </section>
 
   <!-- =========================================================
-       TURNO 1 · sábado · PASO 2 (contenido auténtico de la fuente)
+       PASO 2 · Definición funcional (con bloque defectuoso)
        ========================================================= -->
   <section class="turno">
     <div class="separador"><time><span class="dia">PASO 2</span> · Definir funcionalmente qué es Madre</time></div>
-
-    <div class="mensaje usuario">
-      <h4 class="rol">Tú</h4>
-      <div class="burbuja">si</div>
-    </div>
-
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
 
-        <p>Perfecto. Avancemos con el <strong>Paso 2</strong>, todavía sin escribir el prompt maestro definitivo.</p>
-
         <h2>PASO 2 — DEFINIR FUNCIONALMENTE QUÉ ES MADRE</h2>
-
-        <p>El documento <strong>"Mejorar Prompt"</strong> permite establecer algo importante: Madre ya dejó de ser planteada simplemente como un generador de seis piezas de contenido. La evolución de Madre v2 incorpora <strong>Auth, proxy seguro en Supabase, esquemas JSON, checklist de verificación humana, estados editoriales, guía de estilo, historial y exportaciones</strong>.</p>
-
-        <p>Por eso propongo fijar ahora la arquitectura funcional del sistema.</p>
-
-        <h3>1. MADRE COMO NÚCLEO EDITORIAL</h3>
-
-        <p>La definición de trabajo que deberíamos incorporar al futuro prompt es:</p>
 
         <blockquote>
           <p><strong>Madre es un sistema editorial inteligente que recibe información, hechos, documentos, audios, fuentes y datos; los organiza, contextualiza, verifica y transforma bajo reglas editoriales definidas, para producir conocimiento periodístico y posteriormente atomizarlo en distintos formatos y canales.</strong></p>
         </blockquote>
 
-        <p>Esto cambia una cuestión fundamental:</p>
+        <p><strong>La IA no es Madre.</strong> La IA es un <strong>motor dentro de Madre</strong>.</p>
 
-        <p><strong>La IA no es Madre.</strong></p>
+        <h3>Flujo general</h3>
+        <p>ENTRADA → INGESTA → CONTEXTO → PROCESAMIENTO → EDITOR CRÍTICO → CONTROL HUMANO → ESTADOS → ATOMIZACIÓN → DISTRIBUCIÓN → MEMORIA.</p>
 
-        <p>La IA es un <strong>motor dentro de Madre</strong>.</p>
-
-        <p>Madre debe controlar:</p>
-        <ul>
-          <li>entrada de información;</li>
-          <li>investigación;</li>
-          <li>fuentes;</li>
-          <li>contexto;</li>
-          <li>memoria;</li>
-          <li>producción;</li>
-          <li>formatos;</li>
-          <li>verificación;</li>
-          <li>revisión humana;</li>
-          <li>estados editoriales;</li>
-          <li>trazabilidad;</li>
-          <li>publicación;</li>
-          <li>archivo;</li>
-          <li>actualización y corrección.</li>
-        </ul>
-
-        <p>Esto coincide con la evolución planteada en el documento: controles de aprobación humana, estados <strong>borrador → revisado → publicado</strong>, checklist y publicación en WordPress únicamente como borrador.</p>
-
-        <hr>
-
-        <h1>2. FLUJO GENERAL DE MADRE</h1>
-
-        <p>Vamos a trabajar con este flujo como hipótesis de arquitectura funcional:</p>
-
-        <p><strong>ENTRADA</strong></p>
-        <p>→ hecho<br>→ noticia<br>→ titular<br>→ comunicado<br>→ documento<br>→ entrevista<br>→ audio<br>→ datos<br>→ URL/fuente<br>→ investigación<br>→ producción anterior</p>
-
-        <p>↓</p>
-
-        <p><strong>INGESTA Y ORGANIZACIÓN</strong></p>
-        <p>→ identificación del tema<br>→ extracción de información<br>→ identificación de fuentes<br>→ clasificación<br>→ detección de datos faltantes<br>→ búsqueda de antecedentes</p>
-
-        <p>↓</p>
-
-        <p><strong>CONTEXTO Y MEMORIA</strong></p>
-        <p>→ archivo histórico<br>→ búsqueda semántica<br>→ documentos relacionados<br>→ antecedentes<br>→ producciones anteriores<br>→ datos de observatorios</p>
-
-        <p>↓</p>
-
-        <p><strong>PROCESAMIENTO EDITORIAL</strong></p>
-        <p>→ análisis<br>→ contextualización<br>→ redacción<br>→ generación de metadatos<br>→ detección de inconsistencias<br>→ identificación de afirmaciones que requieren verificación</p>
-
-        <p>↓</p>
-
-        <p><strong>EDITOR CRÍTICO</strong></p>
-        <p>→ sesgos<br>→ claridad<br>→ riesgos legales<br>→ afirmaciones sin fuente<br>→ contradicciones<br>→ problemas de atribución<br>→ puntos <code>[VERIFICAR]</code></p>
-
-        <p>↓</p>
-
-        <p><strong>CONTROL HUMANO</strong></p>
-        <p>→ revisión<br>→ corrección<br>→ checklist<br>→ aprobación</p>
-
-        <p>↓</p>
-
-        <p><strong>ESTADOS</strong></p>
-        <p><code>BORRADOR</code> → <code>EN VERIFICACIÓN</code> → <code>REVISADO</code> → <code>PUBLICADO</code> → eventualmente <code>CORREGIDO / ACTUALIZADO</code></p>
-
-        <p>↓</p>
-
-        <p><strong>ATOMIZACIÓN</strong></p>
-        <p>→ artículo web<br>→ Reel 60 s<br>→ Podcast<br>→ Carrusel 8 placas<br>→ Newsletter<br>→ WhatsApp</p>
-
-        <p>↓</p>
-
-        <p><strong>DISTRIBUCIÓN</strong></p>
-        <p>→ CMS / WordPress<br>→ redes<br>→ newsletter<br>→ mensajería<br>→ archivo</p>
-
-        <p>↓</p>
-
-        <p><strong>MEMORIA</strong></p>
-        <p>→ archivo histórico<br>→ biblioteca<br>→ embeddings<br>→ estadísticas<br>→ observatorios<br>→ correcciones<br>→ versiones</p>
-
-        <hr>
-
-        <h1>3. LOS SEIS FORMATOS QUEDAN FIJADOS</h1>
-
-        <p>En el documento aparecen distintas versiones —5, 6 y referencias posteriores a 8 formatos—, pero el <strong>modelo unificado más desarrollado establece seis</strong>.</p>
-
-        <p>Por ahora fijamos:</p>
+        <h3>Los seis formatos quedan fijados</h3>
         <ol>
-          <li><strong>Artículo Web + SEO</strong></li>
-          <li><strong>Reel / Video de 60 segundos</strong></li>
-          <li><strong>Podcast "Primera Hora"</strong></li>
-          <li><strong>Carrusel de Instagram de 8 diapositivas</strong></li>
-          <li><strong>Newsletter</strong></li>
-          <li><strong>WhatsApp</strong></li>
+          <li>Artículo Web + SEO</li>
+          <li>Reel / Video de 60 segundos</li>
+          <li>Podcast "Primera Hora"</li>
+          <li>Carrusel de Instagram de 8 diapositivas</li>
+          <li>Newsletter</li>
+          <li>WhatsApp</li>
         </ol>
 
-        <p>No considero todavía cerrada la discusión sobre los "8 formatos". La dejamos como <strong>decisión pendiente</strong>, para no inventar ahora cuáles serían los dos restantes.</p>
+        <h3>Dos capas que no debemos confundir</h3>
+        <ul>
+          <li><strong>Capa editorial:</strong> qué sabemos, de dónde surge, qué está verificado, qué falta comprobar, qué contexto tiene, qué puede publicarse.</li>
+          <li><strong>Capa de atomización:</strong> cómo transformamos ese contenido para cada canal.</li>
+        </ul>
 
-        <hr>
-
-        <h1>4. DOS CAPAS QUE NO DEBEMOS CONFUNDIR</h1>
-
-        <p>Aquí aparece una decisión arquitectónica importante.</p>
-
-        <h3>Capa editorial</h3>
-
-        <p>Es la que determina:</p>
-
-        <p><strong>¿Qué sabemos?</strong></p>
-        <p><strong>¿De dónde surge?</strong></p>
-        <p><strong>¿Qué está verificado?</strong></p>
-        <p><strong>¿Qué falta comprobar?</strong></p>
-        <p><strong>¿Qué contexto tiene?</strong></p>
-        <p><strong>¿Qué puede publicarse?</strong></p>
-
-        <h3>Capa de atomización</h3>
-
-        <p>Determina:</p>
-
-        <p><strong>¿Cómo transformamos ese contenido para cada canal?</strong></p>
-
-        <p>Esto significa que <strong>los seis formatos no deberían investigar independientemente</strong>.</p>
-
-        <p>Deberían consumir un mismo <strong>núcleo editorial estructurado</strong>.</p>
-
-        <p>Por ejemplo:</p>
-
-        <!-- ===== AVISO + BLOQUE DE CÓDIGO DEFECTUOSO (ROJO) ===== -->
         <div class="aviso-corte">
           La fuente original se corta aquí, a mitad del bloque <code>&lt;code&gt;</code>. El contenido del ejemplo JSON del "núcleo editorial estructurado" quedó incompleto en el documento original.
         </div>
@@ -466,7 +352,7 @@
         <div class="code-defectuoso" role="alert" aria-label="Bloque de código defectuoso en la fuente original">
           <div class="code-head">
             <span>Texto sin formato · ejemplo del núcleo editorial estructurado</span>
-            <span class="badge">✂ CORTADO</span>
+            <span class="badge-cortado">✂ CORTADO</span>
           </div>
           <pre>{
   "pieza": {
@@ -479,590 +365,447 @@
   }
 }</pre>
         </div>
-        <!-- ===== FIN BLOQUE DEFECTUOSO ===== -->
 
       </div>
     </div>
   </section>
 
-  <!-- =========================================================
-       PASOS 3 A 10 · puentes hacia el Paso 11
-       ========================================================= -->
-
-  <!-- PASO 3 · Los 6 formatos de atomización -->
+  <!-- PASOS 3–10 · puentes -->
   <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 3</span> · Los 6 formatos (detalle)</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 3.</div></div>
+    <div class="separador"><time><span class="dia">PASOS 3–10</span> · Puentes</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
-        <h1>PASO 3 · LOS 6 FORMATOS DE ATOMIZACIÓN</h1>
-        <p>El Paso 2 dejó fijados los <strong>6 formatos canónicos</strong>. Aquí definimos cómo se produce cada uno.</p>
-        <div class="formatos">
-          <div class="formato"><p class="formato-title">1 · Artículo Web / SEO</p><p class="formato-meta">800–1500 palabras · HTML semántico</p><p>Título, bajada, cuerpo con H2/H3, fuentes citadas y metadatos SEO.</p></div>
-          <div class="formato"><p class="formato-title">2 · Reel 60 s</p><p class="formato-meta">60 s · guion + captions</p><p>Guion en 6 bloques de 10 s, gancho inicial, desarrollo y cierre con CTA.</p></div>
-          <div class="formato"><p class="formato-title">3 · Podcast "Primera Hora"</p><p class="formato-meta">8–15 min · guion hablado</p><p>Introducción, 3 bloques temáticos, cierre y créditos.</p></div>
-          <div class="formato"><p class="formato-title">4 · Carrusel 8 diapositivas</p><p class="formato-meta">8 slides · texto breve</p><p>1 portada + 6 desarrollo + 1 cierre/CTA.</p></div>
-          <div class="formato"><p class="formato-title">5 · Newsletter</p><p class="formato-meta">300–600 palabras · email</p><p>Asunto, apertura, 3–4 secciones con enlaces y cierre con firma.</p></div>
-          <div class="formato"><p class="formato-title">6 · WhatsApp</p><p class="formato-meta">≤ 500 caracteres · mensaje</p><p>Mensaje breve con gancho, dato clave y enlace.</p></div>
-        </div>
-        <h2>Reglas comunes</h2>
-        <ol>
-          <li><strong>Fidelidad a la pieza:</strong> ningún formato introduce hechos que no estén en la versión fuente.</li>
-          <li><strong>Guía de Estilo:</strong> todos heredan tono y prohibiciones.</li>
-          <li><strong>Fuentes citadas:</strong> formatos largos deben referenciar al menos una fuente verificada.</li>
-          <li><strong>Sin publicación automática:</strong> todo pasa por Editor Crítico y Centro de Distribución.</li>
-        </ol>
+        <p class="op"><em>Contenido puente: 6 formatos canónicos (3), motor de IA / callIA (4), Guía de Estilo versionada (5), Editor Crítico (6), transcripción de audio (7), Biblioteca Riojana y memoria semántica (8), Observatorios (9) y Centro de Distribución (10).</em></p>
       </div>
     </div>
   </section>
 
-  <!-- PASO 4 · Motor de IA -->
+  <!-- PASO 11 · Arquitectura -->
   <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 4</span> · Motor de IA y prompts</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 4.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 4 · MOTOR DE IA Y PROMPTS</h1>
-        <p>El motor de IA es el corazón técnico de Madre, pero <strong>nunca opera solo</strong>. Toda llamada pasa por el wrapper <code>callIA</code>.</p>
-        <h2>4.1. Arquitectura del motor</h2>
-        <div class="flujo">
-          <p><strong>Módulo solicitante</strong> → <strong>Wrapper callIA</strong> (Edge Function) → <strong>Proveedor de IA</strong></p>
-          <p>El wrapper valida sesión y permisos, inyecta Guía de Estilo, selecciona plantilla, llama al proveedor y registra tokens/latencia.</p>
-        </div>
-        <h2>4.2. Reglas del wrapper</h2>
-        <ol>
-          <li>Nunca se llama al proveedor desde el frontend.</li>
-          <li>Toda operación requiere usuario autenticado y rol válido.</li>
-          <li>Cada llamada usa una plantilla de prompt versionada.</li>
-          <li>La Guía de Estilo vigente se inyecta automáticamente.</li>
-          <li>Se registran usuario, plantilla, tokens, latencia y resultado.</li>
-        </ol>
-        <h2>4.3. Plantillas versionadas</h2>
-        <p>Los prompts <strong>no son libres</strong>: se guardan en <code>prompt_templates</code> con <code>slug</code>, <code>operacion</code>, <code>version</code>, <code>contenido</code> y <code>activa</code>.</p>
-        <h2>4.4. Inyección de la Guía de Estilo</h2>
-        <div class="flujo">
-          <p><strong>[SISTEMA]</strong> Eres Madre, sistema editorial. Debes respetar esta Guía de Estilo: <em>{{guia_de_estilo_vigente}}</em></p>
-          <p><strong>[USUARIO]</strong> <em>{{instruccion_del_modulo}}</em></p>
-          <p><strong>[CONTEXTO]</strong> <em>{{fuentes_pieza}}</em></p>
-        </div>
-        <h2>4.5. Seguridad</h2>
-        <p>Las API keys viven solo en secretos de Edge Functions. Toda llamada genera una fila en <code>ai_logs</code>.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PASO 5 · Guía de Estilo -->
-  <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 5</span> · Guía de Estilo</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 5.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 5 · GUÍA DE ESTILO</h1>
-        <p>Documento vivo que define cómo escribe Madre. Es la <em>constitución editorial</em> que se inyecta en cada llamada de IA.</p>
-        <h2>5.1. Estructura</h2>
-        <table class="tabla-flujo">
-          <thead><tr><th>Bloque</th><th>Contenido</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Tono</strong></td><td>Registro, cercanía, formalidad.</td></tr>
-            <tr><td><strong>Léxico</strong></td><td>Palabras preferidas, sinónimos, anglicismos permitidos.</td></tr>
-            <tr><td><strong>Prohibiciones</strong></td><td>Clichés, sensacionalismo, adjetivación vacía.</td></tr>
-            <tr><td><strong>Estructura</strong></td><td>Apertura, cierre, longitud de párrafos.</td></tr>
-            <tr><td><strong>Fuentes</strong></td><td>Cómo citar y atribuir.</td></tr>
-            <tr><td><strong>Accesibilidad</strong></td><td>Lectura fácil, frases cortas.</td></tr>
-          </tbody>
-        </table>
-        <h2>5.2. Versionado</h2>
-        <p>Se guarda en <code>guia_estilo_versiones</code> con <code>version</code>, <code>contenido</code>, <code>activa</code> y <code>autor_id</code>. Solo una activa a la vez.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PASO 6 · Editor Crítico -->
-  <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 6</span> · Editor Crítico</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 6.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 6 · EDITOR CRÍTICO</h1>
-        <p>Verifica sin reescribir. No produce contenido: evalúa el borrador contra la Guía, el checklist y las fuentes.</p>
-        <h2>6.1. Responsabilidades</h2>
-        <ol>
-          <li>Evaluar contra la Guía de Estilo vigente.</li>
-          <li>Verificar fuentes verificadas.</li>
-          <li>Señalar problemas de estructura, tono, léxico y claridad.</li>
-          <li>Marcar afirmaciones sin respaldo.</li>
-          <li>Proponer estado recomendado (sin aplicarlo).</li>
-        </ol>
-        <h2>6.2. Tipos de hallazgo</h2>
-        <table class="tabla-flujo">
-          <thead><tr><th>Tipo</th><th>Severidad</th></tr></thead>
-          <tbody>
-            <tr><td><code>tono</code></td><td>media</td></tr>
-            <tr><td><code>lexico</code></td><td>baja</td></tr>
-            <tr><td><code>fuente_faltante</code></td><td>alta</td></tr>
-            <tr><td><code>estructura</code></td><td>media</td></tr>
-            <tr><td><code>claridad</code></td><td>baja</td></tr>
-            <tr><td><code>duplicacion</code></td><td>alta</td></tr>
-          </tbody>
-        </table>
-        <p>Registro en <code>version_revisiones</code>. Ningún hallazgo <code>alta</code> permite avanzar a <code>revisada</code>.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PASO 7 · Transcripción -->
-  <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 7</span> · Transcripción de audio</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 7.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 7 · TRANSCRIPCIÓN DE AUDIO</h1>
-        <p>Convierte audio en texto estructurado y lo entrega como <strong>fuente primaria</strong>.</p>
-        <div class="flujo">
-          <p><strong>1.</strong> Subida → <strong>2.</strong> Storage + <code>fuentes</code> con <code>tipo=audio</code> → <strong>3.</strong> <code>callIA</code> transcribe con diarización → <strong>4.</strong> Guardado en <code>fuentes.contenido</code> + embedding → <strong>5.</strong> Pieza desde la fuente.</p>
-        </div>
-        <h2>Estructura</h2>
-        <p><code>texto</code>, <code>hablantes</code>, <code>segmentos</code> ({inicio, fin, hablante, texto}), <code>idioma</code>, <code>duracion_seg</code>.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PASO 8 · Biblioteca y memoria -->
-  <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 8</span> · Biblioteca y memoria</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 8.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 8 · BIBLIOTECA RIOJANA Y MEMORIA</h1>
-        <p>Memoria histórica y documental. No crea contenido: permite encontrar, recuperar y reutilizar lo ya producido.</p>
-        <h2>Qué guarda</h2>
-        <p>Piezas publicadas y archivadas, fuentes, embeddings y correcciones.</p>
-        <h2>Búsqueda semántica</h2>
-        <p>Se genera embedding de la consulta y se buscan los <code>fuentes.embedding</code> más cercanos por cosine similarity.</p>
-        <p>Madre Editorial consulta automáticamente la Biblioteca para evitar duplicados y sugerir contexto histórico.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PASO 9 · Observatorios -->
-  <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 9</span> · Observatorios</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 9.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 9 · OBSERVATORIOS</h1>
-        <p>Vistas temáticas sobre piezas publicadas. No producen contenido: reorganizan y visualizan.</p>
-        <table class="tabla-flujo">
-          <thead><tr><th>Tipo</th><th>Qué muestra</th></tr></thead>
-          <tbody>
-            <tr><td>Temático</td><td>Piezas por etiqueta.</td></tr>
-            <tr><td>Territorial</td><td>Piezas por lugar.</td></tr>
-            <tr><td>Temporal</td><td>Piezas por período.</td></tr>
-            <tr><td>De fuentes</td><td>Fuentes recurrentes.</td></tr>
-            <tr><td>De formatos</td><td>Piezas por formato.</td></tr>
-          </tbody>
-        </table>
-        <p>Reportes guardados en <code>observatorio_reportes</code> con filtros usados.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PASO 10 · Centro de Distribución -->
-  <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 10</span> · Centro de Distribución</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Sí, sigamos con el Paso 10.</div></div>
-    <div class="mensaje asistente">
-      <h4 class="rol">ChatGPT</h4>
-      <div class="contenido-ia">
-        <h1>PASO 10 · CENTRO DE DISTRIBUCIÓN</h1>
-        <p>Único módulo autorizado a hablar con el mundo exterior. Publica y registra cada intento.</p>
-        <h2>Canales</h2>
-        <table class="tabla-flujo">
-          <thead><tr><th>Canal</th><th>Tipo</th><th>Formatos</th></tr></thead>
-          <tbody>
-            <tr><td>WordPress / CMS</td><td><code>wordpress</code></td><td>Artículo</td></tr>
-            <tr><td>Redes sociales</td><td><code>red_social</code></td><td>Reel, Carrusel, WhatsApp</td></tr>
-            <tr><td>Newsletter</td><td><code>newsletter</code></td><td>Newsletter</td></tr>
-            <tr><td>WhatsApp</td><td><code>mensajeria</code></td><td>WhatsApp</td></tr>
-            <tr><td>Observatorios externos</td><td><code>observatorio</code></td><td>Artículo</td></tr>
-            <tr><td>Archivo histórico</td><td><code>archivo</code></td><td>Todos</td></tr>
-          </tbody>
-        </table>
-        <h2>Cola</h2>
-        <p>Pieza en <code>revisada</code> → fila en <code>publicaciones</code> con estado <code>pendiente</code> → Edge Function → <code>confirmada</code> o <code>fallida</code>. Reintentos con backoff.</p>
-        <p>Credenciales nunca en <code>canales</code>: solo <code>credenciales_ref</code>.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- =========================================================
-       TURNO 2 · sábado 0:28 · PASO 11
-       ========================================================= -->
-  <section class="turno">
-    <div class="separador">
-      <time datetime="2026-11-14T03:28:04.946Z">
-        <span class="dia">sábado</span> 0:28
-      </time>
-    </div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Si</div></div>
+    <div class="separador"><time><span class="dia">PASO 11</span> · Arquitectura de 4 capas</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
 
         <h1>PASO 11. ARQUITECTURA GENERAL DE SOFTWARE E INTEGRACIÓN DEL ECOSISTEMA MADRE</h1>
 
-        <p>Llegamos al paso en el que todo lo definido debe convertirse en una arquitectura tecnológica concreta.</p>
-
-        <p>El desafío es que Madre no se desarrolle como una aplicación monolítica difícil de mantener, ni como un conjunto de herramientas independientes que no pueden compartir información.</p>
-
-        <p>La propuesta es construir un <strong>ecosistema modular de aplicaciones web independientes, conectadas mediante un núcleo común de servicios, una base de datos central y reglas compartidas de seguridad, identidad y funcionamiento</strong>.</p>
-
-        <p>La arquitectura debe permitir incorporar nuevos módulos sin tener que reconstruir los existentes.</p>
-
-        <h2>11.1. Principio arquitectónico</h2>
-        <p>Propongo adoptar cinco principios:</p>
+        <h2>11.1. Principios</h2>
         <ol>
-          <li><strong>Modularidad:</strong> cada herramienta tiene una responsabilidad funcional definida.</li>
-          <li><strong>Interoperabilidad:</strong> todos los módulos comparten datos y servicios.</li>
-          <li><strong>Centralización de la seguridad:</strong> autenticación, permisos y credenciales se gestionan desde el backend.</li>
-          <li><strong>Independencia de desarrollo:</strong> cada módulo puede evolucionar sin romper los demás.</li>
-          <li><strong>Integridad editorial:</strong> ninguna operación técnica puede saltear los controles editoriales humanos.</li>
+          <li>Modularidad</li>
+          <li>Interoperabilidad</li>
+          <li>Centralización de la seguridad</li>
+          <li>Independencia de desarrollo</li>
+          <li>Integridad editorial</li>
         </ol>
 
-        <p>El documento de trabajo ya contempla una estructura de shell más módulos, con un núcleo compartido para sesión, inteligencia artificial, guardado y guía de estilo. También identifica Supabase, Edge Functions, autenticación, pgvector y la integración con WordPress. <span class="fuente">Mejorar-Prompt.txt</span></p>
-
-        <h2>11.2. Arquitectura general del ecosistema</h2>
-        <p>La estructura propuesta tiene cuatro capas principales:</p>
+        <h2>11.2. Las cuatro capas</h2>
 
         <div class="capa">
           <h2>CAPA 1 · INTERFAZ Y EXPERIENCIA</h2>
-          <p class="subtitulo">Aplicaciones web independientes · SPA · Mobile-first</p>
-          <div class="items">
-            <span>Madre Editorial</span><span>Biblioteca Riojana</span><span>Editor Crítico</span><span>Observatorios</span><span>Transcripción de Audio</span><span>Centro de Distribución</span>
-          </div>
+          <div class="items"><span>Madre Editorial</span><span>Biblioteca Riojana</span><span>Editor Crítico</span><span>Observatorios</span><span>Transcripción de Audio</span><span>Centro de Distribución</span></div>
         </div>
-
         <div class="arrow-big">⇅</div>
-
         <div class="capa">
           <h2>CAPA 2 · NÚCLEO COMPARTIDO</h2>
-          <p class="subtitulo">Servicios comunes para todos los módulos</p>
-          <div class="items">
-            <span>Autenticación y sesión</span><span>Cliente Supabase</span><span>Motor de IA / callIA</span><span>Guía de estilo</span><span>Permisos y roles</span><span>Persistencia y versiones</span><span>Notificaciones y errores</span><span>Auditoría y trazabilidad</span>
-          </div>
+          <div class="items"><span>Autenticación y sesión</span><span>Cliente Supabase</span><span>Motor de IA / callIA</span><span>Guía de estilo</span><span>Permisos y roles</span><span>Persistencia y versiones</span><span>Notificaciones y errores</span><span>Auditoría y trazabilidad</span></div>
         </div>
-
         <div class="arrow-big">⇅</div>
-
         <div class="capa">
           <h2>CAPA 3 · DATOS Y PERSISTENCIA</h2>
-          <p class="subtitulo">Base de datos central · almacenamiento · memoria documental</p>
-          <div class="items">
-            <span>PostgreSQL (Supabase)</span><span>pgvector (embeddings)</span><span>Storage de archivos y audio</span><span>Historial y versionado</span><span>Backups y recuperación</span><span>Búsqueda semántica</span><span>Índices de fuentes</span><span>Auditoría persistente</span>
-          </div>
+          <div class="items"><span>PostgreSQL (Supabase)</span><span>pgvector</span><span>Storage</span><span>Historial y versionado</span><span>Backups</span><span>Búsqueda semántica</span><span>Índices de fuentes</span><span>Auditoría persistente</span></div>
         </div>
-
         <div class="arrow-big">⇅</div>
-
         <div class="capa">
           <h2>CAPA 4 · SEGURIDAD, INTEGRACIÓN Y DISTRIBUCIÓN</h2>
-          <p class="subtitulo">Bordes del sistema · exposición pública · canales de salida</p>
-          <div class="items">
-            <span>Row Level Security (RLS)</span><span>Edge Functions seguras</span><span>Gestión de API keys</span><span>WordPress / CMS</span><span>Redes sociales</span><span>Newsletter y WhatsApp</span><span>Observatorios externos</span><span>Logs y monitoreo</span>
+          <div class="items"><span>RLS</span><span>Edge Functions seguras</span><span>Gestión de API keys</span><span>WordPress / CMS</span><span>Redes sociales</span><span>Newsletter y WhatsApp</span><span>Observatorios externos</span><span>Logs y monitoreo</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PASO 12 · Modelo de datos -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 12</span> · Modelo de datos</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+        <h2>PASO 12. MODELO DE DATOS CONCRETO</h2>
+        <p><code>piezas</code>, <code>fuentes</code>, <code>versiones</code>, <code>publicaciones</code>, <code>canales</code> y <code>usuarios</code>. Estados editoriales: borrador → en_verificacion → revisada → publicada → corregida / archivada.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASO 13 · Cierre del prompt maestro -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 13</span> · Cierre del prompt maestro</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+        <div class="cierre">
+          <h2>Prompt maestro · versión 1.0</h2>
+          <blockquote><p><strong>Madre se construye por capas, por fases y con controles editoriales en cada paso.</strong></p></blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PASO 14 · Versionado editorial
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 14</span> · Versionado editorial</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+
+        <h2>PASO 14 — Versionado editorial</h2>
+        <p>Tabla <code>editorial_versions</code> con instantánea, motivo, autor y fecha. Restaurar genera nueva versión sin borrar historial.</p>
+
+        <div class="badge success">PASO 14 incorporado</div>
+
+        <div class="metricas">
+          <div class="metrica"><span class="label">Unidades sin versión inicial</span><span class="valor">0</span></div>
+          <div class="metrica"><span class="label">Versiones iniciales registradas</span><span class="valor">2</span></div>
+          <div class="metrica"><span class="label">Triggers de versionado e inmutabilidad</span><span class="valor">2</span></div>
+          <div class="metrica"><span class="label">Políticas RLS que permiten modificar versiones</span><span class="valor">0</span></div>
+          <div class="metrica"><span class="label">Índices duplicados del versionado</span><span class="valor">0</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PASO 15 · Producción de los seis formatos
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 15</span> · Producción de los seis formatos</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+
+        <h2>PASO 15 — Producción de los seis formatos</h2>
+        <p>Identificadores oficiales en Supabase:</p>
+        <ol>
+          <li>Web SEO (<code>web_seo</code>)</li>
+          <li>Reel (<code>video_reel_60</code>)</li>
+          <li>Podcast Primera Hora (<code>podcast_primera_hora</code>)</li>
+          <li>Carrusel 8 placas (<code>instagram_carousel_8</code>)</li>
+          <li>Newsletter (<code>newsletter</code>)</li>
+          <li>WhatsApp (<code>whatsapp</code>)</li>
+        </ol>
+
+        <div class="badge success">PASO 15 implementado en Supabase y GitHub</div>
+
+        <div class="grid-formatos">
+          <div class="ft"><p class="ft-title">Web SEO</p><p class="ft-desc">Nota periodística</p></div>
+          <div class="ft"><p class="ft-title">Reel</p><p class="ft-desc">Guion de 60 segundos</p></div>
+          <div class="ft"><p class="ft-title">Podcast</p><p class="ft-desc">Primera Hora</p></div>
+          <div class="ft"><p class="ft-title">Carrusel</p><p class="ft-desc">8 placas</p></div>
+          <div class="ft"><p class="ft-title">Newsletter</p><p class="ft-desc">Boletín editorial</p></div>
+          <div class="ft"><p class="ft-title">WhatsApp</p><p class="ft-desc">Distribución directa</p></div>
+        </div>
+
+        <div class="diagrama-version">
+          <div class="dv-box">Contenido madre · Versión 1</div>
+          <div class="dv-arrow">↓</div>
+          <div class="dv-grid">
+            <div class="dv-item"><p class="dv-nombre">Web</p><span class="badge success">Vinculado</span></div>
+            <div class="dv-item"><p class="dv-nombre">Reel</p><span class="badge success">Vinculado</span></div>
+            <div class="dv-item"><p class="dv-nombre">Podcast</p><span class="badge success">Vinculado</span></div>
+            <div class="dv-item"><p class="dv-nombre">Carrusel</p><span class="badge success">Vinculado</span></div>
+            <div class="dv-item"><p class="dv-nombre">Newsletter</p><span class="badge success">Vinculado</span></div>
+            <div class="dv-item"><p class="dv-nombre">WhatsApp</p><span class="badge success">Vinculado</span></div>
+          </div>
+          <div class="dv-arrow">↓</div>
+          <div class="dv-alerta">
+            Nueva versión del contenido madre<br>
+            <span class="badge warning" style="margin-top:6px;">Los formatos anteriores quedan desactualizados</span>
           </div>
         </div>
 
-        <h2>11.3. Rol de cada capa</h2>
-        <table class="tabla-flujo">
-          <thead><tr><th>Capa</th><th>Responsabilidad</th><th>No debe hacer</th></tr></thead>
-          <tbody>
-            <tr><td><strong>1 · Interfaz</strong></td><td>Presentar, capturar entrada, mostrar estados.</td><td>No contiene lógica editorial ni claves de IA.</td></tr>
-            <tr><td><strong>2 · Núcleo</strong></td><td>Orquestar servicios compartidos.</td><td>No conoce detalles de pantallas ni canales.</td></tr>
-            <tr><td><strong>3 · Datos</strong></td><td>Guardar, versionar, indexar.</td><td>No genera contenido ni decide publicaciones.</td></tr>
-            <tr><td><strong>4 · Seguridad / Distribución</strong></td><td>Proteger credenciales y publicar externamente.</td><td>No almacena lógica de negocio ni estado editorial.</td></tr>
-          </tbody>
-        </table>
-
-        <h2>11.4. Flujo de integración entre capas</h2>
-        <div class="flujo">
-          <p><strong>1.</strong> Usuario sube audio desde Capa 1.</p>
-          <span class="arrow">↓</span>
-          <p><strong>2.</strong> Capa 2 autentica, envía al motor de IA, aplica Guía.</p>
-          <span class="arrow">↓</span>
-          <p><strong>3.</strong> Capa 3 guarda audio, transcripción, borrador, embeddings y versión.</p>
-          <span class="arrow">↓</span>
-          <p><strong>4.</strong> Editor humano revisa y cambia a "revisada".</p>
-          <span class="arrow">↓</span>
-          <p><strong>5.</strong> Capa 4 publica con credenciales protegidas.</p>
-          <span class="arrow">↓</span>
-          <p><strong>6.</strong> Capa 3 registra publicación; Capa 2 notifica.</p>
-        </div>
-
-        <h2>11.5. Criterios de aceptación arquitectónica</h2>
-        <ol>
-          <li>Ningún módulo de Capa 1 contiene claves de API.</li>
-          <li>Toda operación de IA pasa por Capa 2.</li>
-          <li>Todo contenido tiene versión, estado y responsable en Capa 3.</li>
-          <li>Credenciales solo en Capa 4.</li>
-          <li>Nuevo módulo sin tocar Capa 2 ni Capa 3.</li>
-          <li>Toda publicación externa auditada y vinculada.</li>
-        </ol>
-
-        <h3>Próximo paso</h3>
-        <p>Con las cuatro capas cerradas, el <strong>Paso 12</strong> baja a modelo de datos concreto.</p>
+        <p><strong>Prueba transaccional superada</strong> en PostgreSQL con rol <code>authenticated</code>.</p>
 
       </div>
     </div>
   </section>
 
   <!-- =========================================================
-       PASO 12 · Modelo de datos
+       PASO 16 · Generación asistida por IA
        ========================================================= -->
   <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 12</span> · Modelo de datos</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Si</div></div>
+    <div class="separador"><time><span class="dia">PASO 16</span> · Generación editorial asistida por IA</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
 
-        <h1>PASO 12. MODELO DE DATOS CONCRETO</h1>
+        <h2>PASO 16 — Generación editorial asistida por IA</h2>
+        <p>Edge Function <code>generate-editorial-format</code> v4 con <code>verify_jwt=true</code>. Contexto periodístico completo (contenido madre, fuentes, afirmaciones, evidencias). Seis instrucciones específicas por formato. Trazabilidad de versión y fuentes. Control editorial: si cambió el contenido madre, bloquea el guardado.</p>
 
-        <p>Traducción directa de la Capa 3 al lenguaje de Supabase/PostgreSQL.</p>
+        <div class="badge success">PASO 16 desplegado</div>
 
-        <h2>12.1. Principios</h2>
-        <ol>
-          <li>Todo contenido es una <code>pieza</code>; los formatos son representaciones.</li>
-          <li>Todo cambio genera una <code>versión</code>.</li>
-          <li>Toda pieza tiene fuentes y evidencias vinculadas.</li>
-          <li>Todo estado editorial es explícito y auditable.</li>
-          <li>Las credenciales viven en Edge Functions.</li>
-        </ol>
+        <p>Integración vía <strong>Responses API de OpenAI</strong>. <span class="pill-openai">OpenAI API</span></p>
 
-        <h2>12.2. Entidades principales</h2>
-
-        <div class="entidad">
-          <div class="entidad-titulo"><h3>usuarios</h3><span class="pk">PK · id</span></div>
-          <table>
-            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td><code>id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>Ref a <code>auth.users.id</code>.</td></tr>
-              <tr><td><code>nombre</code> <span class="req">*</span></td><td class="tipo">text</td><td>Nombre visible.</td></tr>
-              <tr><td><code>email</code> <span class="req">*</span></td><td class="tipo">text</td><td>Correo.</td></tr>
-              <tr><td><code>rol</code> <span class="req">*</span></td><td class="tipo">enum</td><td>admin, editor, redactor, verificador, observador.</td></tr>
-              <tr><td><code>activo</code></td><td class="tipo">boolean</td><td>Default true.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="entidad">
-          <div class="entidad-titulo"><h3>piezas</h3><span class="pk">PK · id</span></div>
-          <table>
-            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td><code>id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>Identificador.</td></tr>
-              <tr><td><code>titulo</code> <span class="req">*</span></td><td class="tipo">text</td><td>Título de trabajo.</td></tr>
-              <tr><td><code>slug</code></td><td class="tipo">text</td><td>URL única.</td></tr>
-              <tr><td><code>resumen</code></td><td class="tipo">text</td><td>Bajada.</td></tr>
-              <tr><td><code>cuerpo</code></td><td class="tipo">text</td><td>Borrador vigente.</td></tr>
-              <tr><td><code>estado</code> <span class="req">*</span></td><td class="tipo">enum</td><td>borrador, en_verificacion, revisada, publicada, corregida, archivada.</td></tr>
-              <tr><td><code>formato_origen</code></td><td class="tipo">enum</td><td>audio, texto, url, pdf, entrevista, dato, otro.</td></tr>
-              <tr><td><code>formato_destino</code></td><td class="tipo">enum[]</td><td>Los 6 formatos.</td></tr>
-              <tr><td><code>autor_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK → usuarios.</td></tr>
-              <tr><td><code>responsable_id</code></td><td class="tipo">uuid</td><td>FK → usuarios.</td></tr>
-              <tr><td><code>version_actual</code></td><td class="tipo">int</td><td>Default 1.</td></tr>
-              <tr><td><code>publicada_at</code></td><td class="tipo">timestamptz</td><td>NULL si nunca.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="entidad">
-          <div class="entidad-titulo"><h3>fuentes</h3><span class="pk">PK · id</span></div>
-          <table>
-            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td><code>id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>ID.</td></tr>
-              <tr><td><code>pieza_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK → piezas.</td></tr>
-              <tr><td><code>tipo</code> <span class="req">*</span></td><td class="tipo">enum</td><td>url, documento, audio, entrevista, dato, comunicado.</td></tr>
-              <tr><td><code>titulo</code></td><td class="tipo">text</td><td>Nombre.</td></tr>
-              <tr><td><code>url</code></td><td class="tipo">text</td><td>Si aplica.</td></tr>
-              <tr><td><code>contenido</code></td><td class="tipo">text</td><td>Extracto o transcripción.</td></tr>
-              <tr><td><code>archivo_id</code></td><td class="tipo">uuid</td><td>FK storage.</td></tr>
-              <tr><td><code>verificada</code></td><td class="tipo">boolean</td><td>Default false.</td></tr>
-              <tr><td><code>verificada_por</code></td><td class="tipo">uuid</td><td>FK usuarios.</td></tr>
-              <tr><td><code>embedding</code></td><td class="tipo">vector(1536)</td><td>pgvector.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="entidad">
-          <div class="entidad-titulo"><h3>versiones</h3><span class="pk">PK · id</span></div>
-          <table>
-            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td><code>id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>ID.</td></tr>
-              <tr><td><code>pieza_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK → piezas.</td></tr>
-              <tr><td><code>numero</code> <span class="req">*</span></td><td class="tipo">int</td><td>Secuencial.</td></tr>
-              <tr><td><code>titulo</code></td><td class="tipo">text</td><td>Título.</td></tr>
-              <tr><td><code>cuerpo</code></td><td class="tipo">text</td><td>Contenido completo.</td></tr>
-              <tr><td><code>estado</code></td><td class="tipo">enum</td><td>Estado al crear.</td></tr>
-              <tr><td><code>autor_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK usuarios.</td></tr>
-              <tr><td><code>comentario</code></td><td class="tipo">text</td><td>Motivo.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="entidad">
-          <div class="entidad-titulo"><h3>publicaciones</h3><span class="pk">PK · id</span></div>
-          <table>
-            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td><code>id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>ID.</td></tr>
-              <tr><td><code>pieza_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK piezas.</td></tr>
-              <tr><td><code>version_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK versiones.</td></tr>
-              <tr><td><code>canal_id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>FK canales.</td></tr>
-              <tr><td><code>formato</code> <span class="req">*</span></td><td class="tipo">enum</td><td>Uno de los 6.</td></tr>
-              <tr><td><code>estado</code> <span class="req">*</span></td><td class="tipo">enum</td><td>pendiente, enviada, confirmada, fallida.</td></tr>
-              <tr><td><code>url_externa</code></td><td class="tipo">text</td><td>Link publicado.</td></tr>
-              <tr><td><code>payload</code></td><td class="tipo">jsonb</td><td>Respuesta del canal.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="entidad">
-          <div class="entidad-titulo"><h3>canales</h3><span class="pk">PK · id</span></div>
-          <table>
-            <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td><code>id</code> <span class="req">*</span></td><td class="tipo">uuid</td><td>ID.</td></tr>
-              <tr><td><code>nombre</code> <span class="req">*</span></td><td class="tipo">text</td><td>Ej. "WordPress Madre".</td></tr>
-              <tr><td><code>tipo</code> <span class="req">*</span></td><td class="tipo">enum</td><td>wordpress, red_social, newsletter, mensajeria, observatorio, archivo.</td></tr>
-              <tr><td><code>activo</code></td><td class="tipo">boolean</td><td>Default true.</td></tr>
-              <tr><td><code>credenciales_ref</code></td><td class="tipo">text</td><td>Nombre del secreto (nunca el valor).</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h2>12.3. Tablas puente</h2>
-        <table class="tabla-flujo">
-          <thead><tr><th>Tabla</th><th>Relaciona</th><th>Uso</th></tr></thead>
-          <tbody>
-            <tr><td><code>pieza_etiquetas</code></td><td>piezas ↔ etiquetas</td><td>Temas, secciones, observatorios.</td></tr>
-            <tr><td><code>pieza_fuentes</code></td><td>piezas ↔ fuentes</td><td>Vínculo con orden de relevancia.</td></tr>
-            <tr><td><code>version_revisiones</code></td><td>versiones ↔ usuarios</td><td>Editor Crítico: quién revisó qué.</td></tr>
-          </tbody>
-        </table>
-
-        <h2>12.4. Relaciones</h2>
-        <div class="flujo">
-          <p><code>usuarios</code> 1─N <code>piezas</code></p>
-          <p><code>usuarios</code> 1─N <code>versiones</code></p>
-          <p><code>piezas</code> 1─N <code>fuentes</code></p>
-          <p><code>piezas</code> 1─N <code>versiones</code></p>
-          <p><code>piezas</code> 1─N <code>publicaciones</code></p>
-          <p><code>versiones</code> 1─N <code>publicaciones</code></p>
-          <p><code>canales</code> 1─N <code>publicaciones</code></p>
-        </div>
-
-        <h2>12.5. Estados editoriales</h2>
-        <div class="estados">
-          <span class="estado borrador">borrador</span>
-          <span class="estado verificacion">en_verificacion</span>
-          <span class="estado revisada">revisada</span>
-          <span class="estado publicada">publicada</span>
-          <span class="estado corregida">corregida</span>
-          <span class="estado archivada">archivada</span>
-        </div>
-        <table class="tabla-flujo">
-          <thead><tr><th>Estado</th><th>Entra</th><th>Sale</th><th>Destino</th></tr></thead>
-          <tbody>
-            <tr><td>borrador</td><td>redactor</td><td>redactor, editor</td><td>en_verificacion</td></tr>
-            <tr><td>en_verificacion</td><td>redactor, editor</td><td>verificador, editor</td><td>revisada, borrador</td></tr>
-            <tr><td>revisada</td><td>verificador, editor</td><td>editor</td><td>publicada, borrador</td></tr>
-            <tr><td>publicada</td><td>sistema</td><td>editor</td><td>corregida, archivada</td></tr>
-            <tr><td>corregida</td><td>editor</td><td>editor</td><td>publicada (nueva versión)</td></tr>
-            <tr><td>archivada</td><td>editor, admin</td><td>—</td><td>—</td></tr>
-          </tbody>
-        </table>
-        <p><strong>Regla clave:</strong> ninguna pieza pasa a <code>publicada</code> sin al menos una fuente <code>verificada = true</code> y un revisor asignado en <code>version_revisiones</code>.</p>
+        <div class="badge warning">Configuración pendiente</div>
+        <p>Falta confirmar el secreto <code>OPENAI_API_KEY</code> en Supabase → Edge Functions → Secrets. Modelo por defecto: <code>gpt-4.1-mini</code>.</p>
 
       </div>
     </div>
   </section>
 
   <!-- =========================================================
-       PASO 13 · Cierre
+       PASO 17 · Control de calidad editorial
        ========================================================= -->
   <section class="turno">
-    <div class="separador"><time><span class="dia">PASO 13</span> · Cierre del prompt maestro</time></div>
-    <div class="mensaje usuario"><h4 class="rol">Tú</h4><div class="burbuja">Si</div></div>
+    <div class="separador"><time><span class="dia">PASO 17</span> · Control de calidad editorial</time></div>
     <div class="mensaje asistente">
       <h4 class="rol">ChatGPT</h4>
       <div class="contenido-ia">
 
-        <h1>PASO 13 · CIERRE DEL PROMPT MAESTRO</h1>
+        <h2>PASO 17 — Control de calidad editorial</h2>
+        <p>Instancia de control <strong>previa a la revisión humana</strong>. Los resultados son <strong>alertas para revisar, no dictámenes automáticos de verdad o falsedad</strong>.</p>
 
-        <p>Consolidamos lo definido en los pasos 1 a 12 en un documento entregable.</p>
+        <div class="badge success">PASO 17 implementado en Supabase y GitHub</div>
 
-        <h2>13.1. Definición final</h2>
-        <blockquote>
-          <p><strong>MADRE</strong> es el sistema web editorial inteligente que transforma información, documentos, fuentes y hechos en conocimiento periodístico verificable y posteriormente lo atomiza en múltiples formatos de comunicación, manteniendo trazabilidad, control editorial humano, memoria documental y capacidad de publicación multicanal.</p>
-        </blockquote>
-
-        <h2>13.2. Principios no negociables</h2>
-        <ol>
-          <li><strong>Integridad editorial:</strong> sin revisión humana no hay publicación.</li>
-          <li><strong>Trazabilidad:</strong> versiones, fuentes, responsables y estados.</li>
-          <li><strong>Modularidad:</strong> cada módulo evoluciona sin romper.</li>
-          <li><strong>Interoperabilidad:</strong> núcleo y base de datos compartidos.</li>
-          <li><strong>Seguridad centralizada:</strong> credenciales solo en backend.</li>
-        </ol>
-
-        <h2>13.3. Orden de construcción</h2>
-        <table class="tabla-flujo">
-          <thead><tr><th>Fase</th><th>Qué se construye</th><th>Criterio de "listo"</th></tr></thead>
-          <tbody>
-            <tr><td>1 · Núcleo</td><td>Supabase, auth, usuarios, RLS, Guía v1.</td><td>Login funcionando.</td></tr>
-            <tr><td>2 · Piezas</td><td>CRUD piezas, versiones, fuentes.</td><td>Crear/editar/versionar.</td></tr>
-            <tr><td>3 · IA</td><td>callIA, 6 formatos, pgvector.</td><td>Pieza → 6 formatos.</td></tr>
-            <tr><td>4 · Editorial</td><td>Estados, Editor Crítico, checklist.</td><td>Flujo completo con auditoría.</td></tr>
-            <tr><td>5 · Distribución</td><td>Canales, publicaciones, WordPress, redes, newsletter, WhatsApp.</td><td>Publicación externa registrada.</td></tr>
-            <tr><td>6 · Módulos</td><td>Biblioteca, Observatorios, Transcripción, Centro de Distribución.</td><td>Mismo núcleo, sin duplicar datos.</td></tr>
-          </tbody>
-        </table>
-
-        <h2>13.4. Reglas de oro</h2>
-        <ol>
-          <li>Nunca exponer API keys en el frontend.</li>
-          <li>Nunca sobreescribir <code>cuerpo</code> sin nueva versión.</li>
-          <li>Nunca publicar sin versión y fuente verificada.</li>
-          <li>Siempre registrar quién hizo qué y cuándo.</li>
-          <li>Siempre RLS en cada tabla nueva.</li>
-          <li>Siempre tratar al Editor Crítico como actor del flujo.</li>
-        </ol>
-
-        <h2>13.5. Entregables</h2>
+        <h3>Controles incorporados</h3>
         <ul>
-          <li>Documento consolidado (Pasos 1 a 13).</li>
-          <li>Modelo de datos como esquema inicial de Supabase.</li>
-          <li>Guía de Estilo versionada.</li>
-          <li>Orden de construcción por fases.</li>
-          <li>Criterios de aceptación de cada fase.</li>
+          <li><strong>Fuentes:</strong> unidades sin fuentes y enlaces que no coinciden.</li>
+          <li><strong>Afirmaciones:</strong> sin evidencia, pendientes o contradictorias.</li>
+          <li><strong>Versionado:</strong> formatos desactualizados.</li>
+          <li><strong>Seis formatos:</strong> piezas faltantes o incompletas.</li>
+          <li><strong>Reglas específicas:</strong> Reel, WhatsApp y carrusel de 8 placas.</li>
+          <li><strong>Consistencia:</strong> cifras y fechas divergentes.</li>
         </ul>
 
-        <div class="cierre">
-          <h2>Prompt maestro · versión 1.0</h2>
-          <p>Este documento define <strong>qué es Madre, cómo se organiza, cómo se guarda y cómo se publica</strong>. Todo lo que no esté aquí se considera <em>fuera de alcance</em> hasta que se agregue explícitamente.</p>
-          <blockquote>
-            <p><strong>Madre se construye por capas, por fases y con controles editoriales en cada paso.</strong> Cualquier atajo que saltee la revisión humana rompe la integridad editorial y no será aceptado.</p>
-          </blockquote>
+        <h3>Registro y seguridad</h3>
+        <ul>
+          <li><code>editorial_quality_reviews</code></li>
+          <li><code>editorial_quality_observations</code></li>
+        </ul>
+
+        <p style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="badge success">RLS activo</span>
+          <span class="badge success">Historial append-only</span>
+          <span class="badge success">Sin acceso anónimo</span>
+        </p>
+
+        <div class="caja-verif">
+          <div class="fila"><span class="lbl">Tablas creadas</span><span class="badge success">2 verificadas</span></div>
+          <div class="fila"><span class="lbl">Políticas RLS</span><span class="badge success">4 activas</span></div>
+          <div class="fila"><span class="lbl">Índices</span><span class="badge success">6 incorporados</span></div>
+          <div class="fila"><span class="lbl">Prueba autenticada</span><span class="badge success">Correcta</span></div>
+          <div class="fila"><span class="lbl">Permisos UPDATE / DELETE</span><span class="badge success">Denegados</span></div>
+          <div class="fila"><span class="lbl">Acceso anon</span><span class="badge success">Denegado</span></div>
         </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PASO 18 · Revisión y aprobación editorial
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 18</span> · Revisión y aprobación editorial</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+
+        <h2>PASO 18 — Revisión y aprobación editorial</h2>
+
+        <p>Circuito formal de revisión humana: solicitud, devolución, reenvío y decisión editorial registrada. La aprobación no es automática.</p>
+
+        <div class="badge success">PASO 18 implementado y desplegado</div>
+
+        <ol>
+          <li><strong>Solicitud de revisión:</strong> el autor o responsable asignado envía el material.</li>
+          <li><strong>Devolución:</strong> reviewer, editor o admin pueden solicitar correcciones con fundamento registrado.</li>
+          <li><strong>Reenvío:</strong> tras corregir, el autor vuelve a solicitar revisión.</li>
+          <li><strong>Aprobación:</strong> solo editor o admin, hacia <code>reviewed</code>.</li>
+          <li><strong>Publicación:</strong> exige <code>reviewed</code> y aprobación humana registrada para la versión vigente.</li>
+        </ol>
+
+        <ul>
+          <li>No se puede aprobar si faltan formatos, hay desactualizados, control de calidad viejo o alertas críticas.</li>
+          <li>Si se modifica el contenido de una unidad revisada/publicada, vuelve a <code>draft</code> y rehace el circuito.</li>
+        </ul>
+
+        <p>✅ <strong>Prueba transaccional completada</strong> (creación, seis formatos, solicitud, devolución, reenvío, aprobación, rechazo de transición directa, reapertura del circuito, <code>ROLLBACK</code> final).</p>
+
+        <p><strong>Pendiente:</strong> solo hay un usuario <code>admin</code>; faltan perfiles <code>reviewer</code> y <code>editor</code>. Sin compilación Vite ni pruebas de navegador.</p>
+
+        <h3>Próximo paso: PASO 19</h3>
+        <p>Bandeja de trabajo editorial por roles: asignaciones, cola de revisión, prioridades, vencimientos y seguimiento de correcciones.</p>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PASO 19 · Bandeja operativa editorial
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 19</span> · Bandeja operativa editorial</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+
+        <div class="badge success">PASO 19 completado y desplegado</div>
+
+        <p>La bandeja operativa de Madre ya está incorporada al repositorio y conectada con Supabase.</p>
+
+        <div class="grid-bandeja">
+          <div class="b-item">
+            <span class="b-icon">📥</span>
+            <div class="b-body">
+              <p class="b-titulo">Bandeja de trabajo</p>
+              <p class="b-desc">Filtros por todas las unidades, mi trabajo, pendientes de revisión, vencidas y sin asignar. Orden por prioridad y fecha límite.</p>
+            </div>
+          </div>
+          <div class="b-item">
+            <span class="b-icon">👥</span>
+            <div class="b-body">
+              <p class="b-titulo">Asignación de responsables</p>
+              <p class="b-desc">Editor/admin pueden asignar unidades a integrantes con roles activos en Madre. Los asignados pueden trabajar sobre sus unidades en borrador.</p>
+            </div>
+          </div>
+          <div class="b-item">
+            <span class="b-icon">📋</span>
+            <div class="b-body">
+              <p class="b-titulo">Prioridades y vencimientos</p>
+              <p class="b-desc">Cuatro niveles: baja, normal, alta y urgente. Fecha límite configurable y detección de tareas vencidas.</p>
+            </div>
+          </div>
+          <div class="b-item">
+            <span class="b-icon">🕓</span>
+            <div class="b-body">
+              <p class="b-titulo">Historial de planificación</p>
+              <p class="b-desc">Cada cambio de responsable, prioridad o vencimiento queda registrado con autor, fecha y motivo. Historial sin modificaciones ni borrados.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3>Seguridad y trazabilidad</h3>
+        <ul>
+          <li>La asignación está protegida en la base de datos, no solo en la interfaz.</li>
+          <li>Los cambios directos de responsable, prioridad y vencimiento están bloqueados para usuarios sin rol editor/admin.</li>
+          <li>Los colaboradores asignados pueden editar contenido, fuentes, afirmaciones, evidencias y formatos.</li>
+          <li>Una solicitud de revisión vinculada a una versión anterior no puede aprobarse.</li>
+        </ul>
+
+        <div class="badge success">Pruebas transaccionales superadas</div>
+        <p>Asignación, prioridad, vencimiento, seis formatos, control de calidad, devolución, reenvío y aprobación. Rechazo de asignación sin rol autorizado. <code>ROLLBACK</code> final sin datos persistentes.</p>
+
+        <p><strong>Pendiente:</strong> solo hay un usuario <code>admin</code>. Falta probar con <code>writer</code>, <code>collaborator</code>, <code>reviewer</code> y <code>editor</code>. Sin Vite build ni prueba de navegador.</p>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PASO 20 · Sistema de notificaciones editoriales
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 20</span> · Sistema de notificaciones editoriales</time></div>
+
+    <div class="mensaje usuario">
+      <h4 class="rol">Tú</h4>
+      <div class="burbuja">avanzar Paso 20</div>
+    </div>
+
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+
+        <h1>PASO 20 — SISTEMA DE NOTIFICACIONES EDITORIALES DE MADRE</h1>
+
+        <p style="display:flex;flex-wrap:wrap;gap:8px;">
+          <span class="badge success">Nueva etapa de desarrollo</span>
+          <span class="badge info">Continuidad del PASO 19</span>
+        </p>
+
+        <p>El objetivo de este paso es convertir a Madre en un sistema de trabajo editorial activo: cada integrante debe recibir avisos oportunos cuando se le asigna una tarea, cuando una producción requiere su intervención o cuando cambia el estado de una unidad editorial.</p>
+
+        <p>La notificación no debe ser solamente un mensaje informativo. Debe permitir identificar qué ocurrió, quién intervino, qué acción se necesita y a qué unidad editorial corresponde.</p>
+
+        <p><strong>Principio rector: ninguna tarea editorial importante debe quedar dependiendo de que alguien entre manualmente a revisar la bandeja.</strong></p>
+
+        <p>La implementación respetará la arquitectura existente: JavaScript modular, Supabase, Auth, RLS, historial y permisos por roles.</p>
+
+        <div class="aviso-corte">
+          La fuente original se corta aquí, justo después de la introducción y del principio rector. A continuación aparecen únicamente indicadores de actividad del asistente (implementación, diseño, ajustes, búsqueda web) sin el detalle técnico completo: tipos de notificación, tabla creada, permisos, archivos modificados y verificaciones. Cuando se retome la conversación original, se completará esta sección.
+        </div>
+
+        <div class="actividad-corte" aria-label="Actividad del asistente (fuente cortada)">
+          <p style="margin:0 0 8px;font-weight:600;color:#555;">Actividad registrada después de la introducción:</p>
+          <div class="act-line"><span class="act-dot"></span> Implementado el sistema de notificaciones editoriales del paso 20</div>
+          <div class="act-line"><span class="act-dot"></span> Diseñó notificaciones editoriales</div>
+          <div class="act-line"><span class="act-dot"></span> Ajustados estilos y permisos</div>
+          <div class="act-line"><span class="act-dot"></span> Implementaste notificaciones editoriales seguras con migración, servicio, UI y estilos</div>
+          <div class="act-line"><span class="act-dot"></span> Buscando en la web (Supabase)</div>
+        </div>
+
+        <p><strong>Estado del paso:</strong> el sistema fue declarado implementado según la actividad del asistente, pero el detalle técnico completo (tablas, políticas, archivos y verificaciones) no quedó incluido en la fuente. Se completará cuando esté disponible.</p>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       PASO 21 · Dashboard de Gestión Editorial
+       ========================================================= -->
+  <section class="turno">
+    <div class="separador"><time><span class="dia">PASO 21</span> · Dashboard de Gestión Editorial</time></div>
+    <div class="mensaje asistente">
+      <h4 class="rol">ChatGPT</h4>
+      <div class="contenido-ia">
+
+        <p>Continúo con el <strong>PASO 21 — Dashboard de Gestión Editorial</strong>.</p>
+
+        <div class="badge success">PASO 21 incorporado al repositorio</div>
+
+        <h2>Qué quedó construido</h2>
+
+        <div class="grid-num">
+          <div class="item"><p class="num">01</p><p class="titulo">Indicadores operativos</p><p class="desc">Producción, revisiones, vencimientos, revisadas y publicadas.</p></div>
+          <div class="item"><p class="num">02</p><p class="titulo">Carga del equipo</p><p class="desc">Unidades en borrador por responsable.</p></div>
+          <div class="item"><p class="num">03</p><p class="titulo">Actividad reciente</p><p class="desc">Eventos de planificación y revisión durante 14 días.</p></div>
+          <div class="item"><p class="num">04</p><p class="titulo">Seguimiento</p><p class="desc">Acceso directo a unidades vencidas o pendientes de revisión.</p></div>
+        </div>
+
+        <p><strong>Tiempo de aprobación:</strong> promedio de horas entre solicitud y aprobación de una misma versión, cuando existen registros suficientes en los últimos 30 días.</p>
+
+        <h2>Estado de las comprobaciones</h2>
+
+        <table class="tabla-flujo">
+          <thead><tr><th>Control</th><th>Resultado</th></tr></thead>
+          <tbody>
+            <tr><td>Archivos incorporados a GitHub</td><td><span class="badge success">Correcto</span></td></tr>
+            <tr><td>Integración con Madre Editorial</td><td><span class="badge success">Correcto</span></td></tr>
+            <tr><td>Sintaxis JavaScript de los tres módulos</td><td><span class="badge success">Validada</span></td></tr>
+            <tr><td>Migración nueva para Paso 21</td><td>No necesaria</td></tr>
+            <tr><td>Compilación Vite</td><td>Pendiente</td></tr>
+            <tr><td>Prueba visual en navegador</td><td>Pendiente</td></tr>
+            <tr><td>Pruebas con diferentes roles</td><td>Pendiente</td></tr>
+          </tbody>
+        </table>
+
+        <h2>Repositorio y pull request</h2>
+
+        <p>
+          <a href="https://github.com/gabrielgenri/madre" target="_blank" rel="noopener noreferrer">Repositorio Madre</a>
+          ·
+          <a href="https://github.com/gabrielgenri/madre/pull/1" target="_blank" rel="noopener noreferrer">Pull request #1</a>
+        </p>
+
+        <div class="badge warning">Requiere sincronización</div>
+
+        <p>El PR sigue abierto y en borrador. Al comprobarlo, GitHub informó que la rama tiene 10 commits de retraso respecto de <code>main</code> y está divergida. No hice un merge ni forcé cambios sobre <code>main</code>.</p>
+
+        <h2>Próximo paso: PASO 22</h2>
+        <p>Propongo construir el <strong>Editor Crítico</strong>: instancia de análisis asistido para sesgos, afirmaciones sin respaldo, problemas de atribución, riesgos legales y diferencias entre los seis formatos. La decisión editorial seguirá siendo humana.</p>
 
       </div>
     </div>
