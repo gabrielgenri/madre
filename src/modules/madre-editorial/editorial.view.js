@@ -1,4 +1,5 @@
 import { EditorialService } from '../../shared/services/editorial.service.js'
+import { mountCriticalEditor } from '../editor-critico/editor-critico.view.js'
 
 const esc = (value = '') => String(value).replace(/[&<>"']/g, (c) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -31,7 +32,7 @@ export async function renderWorkspace(root, user, onSignOut) {
         <nav aria-label="Navegación principal">
           <a class="nav-item active" href="#editorial">Madre Editorial</a>
           <span class="nav-item disabled">Biblioteca Riojana <small>Próximamente</small></span>
-          <span class="nav-item disabled">Editor Crítico <small>Próximamente</small></span>
+          <span class="nav-item">Editor Crítico <small>Dentro de cada unidad</small></span>
           <span class="nav-item disabled">Transcripción <small>Próximamente</small></span>
           <span class="nav-item disabled">Observatorios <small>Próximamente</small></span>
           <span class="nav-item disabled">Distribución <small>Próximamente</small></span>
@@ -99,6 +100,7 @@ export async function renderWorkspace(root, user, onSignOut) {
           <button type="submit" class="button ghost" id="save-quality-observation" disabled>Registrar observación</button>
         </form>
       </section>
+      <div id="critical-editor-root"></div>
       <form id="format-form" class="format-editor stack">
         <h3>Editar borrador</h3>
         <label for="format-type">Formato</label>
@@ -155,7 +157,9 @@ export async function renderWorkspace(root, user, onSignOut) {
   const detailDialog = root.querySelector('#detail-dialog')
   const researchDialog = root.querySelector('#research-dialog')
   const formatsDialog = root.querySelector('#formats-dialog')
+  let criticalEditorCleanup = null
   formatsDialog.addEventListener('close', () => {
+    if (criticalEditorCleanup) { criticalEditorCleanup(); criticalEditorCleanup = null }
     if (activeUnitId && !detailDialog.open) detailDialog.showModal()
   })
   const notice = root.querySelector('#notice')
@@ -187,6 +191,8 @@ export async function renderWorkspace(root, user, onSignOut) {
     await loadQualityHistory()
     detailDialog.close()
     formatsDialog.showModal()
+    if (criticalEditorCleanup) criticalEditorCleanup()
+    criticalEditorCleanup = mountCriticalEditor(root.querySelector('#critical-editor-root'), activeUnitId)
   })
   root.querySelector('#format-type').addEventListener('change', (event) => {
     generatedSourceVersionId = null

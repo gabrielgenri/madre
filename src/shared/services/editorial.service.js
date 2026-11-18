@@ -312,17 +312,18 @@ export const EditorialService = {
     const { data: reviews, error } = await client().from('editorial_quality_reviews')
       .select('id,source_version_id,scope,status,checklist,findings,metrics,created_at,created_by')
       .eq('editorial_unit_id', unitId)
-      .order('created_at', { ascending: false })
-      .limit(10)
+       .order('created_at', { ascending: false })
+      .limit(100)
     if (error) throw error
-    const ids = (reviews ?? []).map(item => item.id)
+    const structuralReviews = (reviews ?? []).filter(item => item.metrics?.engine !== 'editor_critico_ai').slice(0, 10)
+    const ids = structuralReviews.map(item => item.id)
     if (!ids.length) return []
     const { data: observations, error: observationError } = await client().from('editorial_quality_observations')
       .select('id,review_id,severity,note,created_at,created_by')
       .in('review_id', ids)
       .order('created_at', { ascending: false })
     if (observationError) throw observationError
-    return (reviews ?? []).map(item => ({
+    return structuralReviews.map(item => ({
       ...item,
       observations: (observations ?? []).filter(note => note.review_id === item.id)
     }))
