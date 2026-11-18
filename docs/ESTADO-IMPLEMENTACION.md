@@ -247,3 +247,13 @@ No se deben guardar estas credenciales en GitHub, archivos frontend ni variables
 - Pendiente desplegar la Edge Function y configurar los cuatro secretos.
 - Pendiente prueba real autenticada con un usuario editor/admin y WordPress configurado.
 - No se declara un envío real ni una publicación real hasta completar esa prueba.
+
+
+## MEJORA — Cambio controlado del estado editorial
+
+- Se incorporó el historial append-only `editorial_status_events` para registrar estado anterior, estado nuevo, motivo, responsable y fecha.
+- La RPC `change_editorial_status` solo permite a editor/admin devolver una unidad Revisada o Publicada a Borrador, o marcar como Publicada una unidad Revisada con aprobación humana vigente para la versión madre actual.
+- El estado Revisado no puede asignarse manualmente: continúa dependiendo del evento `approved` del circuito de revisión y de sus controles de calidad.
+- La interfaz muestra los cambios disponibles según el estado y el rol; exige motivo y confirmación para registrar la publicación externa. La acción no publica por sí sola en WordPress.
+- La base de datos aplica una validación adicional para impedir que se omitan las decisiones de aprobación o el registro del cambio de estado.
+- Pendiente: probar los controles desde navegador con perfiles editor/admin y confirmar el flujo con WordPress real.
