@@ -451,6 +451,41 @@ export const EditorialService = {
     return data
   },
 
+  async sendToWordPress(unitId) {
+    const db = client()
+    const { data: sessionData, error: sessionError } = await db.auth.getSession()
+    if (sessionError) throw sessionError
+    const accessToken = sessionData?.session?.access_token
+    if (!accessToken) throw new Error('No hay una sesión autenticada. Iniciá sesión nuevamente antes de enviar a WordPress.')
+
+    const { data, error } = await db.functions.invoke('wordpress-draft', {
+      body: { unit_id: unitId },
+      headers: { Authorization: 'Bearer ' + accessToken }
+    })
+    if (error) {
+      let detail = ''
+      let code = ''
+      try {
+        const response = error.context?.clone ? error.context.clone() : error.context
+        const payload = response?.json ? await response.json() : null
+        detail = payload?.error ?? ''
+        code = payload?.code ?? ''
+      } catch { /* El SDK puede devolver un error sin cuerpo JSON legible. */ }
+      if (code === 'wordpress_not_configured') throw new Error(detail || 'Configurá las credenciales de WordPress en los secretos de Supabase.')
+      throw new Error(detail || error.message || 'No se pudo enviar el artículo a WordPress.')
+    }
+    return data
+  },
+
+  async distributionHistory(unitId) {
+    const { data, error } = await client().from('editorial_distribution_events')
+      .select('id,source_version_id,channel,external_id,external_url,status,created_at')
+      .eq('editorial_unit_id', unitId)
+      .eq('channel', 'wordpress')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data ?? []
+  },
   async get(id) {
     const { data, error } = await client().from('editorial_units').select('*').eq('id', id).single()
     if (error) throw error
