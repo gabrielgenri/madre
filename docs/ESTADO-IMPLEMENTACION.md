@@ -205,3 +205,45 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - La interfaz muestra el progreso de generación y guardado, actualiza la lista de formatos y comunica errores parciales para que el equipo revise qué piezas llegaron a guardarse.
 - **Pendiente de prueba:** ejecutar la generación completa desde navegador con una unidad real y comprobar que los seis formatos queden guardados.
 - **Estado de publicación:** la unidad ya dispone del flujo existente `draft → reviewed → published` y la revisión/aprobación humana. La opción visible y segura para cambiar a «Publicada» debe conectarse a la autorización de publicación ya protegida por backend; no se habilita un cambio directo desde el selector del navegador.
+
+## PASO 22 — Distribución controlada a WordPress
+
+Se incorpora el envío del artículo Web/SEO a WordPress como borrador, sin publicación automática.
+
+### Reglas de autorización y validación
+
+- Solo perfiles con rol `editor` o `admin` pueden solicitar el envío.
+- La unidad debe estar en estado `reviewed` y conservar una aprobación humana para la versión madre vigente.
+- El artículo `web_seo` debe existir, estar completo, vinculado a la versión madre actual y no figurar desactualizado.
+- Se bloquea el envío si el título o el cuerpo contienen la marca `[VERIFICAR]`.
+- La función fija `status: "draft"` en el servidor. El navegador no puede solicitar ni forzar `publish`.
+- El envío requiere confirmación explícita en la interfaz.
+- Madre conserva el estado editorial `Revisado`; la publicación final se realiza en WordPress por una persona autorizada.
+
+### Integración y trazabilidad
+
+- Edge Function `wordpress-draft`, con JWT obligatorio, validación de sesión y permisos en backend.
+- Conexión a WordPress REST API mediante HTTPS y contraseña de aplicación, guardada exclusivamente como secreto de Supabase.
+- Conversión básica y segura de Markdown a HTML; se escapa el HTML de entrada para evitar insertar etiquetas o scripts arbitrarios.
+- Slug determinístico por unidad y versión, y consulta previa a WordPress para evitar duplicar una pieza si el envío se reintenta.
+- Tabla `editorial_distribution_events` con RLS: solo editor/admin puede consultar o insertar eventos. Guarda canal, versión madre, ID y URL externa, estado del envío, usuario y fecha.
+- La interfaz muestra el botón solo a editor/admin cuando la unidad está Revisada y presenta el historial de borradores enviados.
+
+### Secretos pendientes de configurar en Supabase
+
+En Dashboard → Edge Functions → Secrets, cargar:
+
+- `WORDPRESS_SITE_URL`: URL raíz del sitio WordPress, con HTTPS y sin barra final.
+- `WORDPRESS_USERNAME`: usuario WordPress con permiso para crear borradores.
+- `WORDPRESS_APP_PASSWORD`: contraseña de aplicación revocable de ese usuario, sin necesidad de compartir su contraseña principal.
+- `MADRE_ALLOWED_ORIGINS`: orígenes exactos del frontend separados por coma, por ejemplo `https://madre.example.com` (reemplazar por el dominio real).
+
+No se deben guardar estas credenciales en GitHub, archivos frontend ni variables `VITE_*`.
+
+### Estado de verificación
+
+- Migración de auditoría aplicada en Supabase.
+- Código de función y frontend incorporado a GitHub.
+- Pendiente desplegar la Edge Function y configurar los cuatro secretos.
+- Pendiente prueba real autenticada con un usuario editor/admin y WordPress configurado.
+- No se declara un envío real ni una publicación real hasta completar esa prueba.
