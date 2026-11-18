@@ -206,7 +206,7 @@ Esta entrega implementa persistencia, edición y trazabilidad de borradores para
 - **Pendiente de prueba:** ejecutar la generación completa desde navegador con una unidad real y comprobar que los seis formatos queden guardados.
 - **Estado de publicación:** la unidad ya dispone del flujo existente `draft → reviewed → published` y la revisión/aprobación humana. La opción visible y segura para cambiar a «Publicada» debe conectarse a la autorización de publicación ya protegida por backend; no se habilita un cambio directo desde el selector del navegador.
 
-## PASO 22 — Distribución controlada a WordPress
+## MEJORA — Distribución controlada a WordPress
 
 Se incorpora el envío del artículo Web/SEO a WordPress como borrador, sin publicación automática.
 
