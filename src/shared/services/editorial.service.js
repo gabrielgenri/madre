@@ -451,6 +451,25 @@ export const EditorialService = {
     return data
   },
 
+  async changeStatus(unitId, status, note) {
+    const { data, error } = await client().rpc('change_editorial_status', {
+      p_unit_id: unitId,
+      p_status: status,
+      p_note: note
+    })
+    if (error) throw error
+    return data
+  },
+
+  async statusHistory(unitId) {
+    const { data, error } = await client().from('editorial_status_events')
+      .select('id,from_status,to_status,note,created_by,created_at')
+      .eq('editorial_unit_id', unitId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data ?? []
+  },
+
   async sendToWordPress(unitId) {
     const db = client()
     const { data: sessionData, error: sessionError } = await db.auth.getSession()
