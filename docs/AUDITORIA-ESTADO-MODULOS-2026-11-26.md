@@ -112,3 +112,87 @@ Tipos de formato presentes: Web/SEO 8, Reel 5, Podcast 4, Carrusel 3, Newsletter
 - QA01: Pendiente de validación integral.
 
 **Conclusión:** MADRE ya tiene una base técnica y editorial concreta. No está en cero, pero tampoco es todavía el ecosistema completo del Mapa Maestro. La prioridad es demostrar y estabilizar el circuito de Madre Editorial antes de expandir el resto de los módulos.
+
+
+---
+
+## 16. Validación complementaria de M01 — 26/27 de noviembre de 2026
+
+Esta sección amplía el corte inicial con comprobaciones realizadas sobre el repositorio y la base Supabase. Las fechas de GitHub Actions aparecen en UTC; corresponden a la noche del 26 de noviembre en Argentina.
+
+### 16.1 Pruebas ejecutadas y aprobadas
+
+Se agregó el workflow `.github/workflows/validate.yml`, commit `4ca080eee74ea243982aaeb7a997b17d0cc788e3`.
+
+Ejecución GitHub Actions: [Validate Madre — run 45918763540](https://github.com/gabrielgenri/madre/actions/runs/45918763540).
+
+| Prueba | Resultado | Evidencia |
+|---|---|---|
+| Instalación de dependencias | Aprobada | Paso `Install dependencies` |
+| Sintaxis de todos los archivos `.js` bajo `src` | Aprobada | `find src ... node --check` |
+| Compilación de producción Vite | Aprobada | `npm run build` |
+| Pruebas unitarias / integración | No disponibles | `package.json` no define script `test` ni se encontró suite de pruebas |
+| Navegador / E2E | No ejecutadas | Requieren entorno de navegador y sesión real |
+
+La ejecución previa de Pages no debe confundirse con esta validación: el workflow preexistente informa pasos de compilación Jekyll. El nuevo workflow comprueba Vite, pero no despliega su carpeta `dist`.
+
+### 16.2 Comprobaciones adicionales en Supabase
+
+- Las 17 tablas públicas consultadas tienen RLS habilitado.
+- Ninguna de esas tablas tiene `FORCE ROW LEVEL SECURITY`.
+- Se inspeccionaron políticas de unidades, versiones, fuentes, afirmaciones, evidencias, verificaciones, formatos, controles de calidad, eventos de revisión y asignaciones.
+- Se verificó que los RPC principales de actualización/versionado, guardado de formatos, asignación, cambio de estado y registro de revisión se ejecutan como funciones invocadoras (`SECURITY INVOKER`), no como `SECURITY DEFINER`.
+- Se verificaron disparadores de auditoría, captura de versiones, protección de publicación, protección de asignaciones, reapertura de revisión ante cambios y aplicación de aprobación.
+- La función `has_role` sí es `SECURITY DEFINER` y mantiene permiso EXECUTE para `anon` y `authenticated`. Su implementación consulta el rol asociado a `auth.uid()`; para una llamada anónima sin usuario autenticado devuelve falso. Se recomienda igualmente revisar y minimizar su exposición y fijar cuidadosamente su `search_path`; no se revocó para no alterar políticas dependientes.
+- El RLS inspeccionado muestra restricciones por autor/asignado y roles de revisión/edición en las operaciones principales. No se ejecutó una prueba negativa con identidades separadas.
+
+### 16.3 Estado de datos actualizado
+
+Conteos observados en la consulta más reciente:
+
+| Registro | Cantidad |
+|---|---:|
+| Unidades editoriales | 9 |
+| Versiones | 19 |
+| Fuentes | 2 |
+| Afirmaciones | 1 |
+| Evidencias | 0 |
+| Verificaciones | 1 |
+| Formatos | 26 |
+| Controles de calidad | 3 |
+| Eventos de revisión/aprobación | 0 |
+| Eventos de trabajo/asignación | 2 |
+
+El total de versiones pasó de 18 a 19 respecto de la primera auditoría. Se conserva el dato actualizado de 19 como nuevo corte. La ausencia de evidencias y de eventos de revisión impide demostrar un ciclo editorial completo con datos de trabajo reales.
+
+### 16.4 Revisión estática del flujo M01
+
+Se confirmó en el código:
+- La interfaz incluye creación y edición de unidades, bandeja de trabajo, asignaciones, historial, investigación, fuentes, afirmaciones, evidencias, verificaciones, versiones, seis formatos, control de calidad, revisión humana y envío WordPress.
+- La restauración de una versión reutiliza el mecanismo de actualización con motivo; crea una versión nueva y conserva el historial.
+- La aprobación humana se registra contra una versión y un control de calidad; un disparador actualiza el estado a `reviewed` y la base exige aprobación vigente de editor/admin.
+- La generación de los seis formatos ocurre secuencialmente y los guarda uno por uno. Si falla un guardado intermedio, puede quedar un lote parcial. La interfaz informa el error y pide revisar los borradores guardados antes de reintentar; falta atomicidad de lote.
+- La comparación entre formatos detecta estructura, vínculo de versión y divergencias literales de algunas cifras/fechas, pero deja expresamente la comparación semántica a revisión humana.
+
+### 16.5 Bloqueos para declarar M01 validado integralmente
+
+1. **Despliegue:** el flujo actual de GitHub Pages utiliza Jekyll; el nuevo workflow compila Vite, pero no publica `dist`. No se certificó la carga de la aplicación desplegada. Revisar además la configuración `base` de Vite si se mantiene un sitio de proyecto bajo `/madre/`.
+2. **Autenticación real:** falta prueba de Magic Link en navegador, expiración/renovación de sesión y cierre de sesión.
+3. **Roles y RLS:** hay un solo usuario admin registrado; faltan identidades de prueba para colaborador, redactor, revisor y editor y pruebas de acceso permitido/denegado.
+4. **IA:** falta invocación real al proveedor Gemini con los seis formatos, validación de fallback, errores, referencias y persistencia. No se modificaron secretos.
+5. **Circuito editorial:** faltan evidencias reales y eventos de solicitud, devolución y aprobación sobre contenido de prueba.
+6. **WordPress:** falta prueba real de extremo a extremo; no se enviaron borradores ni se alteró contenido externo.
+7. **Calidad:** falta suite unitaria/integración, E2E, accesibilidad, responsive y pruebas de recuperación de errores.
+
+### 16.6 Higiene de repositorio
+
+- `package.json` no define script de test y no se identificó lockfile npm. La instalación CI se realiza sin lockfile; conviene incorporar uno para builds reproducibles.
+- `.env.local` aparece versionado aunque `.gitignore` lo excluye. Su contenido observado coincide con la URL y la publishable key de `.env.example`; no se observó una clave `service_role` en ese archivo. La publishable key está diseñada para uso cliente, pero el archivo local debe dejar de versionarse por higiene operativa.
+
+### 16.7 Dictamen actualizado de M01
+
+**M01 Madre Editorial: PARCIAL AVANZADO — compilación y sintaxis verificadas; integridad de los principales controles de base inspeccionada; operación integral todavía no certificada.**
+
+No declarar M01 terminado ni habilitar producción plena hasta resolver el despliegue Vite, probar autenticación y permisos con roles diferenciados, ejecutar la generación IA real y completar el circuito editorial de punta a punta en datos de prueba.
+
+No se ejecutaron escrituras de prueba en producción, no se cambiaron roles ni secretos, no se aprobó ninguna unidad y no se publicó ni envió contenido a WordPress.
