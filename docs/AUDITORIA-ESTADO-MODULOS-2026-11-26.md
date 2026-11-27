@@ -196,3 +196,12 @@ Se confirmó en el código:
 No declarar M01 terminado ni habilitar producción plena hasta resolver el despliegue Vite, probar autenticación y permisos con roles diferenciados, ejecutar la generación IA real y completar el circuito editorial de punta a punta en datos de prueba.
 
 No se ejecutaron escrituras de prueba en producción, no se cambiaron roles ni secretos, no se aprobó ninguna unidad y no se publicó ni envió contenido a WordPress.
+
+
+## Actualización posterior — validación M01
+
+La validación técnica de M01 realizada el 26/11/2026 (Argentina) confirmó build y despliegue, y detectó un bloqueo concreto en la integración Gemini: la cuenta de servicio vinculada a la API key está deshabilitada. También registró cobertura incompleta de los seis formatos y pruebas multirol/flujo editorial pendientes.
+
+Informe detallado: [VALIDACION-M01-MADRE-EDITORIAL-2026-11-26.md](VALIDACION-M01-MADRE-EDITORIAL-2026-11-26.md).
+
+**Estado M01 actualizado:** Parcial avanzado. Infraestructura, build y carga del workspace verificados; generación IA bloqueada por credenciales del proveedor; operación editorial integral aún no certificada.
